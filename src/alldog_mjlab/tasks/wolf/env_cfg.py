@@ -51,7 +51,6 @@ from alldog_mjlab.robots.wolf import get_wolf_robot_cfg
 from alldog_mjlab.robots.wolf.wolf_constants import (
     WOLF_LEG_JOINT_NAMES,
     WOLF_LEG_ORDER,
-    WOLF_POLICY_JOINT_NAMES,
     WOLF_WHEEL_BODY_NAMES,
     WOLF_WHEEL_COLLISION_GEOM_NAMES,
     WOLF_WHEEL_FORWARD_SIGN,
@@ -308,12 +307,6 @@ def _wheel_vel_term_cfg(dr: DomainRandomizationParams) -> ObservationTermCfg:
             n_max=_WOLF_ACTOR_TERM_NOISE["wheel_vel"][1],
         ),
     )
-
-
-WOLF_COLLISION_SENSOR = "body_ground_contact"
-WOLF_COLLISION_BODY_NAMES = ("base_link",) + tuple(
-    f"{leg}_Link{index}" for leg in WOLF_LEG_ORDER for index in (2, 3)
-)
 
 
 def wolf_rough_terrain_generator_cfg() -> TerrainGeneratorCfg:
@@ -802,28 +795,20 @@ def make_env_cfg(
             num_slots=1,
             history_length=4,
         ),
-        ContactSensorCfg(
-            name=WOLF_COLLISION_SENSOR,
-            primary=ContactMatch(
-                mode="body", pattern=WOLF_COLLISION_BODY_NAMES, entity="robot"
-            ),
-            secondary=ContactMatch(mode="body", pattern="terrain"),
-            fields=("force",),
-            reduce="netforce",
-            num_slots=1,
-        ),
-        ContactSensorCfg(
-            name=WOLF_WHEEL_FORCE_CONTACT_SENSOR,
-            primary=ContactMatch(
-                mode="geom", pattern=WOLF_WHEEL_COLLISION_GEOM_NAMES, entity="robot"
-            ),
-            secondary=ContactMatch(mode="body", pattern="terrain"),
-            fields=("force",),
-            reduce="netforce",
-            num_slots=1,
-        ),
     ]
     if rough:
+        sensors.append(
+            ContactSensorCfg(
+                name=WOLF_WHEEL_FORCE_CONTACT_SENSOR,
+                primary=ContactMatch(
+                    mode="geom", pattern=WOLF_WHEEL_COLLISION_GEOM_NAMES, entity="robot"
+                ),
+                secondary=ContactMatch(mode="body", pattern="terrain"),
+                fields=("force",),
+                reduce="netforce",
+                num_slots=1,
+            )
+        )
         sensors.append(
             RayCastSensorCfg(
                 name=WOLF_TERRAIN_SCAN_SENSOR,
@@ -937,116 +922,109 @@ def make_env_cfg(
             ),
             "tracking_ang_vel": RewardTermCfg(
                 func=rewards.track_angular_velocity_z,
-                weight=0.75,
+                weight=1.0,
                 params={"command_name": WOLF_COMMAND_NAME, "sigma": 0.25},
             ),
             "lin_vel_z": RewardTermCfg(
-                func=rewards.vertical_linear_velocity_l2, weight=-1.0
+                func=rewards.vertical_linear_velocity_l2, weight=-0.8
             ),
             "ang_vel_xy": RewardTermCfg(
                 func=rewards.angular_velocity_xy_l2, weight=-0.05
             ),
-            "orientation": RewardTermCfg(
-                func=envs_mdp.flat_orientation_l2, weight=-0.5
-            ),
+            "orientation": RewardTermCfg(func=rewards.orientation_l1, weight=-0.5),
             "base_height": RewardTermCfg(
                 func=rewards.base_height_l2_terrain
                 if rough
                 else rewards.base_height_l2_flat,
-                weight=-10.0,
+                weight=-1.0,
                 params={
-                    "target_height": 0.4,
+                    "target_height": 0.40,
                     **({"sensor_name": WOLF_TERRAIN_SCAN_SENSOR} if rough else {}),
                 },
             ),
+            "leg_action_rate": RewardTermCfg(
+                func=rewards.leg_action_rate_l2, weight=-0.01
+            ),
+            "wheel_action_rate": RewardTermCfg(
+                func=rewards.wheel_action_rate_l2, weight=-0.005
+            ),
             "hip_default": RewardTermCfg(
-                func=rewards.hip_default,
-                weight=-0.5,
+                func=rewards.hip_default_l1,
+                weight=-0.30,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
                         joint_names=tuple(f"{leg}_hip" for leg in WOLF_LEG_ORDER),
                         preserve_order=True,
-                    )
+                    ),
+                    "command_name": WOLF_COMMAND_NAME,
+                    "y_ref": 0.5,
+                    "yaw_ref": 1.0,
+                    "y_scale": 0.2,
+                    "yaw_scale": 0.35,
+                    "min_scale": 0.5,
                 },
             ),
             "stand_still": RewardTermCfg(
                 func=rewards.stand_still,
-                weight=-0.5,
+                weight=-0.40,
                 params={
-                    "command_name": WOLF_COMMAND_NAME,
                     "asset_cfg": SceneEntityCfg(
                         "robot",
                         joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
                         preserve_order=True,
                     ),
+                    "command_name": WOLF_COMMAND_NAME,
                     "command_threshold": 0.1,
                     "yaw_threshold": 0.1,
                 },
             ),
-            "collision": RewardTermCfg(
-                func=rewards.collision,
-                weight=-1.0,
-                params={
-                    "sensor_name": WOLF_COLLISION_SENSOR,
-                    "body_names": WOLF_COLLISION_BODY_NAMES,
-                    "force_threshold": 0.1,
-                },
-            ),
-            "feet_stumble": RewardTermCfg(
-                func=rewards.feet_stumble,
-                weight=-0.1,
-                params={
-                    "sensor_name": WOLF_WHEEL_FORCE_CONTACT_SENSOR,
-                    "geom_names": WOLF_WHEEL_COLLISION_GEOM_NAMES,
-                    "horizontal_ratio": 3.0,
-                },
-            ),
-            "action_rate": RewardTermCfg(func=envs_mdp.action_rate_l2, weight=-0.01),
-            "torques": RewardTermCfg(
-                func=envs_mdp.joint_torques_l2,
-                weight=-5e-4,
-                params={
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        actuator_names=WOLF_POLICY_JOINT_NAMES,
-                        preserve_order=True,
-                    )
-                },
-            ),
-            "dof_vel": RewardTermCfg(
-                func=envs_mdp.joint_vel_l2,
-                weight=-1e-7,
-                params={
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
-                        preserve_order=True,
-                    )
-                },
-            ),
-            "dof_acc": RewardTermCfg(
-                func=envs_mdp.joint_acc_l2,
-                weight=-1e-7,
-                params={
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        joint_names=WOLF_POLICY_JOINT_NAMES,
-                        preserve_order=True,
-                    )
-                },
-            ),
             "run_still": RewardTermCfg(
-                func=rewards.run_still,
-                weight=-0.05,
+                func=rewards.run_still_leg_l1,
+                weight=-0.20,
                 params={
-                    "command_name": WOLF_COMMAND_NAME,
                     "asset_cfg": SceneEntityCfg(
                         "robot",
                         joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
                         preserve_order=True,
                     ),
-                    "command_threshold": 0.1,
+                    "command_name": WOLF_COMMAND_NAME,
+                    "x_threshold": 0.1,
+                    "y_threshold": 0.1,
+                    "yaw_threshold": 0.15,
+                },
+            ),
+            "dof_pos_limits": RewardTermCfg(
+                func=envs_mdp.joint_pos_limits,
+                weight=-0.20,
+                params={
+                    "asset_cfg": SceneEntityCfg(
+                        "robot",
+                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
+                        preserve_order=True,
+                    )
+                },
+            ),
+            "leg_torques": RewardTermCfg(
+                func=envs_mdp.joint_torques_l2,
+                weight=-0.0001,
+                params={
+                    "asset_cfg": SceneEntityCfg(
+                        "robot",
+                        actuator_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
+                        preserve_order=True,
+                    )
+                },
+            ),
+            "wheel_torques": RewardTermCfg(
+                func=envs_mdp.joint_torques_l2,
+                weight=-0.0005,
+                params={
+                    "asset_cfg": SceneEntityCfg(
+                        "robot",
+                        actuator_names=WOLF_WHEEL_JOINT_NAMES,
+                        preserve_order=True,
+                    )
                 },
             ),
         },
@@ -1070,6 +1048,18 @@ def make_env_cfg(
         episode_length_s=int(1e9) if play else 20.0,
         scale_rewards_by_dt=True,
     )
+    if rough:
+        cfg.rewards["wheel_force_lift"] = RewardTermCfg(
+            func=rewards.wheel_force_lift,
+            weight=0.5,
+            params={
+                "sensor_name": WOLF_WHEEL_FORCE_CONTACT_SENSOR,
+                "min_horizontal_force": 15.0,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
+                ),
+            },
+        )
     if him_enabled:
         configure_him_observations(cfg)
         configure_him_terminal_targets(cfg)

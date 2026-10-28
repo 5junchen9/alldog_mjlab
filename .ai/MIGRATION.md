@@ -84,30 +84,29 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 |---|---:|
 | tracking_lin_vel_x | 1.0 |
 | tracking_lin_vel_y | 1.0 |
-| tracking_ang_vel | 0.75 |
-| lin_vel_z | -1.0 |
+| tracking_ang_vel | 1.0 |
+| lin_vel_z | -0.8 |
 | ang_vel_xy | -0.05 |
 | orientation | -0.5 |
-| base_height | -10.0 |
-| hip_default | -0.5 |
-| stand_still | -0.5 |
-| collision | -1.0 |
-| feet_stumble | -0.1 |
-| action_rate | -0.01 |
-| torques | -5e-4 |
-| dof_vel | -1e-7 |
-| dof_acc | -1e-7 |
-| run_still | -0.05 |
+| base_height | -1.0 |
+| leg_action_rate | -0.01 |
+| wheel_action_rate | -0.005 |
+| hip_default | -0.3 |
+| stand_still | -0.4 |
+| run_still | -0.2 |
+| dof_pos_limits | -0.2 |
+| leg_torques | -1e-4 |
+| wheel_torques | -5e-4 |
 
-Wolf 高度目标 0.40 m。Hip default 计算四个 hip 的位置误差平方和；stand_still 在 norm(command_xy)<0.1 m/s 且 abs(command_yaw)<0.1 rad/s 时计算 12 腿关节位置误差 L1；run_still 在 norm(command_xy)>0.1 时启用相同 L1，不使用 yaw 门控。两项均排除轮关节。
+Wolf flat 注册上述 15 项，rough 另加 wheel_force_lift，权重 0.5，共 16 项。
 
-Collision 的 body 选择为 base_link，以及 FL/FR/RL/RR 的 Link2、Link3；这些 body 分别承载 thigh/calf 关节。每个 body 聚合 terrain 接触净力，norm(force)>0.1 N 计 1 次，按 9 个 body 求和。
+Wolf 高度目标 0.40 m，orientation 使用 projected gravity XY 的 L1 和。Hip default 为四个 hip 位置误差 L1，乘以 `clamp(1 - 0.2×min(abs(vy_cmd)/0.5,1) - 0.35×min(abs(yaw_cmd)/1.0,1), 0.5, 1)`；横移和转向指令下放宽回中约束。
 
-Feet stumble 显式选择四个轮碰撞 geom，使用 world-frame net force；任一轮满足 norm(force_xy)>3×abs(force_z) 返回 1。Sensor primary_names、匹配数量和 force shape 显式校验。
+Stand_still 在 norm(command_xy)<0.1 m/s 且 abs(command_yaw)<0.1 rad/s 时计算 12 腿关节位置误差 L1。Run_still 在 abs(command_x)>0.1 m/s、abs(command_y)<0.1 m/s 且 abs(command_yaw)<0.15 rad/s 时启用相同 L1。两项均排除轮关节。
 
-Action rate 使用全部 raw action 的相邻帧平方差；torques 包含全部 16 个 actuator；dof_vel 只选择 12 个腿关节且不修改原始状态；dof_acc 使用原生瞬时 joint acceleration 的全部 16 个受控关节。
+Leg/wheel action rate 分别选择 12/4 个 raw action 通道计算相邻帧平方差；leg/wheel torques 分别选择 12/4 个 actuator 的实际力矩计算平方和，选择集合互不重叠。Dof_pos_limits 仅惩罚 12 个腿关节超出 soft position limit 的距离，soft limit factor=0.9。
 
-Flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两种地形的奖励名称、权重和目标高度一致。
+Flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两种地形共用上述 15 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
 
 ## 课程、DR、训练状态
 
@@ -133,17 +132,13 @@ Black flat/rough nconmax=35/128，Wolf flat/rough nconmax=64/128；njmax 均为 
 
 项目 train 入口默认启用 EPA 数值过滤与终端 warning 控制；overflow bit 与结构化 metrics 保留。此任务未修改物理资产、碰撞几何、仿真补丁或求解器。
 
-验证工具：`tests/check_task_architecture.py`，仅本地使用，不提交。
+奖励验证工具：`tests/check_wolf_reward_restore.py --light`，仅本地使用，不提交。
 
-- IMPLEMENTED：机器人独立任务架构、八任务注册、8/16 项奖励、课程版本、runner 与文档。
-- STATIC CHECKED：Python 语法、imports、注册、精确奖励表、无内部 tasks.velocity 引用、代码文本检查。
-- CONFIG CHECKED：八任务 train/play 与 RL 配置；与重构开始时的冻结配置快照逐项比较。
-- CPU PASS：独立奖励公式、阈值、门控、全维动作变化率和状态不变性数值检查；两机器人纯模型 PPO→HIM warm start、复制列及补零列验证通过。
-- Stand-still XY+yaw 门控：`tests/check_wolf_stand_still.py` 的四任务 train/play 配置及 CPU/CUDA 数值检查通过，覆盖正负 yaw、阈值边界和轮关节排除；未进行此奖励变更的 rollout 或训练评估。
-- Wolf X/Y tracking：`tests/check_wolf_tracking_axes.py --light` 通过四任务 train/play 配置、CPU/CUDA 独立轴公式、X-only 课程评分、weight/dt 归一化及版本恢复检查；wolf-flat-him 的 1 env reset + 2 policy steps CUDA 输出有限。
-- CUDA LIGHT TEST PASS / SIM VERIFIED limited：black-flat、wolf-flat、black-rough-him、wolf-rough-him 各 1 env，reset 和 3 步 rollout；rough 验证将地形行数缩为 2。
-- HIM terminal/history、课程评分缩放与版本恢复、实际 PPO/HIM runner 单步采样数据流通过。
-- Wolf rough HIM 的单个 checkpoint 在新 runner 中恢复；错误算法拒绝加载；TorchScript 创建、reload 和数值一致性探针通过。
+- IMPLEMENTED：机器人独立任务架构、八任务注册、Black 8 项及 Wolf flat 15 / rough 16 项奖励、课程版本、runner 与文档。
+- STATIC CHECKED：Python 语法、imports、八任务注册、精确奖励表和无内部 tasks.velocity 引用。
+- CONFIG CHECKED：Wolf 四任务 train/play 的奖励权重、参数和 selector；八任务 train/play 的控制、观测、DR、终止、课程、仿真、机器人及 RL 配置与修改前快照一致。课程、runner 和 RL 源码未变。
+- CPU PASS / CUDA PASS：姿态 L1、hip 指令缩放、stand_still 的 XY+yaw 门控、run_still 的直线门控、腿轮动作变化率与力矩分组、抬轮力阈值及向上速度截断。
+- CUDA LIGHT TEST PASS / SIM VERIFIED limited：wolf-flat 和 wolf-rough-him 各 1 env，reset 和 2 步 rollout，全部 15/16 项奖励输出为有限的一维 Tensor。实际力矩 selector 为互不重叠的 12/4 个 actuator；轮接触匹配四个指定 geom，force shape=[1,4,3]。Rough 验证将地形行数缩为 2。
 - TRAIN VERIFIED：NOT RUN。没有执行 PPO/HIM update、长程训练、收敛验证或实机测试。
 
 已知限制和待审查项：

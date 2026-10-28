@@ -10,6 +10,12 @@ from mjlab.managers import ManagerTermBase
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 
+from alldog_mjlab.robots.wolf.wolf_constants import (
+    WOLF_JOINTS_PER_LEG,
+    WOLF_LEG_ORDER,
+    WOLF_WHEEL_COLLISION_GEOM_NAMES,
+)
+
 if TYPE_CHECKING:
     from mjlab.entity import Entity
     from mjlab.envs import ManagerBasedRlEnv
@@ -124,15 +130,6 @@ class base_height_l2_terrain(ManagerTermBase):
         return torch.square(base_height - target_height)
 
 
-def hip_default(env, asset_cfg: SceneEntityCfg) -> torch.Tensor:
-    asset = env.scene[asset_cfg.name]
-    error = (
-        asset.data.joint_pos[:, asset_cfg.joint_ids]
-        - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
-    )
-    return error.square().sum(dim=1)
-
-
 def stand_still(
     env,
     command_name: str,
@@ -152,50 +149,113 @@ def stand_still(
     return error.abs().sum(dim=1) * standing
 
 
-def run_still(
-    env, command_name: str, asset_cfg: SceneEntityCfg, command_threshold: float
+# Policy action channels are interleaved as hip/thigh/calf/wheel for each leg.
+_BLOCK_DIM = len(WOLF_JOINTS_PER_LEG)
+_LEG_CHANNELS = tuple(
+    leg * _BLOCK_DIM + joint
+    for leg in range(len(WOLF_LEG_ORDER))
+    for joint in range(_BLOCK_DIM - 1)
+)
+_WHEEL_CHANNELS = tuple(
+    leg * _BLOCK_DIM + (_BLOCK_DIM - 1) for leg in range(len(WOLF_LEG_ORDER))
+)
+
+
+def leg_action_rate_l2(env) -> torch.Tensor:
+    action = env.action_manager.action
+    prev_action = env.action_manager.prev_action
+    diff = action[:, list(_LEG_CHANNELS)] - prev_action[:, list(_LEG_CHANNELS)]
+    return torch.sum(torch.square(diff), dim=1)
+
+
+def wheel_action_rate_l2(env) -> torch.Tensor:
+    action = env.action_manager.action
+    prev_action = env.action_manager.prev_action
+    diff = action[:, list(_WHEEL_CHANNELS)] - prev_action[:, list(_WHEEL_CHANNELS)]
+    return torch.sum(torch.square(diff), dim=1)
+
+
+def orientation_l1(
+    env: "ManagerBasedRlEnv", asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG
 ) -> torch.Tensor:
-    asset = env.scene[asset_cfg.name]
-    error = (
-        asset.data.joint_pos[:, asset_cfg.joint_ids]
-        - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    asset: "Entity" = env.scene[asset_cfg.name]
+    return torch.sum(torch.abs(asset.data.projected_gravity_b[:, :2]), dim=1)
+
+
+def hip_default_l1(
+    env: "ManagerBasedRlEnv",
+    asset_cfg: SceneEntityCfg,
+    command_name: str,
+    y_ref: float,
+    yaw_ref: float,
+    y_scale: float,
+    yaw_scale: float,
+    min_scale: float,
+) -> torch.Tensor:
+    asset: "Entity" = env.scene[asset_cfg.name]
+    default_joint_pos = asset.data.default_joint_pos
+    assert default_joint_pos is not None
+    hip_error = torch.sum(
+        torch.abs(
+            asset.data.joint_pos[:, asset_cfg.joint_ids]
+            - default_joint_pos[:, asset_cfg.joint_ids]
+        ),
+        dim=1,
     )
     command = env.command_manager.get_command(command_name)
-    return error.abs().sum(dim=1) * (command[:, :2].norm(dim=1) > command_threshold)
+    alpha = 1.0
+    alpha = alpha - y_scale * torch.clamp(
+        torch.abs(command[:, 1]) / max(y_ref, 1e-06), max=1.0
+    )
+    alpha = alpha - yaw_scale * torch.clamp(
+        torch.abs(command[:, 2]) / max(yaw_ref, 1e-06), max=1.0
+    )
+    alpha = torch.clamp(alpha, min=min_scale, max=1.0)
+    return hip_error * alpha
 
 
-def collision(
-    env, sensor_name: str, body_names: tuple[str, ...], force_threshold: float
+def run_still_leg_l1(
+    env: "ManagerBasedRlEnv",
+    asset_cfg: SceneEntityCfg,
+    command_name: str,
+    x_threshold: float,
+    y_threshold: float,
+    yaw_threshold: float,
+) -> torch.Tensor:
+    asset: "Entity" = env.scene[asset_cfg.name]
+    default_joint_pos = asset.data.default_joint_pos
+    assert default_joint_pos is not None
+    command = env.command_manager.get_command(command_name)
+    active = (
+        (torch.abs(command[:, 0]) > x_threshold)
+        & (torch.abs(command[:, 1]) < y_threshold)
+        & (torch.abs(command[:, 2]) < yaw_threshold)
+    ).to(torch.float32)
+    leg_error = torch.sum(
+        torch.abs(
+            asset.data.joint_pos[:, asset_cfg.joint_ids]
+            - default_joint_pos[:, asset_cfg.joint_ids]
+        ),
+        dim=1,
+    )
+    return leg_error * active
+
+
+def wheel_force_lift(
+    env: ManagerBasedRlEnv,
+    sensor_name: str,
+    asset_cfg: SceneEntityCfg,
+    min_horizontal_force: float,
 ) -> torch.Tensor:
     sensor = env.scene[sensor_name]
-    if tuple(sensor.primary_names) != tuple(body_names):
-        raise ValueError(
-            f"collision body mapping mismatch: {sensor.primary_names} != {body_names}"
-        )
-    force = sensor.data.force
-    assert force is not None and force.shape == (env.num_envs, len(body_names), 3), (
-        force
+    assert list(sensor.primary_names) == list(WOLF_WHEEL_COLLISION_GEOM_NAMES), (
+        f"wheel contact sensor primary order {sensor.primary_names} != policy wheel order {WOLF_WHEEL_COLLISION_GEOM_NAMES}"
     )
-    return (force.norm(dim=-1) > force_threshold).float().sum(dim=1)
-
-
-def feet_stumble(
-    env, sensor_name: str, geom_names: tuple[str, ...], horizontal_ratio: float
-) -> torch.Tensor:
-    sensor = env.scene[sensor_name]
-    if tuple(sensor.primary_names) != tuple(geom_names):
-        raise ValueError(
-            f"wheel contact mapping mismatch: {sensor.primary_names} != {geom_names}"
-        )
-    assert sensor.cfg.reduce == "netforce", (
-        "feet_stumble requires world-frame net force"
-    )
-    force = sensor.data.force
-    assert force is not None and force.shape == (env.num_envs, len(geom_names), 3), (
-        force
-    )
-    return (
-        (force[..., :2].norm(dim=-1) > horizontal_ratio * force[..., 2].abs())
-        .any(dim=1)
-        .float()
-    )
+    contact_force = sensor.data.force
+    assert contact_force is not None
+    horizontal_force = torch.norm(contact_force[..., :2], dim=-1)
+    contact_gate = (horizontal_force >= min_horizontal_force).to(horizontal_force.dtype)
+    asset: Entity = env.scene[asset_cfg.name]
+    wheel_velocity_w = asset.data.body_link_lin_vel_w[:, asset_cfg.body_ids]
+    upward_velocity = torch.clamp(wheel_velocity_w[..., 2], min=0.0)
+    return torch.sum(contact_gate * upward_velocity, dim=1)

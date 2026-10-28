@@ -128,7 +128,7 @@ src/alldog_mjlab/
 
 `env_cfg.py` 直接定义完整环境及奖励表；`rl_cfg.py` 定义 PPO/HIM 网络、算法和 runner 参数；`mdp/` 保存各机器人的自定义函数与局部配置类型。任务之间不引用另一机器人的奖励或环境配置。
 
-Black 的 8 项和 Wolf 的 16 项奖励在各自 `env_cfg.py` 中逐项可见。每个奖励返回每环境 raw 值，统一由 RewardManager 乘以 weight 和 policy dt，不进行总奖励非负裁剪。Wolf 的 collision 按 9 个 body 聚合，feet_stumble 使用 4 个轮碰撞 geom 的世界系 net force。
+Black 的 8 项和 Wolf 的 flat 15 项、rough 16 项奖励在各自 `env_cfg.py` 中逐项可见。每个奖励返回每环境 raw 值，统一由 RewardManager 乘以 weight 和 policy dt，不进行总奖励非负裁剪。Wolf 分别跟踪 X/Y/yaw，权重均为 1.0；腿部和轮部的动作变化率、力矩惩罚分别计算。腿部力矩权重为 -1e-4，轮部为 -5e-4。Hip 回中约束随 Y/yaw 指令放宽，run_still 仅在近直线行进时启用；rough 额外奖励轮子沿障碍向上运动。
 
 `train` 默认启用项目的 EPA 数值过滤和终端 warning 控制。可用 `MJWARP_EPA_PATCH=0` 关闭过滤，`MJWARP_SUPPRESS_WARNINGS=0` 保留警告打印；结构化 overflow 指标继续保留。
 
