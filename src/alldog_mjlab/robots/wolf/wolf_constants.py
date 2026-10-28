@@ -11,9 +11,7 @@ from mjlab.entity import EntityArticulationInfoCfg, EntityCfg
 _HERE = Path(__file__).parent
 
 WOLF_XML: Path = _HERE / "xmls" / "wolf.xml"
-
 WOLF_ASSETS_DIR: Path = _HERE / "xmls" / "assets"
-
 assert WOLF_XML.exists(), f"Wolf MJCF not found: {WOLF_XML}"
 
 
@@ -40,44 +38,29 @@ def get_spec() -> mujoco.MjSpec:
 
 # Joint / policy order
 WOLF_LEG_ORDER = ("FL", "FR", "RL", "RR")
-
 WOLF_JOINTS_PER_LEG = ("hip", "thigh", "calf", "foot")
-
 WOLF_POLICY_JOINT_NAMES = tuple(
     (f"{leg}_{joint}" for leg in WOLF_LEG_ORDER for joint in WOLF_JOINTS_PER_LEG)
 )
-
 WOLF_LEG_JOINT_NAMES = {
     leg: (f"{leg}_hip", f"{leg}_thigh", f"{leg}_calf", f"{leg}_foot")
     for leg in WOLF_LEG_ORDER
 }
-
 WOLF_WHEEL_JOINT_NAMES = tuple((f"{leg}_foot" for leg in WOLF_LEG_ORDER))
-
 WOLF_WHEEL_FORWARD_SIGN = {"FL": 1, "FR": -1, "RL": 1, "RR": -1}
-
 WOLF_IMU_BODY_NAME = "imu_Link"
-
 WOLF_IMU_SITE_NAME = "imu_site"
-
 WOLF_IMU_ANG_VEL_SENSOR = "imu_ang_vel"
-
 WOLF_IMU_UPVECTOR_SENSOR = "imu_upvector"
-
 WOLF_IMU_BODY_OFFSET = (0.0, 0.0, 0.05975)
 
 
 # Actuator configuration
 WOLF_LEG_STIFFNESS = {"hip": 90.0, "thigh": 80.0, "calf": 80.0}
-
 WOLF_LEG_DAMPING = {"hip": 3.3, "thigh": 3.0, "calf": 3.0}
-
 WOLF_LEG_EFFORT_LIMIT = 60.0
-
 WOLF_WHEEL_STIFFNESS = 0.0
-
 WOLF_WHEEL_DAMPING = 2.0
-
 WOLF_WHEEL_EFFORT_LIMIT = 17.0
 
 
