@@ -89,7 +89,7 @@ def apply_command_curriculum_state(
         )
     restored = resolve_restore_mode(restore_mode, state.get("stage"), term.stage)
     if (
-        state.get("version") in (1, 2)
+        state.get("version") in (1, 2, 3)
         and restored == "full"
         and (restore_mode == "auto")
     ):

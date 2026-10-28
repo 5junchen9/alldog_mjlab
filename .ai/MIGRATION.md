@@ -65,7 +65,7 @@ TorchScript exporter 使用 runner 原生能力，重新加载并检查数值等
 
 ## 奖励基线
 
-所有奖励返回 `[num_envs]` raw Tensor，由 RewardManager 统一乘 weight 和 policy dt，不进行总奖励非负裁剪。Tracking sigma=0.25，linear tracking 使用 body-frame XY 平方误差，angular tracking 使用 yaw 平方误差。
+所有奖励返回 `[num_envs]` raw Tensor，由 RewardManager 统一乘 weight 和 policy dt，不进行总奖励非负裁剪。Tracking sigma=0.25。Black linear tracking 使用 body-frame XY 平方误差和；Wolf 的 X/Y 分别使用对应轴的速度平方误差，两个独立指数奖励的权重均为 1.0。Angular tracking 使用 yaw 平方误差。
 
 | Black 奖励 | Weight |
 |---|---:|
@@ -82,7 +82,8 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 
 | Wolf 奖励 | Weight |
 |---|---:|
-| tracking_lin_vel | 1.5 |
+| tracking_lin_vel_x | 1.0 |
+| tracking_lin_vel_y | 1.0 |
 | tracking_ang_vel | 0.75 |
 | lin_vel_z | -1.0 |
 | ang_vel_xy | -0.05 |
@@ -114,9 +115,9 @@ Command 使用 body-frame velocity sampler，每 10 s 重采样；standing fract
 
 Black 初始 vx/vy=[-1,1]，yaw=[-π,π]，课程 vx 上限 ±2。Wolf 初始 vx/vy=[-1,1]，yaw=[-3.14,3.14]，课程 vx 上限 ±3。性能课程只扩展 vx，每次双边扩展 0.1；其余 sampler 设置保持固定。
 
-课程根据已完成 episode 的 tracking_lin_vel 累计值评分，除以 episode policy 步数、dt 和实际 reward weight。Buffer min=256、EMA alpha=0.2、low/high 阈值=0.7/0.6、连续通过 2 次再扩范围。
+课程根据已完成 episode 的实际 tracking 累计值评分：Black 读取 tracking_lin_vel，Wolf 读取 tracking_lin_vel_x，仅用 X 跟踪表现推进 vx 课程；Y 项独立参与奖励。累计值除以 episode policy 步数、dt 和实际 reward weight。Buffer min=256、EMA alpha=0.2、low/high 阈值=0.7/0.6、连续通过 2 次再扩范围。
 
-课程 state version：Black=2，Wolf=3；state 保存评分 reward key、robot、stage、range、EMA、streak 和 buffer。同版本 full 恢复要求评分项一致；不兼容统计版本只允许 range/none，auto full 自动降为 range。跨机器人 state 拒绝恢复。
+课程 state version：Black=2，Wolf=4；state 保存评分 reward key、robot、stage、range、EMA、streak 和 buffer。同版本 full 恢复要求评分项一致；不兼容统计版本只允许 range/none，auto full 自动降为 range。跨机器人 state 拒绝恢复。
 
 默认 DR profile 的开关、范围和调用频率保留在机器人 mdp/events.py。Black 默认开启摩擦、payload、COM、PD gain、encoder bias 和周期推力。Wolf 默认开启质量、惯性、摩擦、PD/motor strength、轮半径、控制延迟、推力、外力和初始腿姿态缩放；hip motor strength、calf backlash、wheel target bias/scale 和 wheel observation bias 默认关闭。
 
@@ -134,11 +135,12 @@ Black flat/rough nconmax=35/128，Wolf flat/rough nconmax=64/128；njmax 均为 
 
 验证工具：`tests/check_task_architecture.py`，仅本地使用，不提交。
 
-- IMPLEMENTED：机器人独立任务架构、八任务注册、8/15 项奖励、课程版本、runner 与文档。
+- IMPLEMENTED：机器人独立任务架构、八任务注册、8/16 项奖励、课程版本、runner 与文档。
 - STATIC CHECKED：Python 语法、imports、注册、精确奖励表、无内部 tasks.velocity 引用、代码文本检查。
 - CONFIG CHECKED：八任务 train/play 与 RL 配置；与重构开始时的冻结配置快照逐项比较。
 - CPU PASS：独立奖励公式、阈值、门控、全维动作变化率和状态不变性数值检查；两机器人纯模型 PPO→HIM warm start、复制列及补零列验证通过。
 - Stand-still XY+yaw 门控：`tests/check_wolf_stand_still.py` 的四任务 train/play 配置及 CPU/CUDA 数值检查通过，覆盖正负 yaw、阈值边界和轮关节排除；未进行此奖励变更的 rollout 或训练评估。
+- Wolf X/Y tracking：`tests/check_wolf_tracking_axes.py --light` 通过四任务 train/play 配置、CPU/CUDA 独立轴公式、X-only 课程评分、weight/dt 归一化及版本恢复检查；wolf-flat-him 的 1 env reset + 2 policy steps CUDA 输出有限。
 - CUDA LIGHT TEST PASS / SIM VERIFIED limited：black-flat、wolf-flat、black-rough-him、wolf-rough-him 各 1 env，reset 和 3 步 rollout；rough 验证将地形行数缩为 2。
 - HIM terminal/history、课程评分缩放与版本恢复、实际 PPO/HIM runner 单步采样数据流通过。
 - Wolf rough HIM 的单个 checkpoint 在新 runner 中恢复；错误算法拒绝加载；TorchScript 创建、reload 和数值一致性探针通过。

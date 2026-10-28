@@ -20,7 +20,7 @@ _BASE_HEIGHT_FOOTPRINT_NUM_RAYS = 35
 _BASE_HEIGHT_FOOTPRINT_TOLERANCE = 0.0001
 
 
-def track_linear_velocity_xy(
+def track_linear_velocity_x(
     env: ManagerBasedRlEnv,
     sigma: float,
     command_name: str,
@@ -30,7 +30,21 @@ def track_linear_velocity_xy(
     command = env.command_manager.get_command(command_name)
     assert command is not None, f"Command '{command_name}' not found."
     actual = asset.data.root_link_lin_vel_b
-    error = torch.sum(torch.square(command[:, :2] - actual[:, :2]), dim=1)
+    error = torch.square(command[:, 0] - actual[:, 0])
+    return torch.exp(-error / sigma)
+
+
+def track_linear_velocity_y(
+    env: ManagerBasedRlEnv,
+    sigma: float,
+    command_name: str,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+    asset: Entity = env.scene[asset_cfg.name]
+    command = env.command_manager.get_command(command_name)
+    assert command is not None, f"Command '{command_name}' not found."
+    actual = asset.data.root_link_lin_vel_b
+    error = torch.square(command[:, 1] - actual[:, 1])
     return torch.exp(-error / sigma)
 
 

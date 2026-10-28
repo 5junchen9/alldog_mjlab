@@ -11,7 +11,7 @@ from mjlab.managers import CurriculumTermCfg, ManagerTermBase
 
 if TYPE_CHECKING:
     from mjlab.envs import ManagerBasedRlEnv
-CURRICULUM_STATE_VERSION = 3
+CURRICULUM_STATE_VERSION = 4
 CURRICULUM_TERM_NAME = "command"
 RestoreMode = Literal["none", "range", "full"]
 RunnerRestoreMode = Literal["auto", "none", "range", "full"]
@@ -116,7 +116,7 @@ class WolfForwardSpeedCommandCurriculum(ManagerTermBase):
                 f"command curriculum state must be a dict, got {type(state)}"
             )
         state_version = state.get("version")
-        if state_version not in (1, 2, 3):
+        if state_version not in (1, 2, 3, 4):
             raise ValueError(
                 f"unsupported command curriculum state version: {state_version!r}"
             )

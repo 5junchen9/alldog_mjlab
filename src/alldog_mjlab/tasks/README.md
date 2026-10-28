@@ -11,6 +11,6 @@
 - `mdp/him.py`：history、estimator velocity target 和 terminal target。
 - `mdp/terrain.py`：自定义地形构造；数值和地形组合在 `env_cfg.py` 中定义。
 
-Black 具有 8 项奖励、12 维动作、45 维 actor、259 维 critic。Wolf 具有 15 项奖励、16 维动作、53 维 actor、56 维 critic。每个机器人的 flat/rough 观测 specification 完全一致，HIM actor 使用相同基础观测的 6 帧 history。
+Black 具有 8 项奖励、12 维动作、45 维 actor、259 维 critic。Wolf 具有 16 项奖励、16 维动作、53 维 actor、56 维 critic。每个机器人的 flat/rough 观测 specification 完全一致，HIM actor 使用相同基础观测的 6 帧 history。
 
 训练 experiment 为 `black_locomotion` 与 `wolf_locomotion`。命令、训练/续训和策略导出示例见仓库根 README。

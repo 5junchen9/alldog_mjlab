@@ -67,7 +67,7 @@ uv run train wolf-flat-him --agent.warm-start True --agent.checkpoint-path '/abs
 
 `warm_start` 与 `resume` 互斥。PPO/HIM 算法类型、模型结构、机器人来源和课程状态均需兼容；不兼容时加载报错。历史日志和 checkpoint 不会被移动或删除。
 
-课程恢复选项为 `none / range / full / auto`。Black 默认 `range`，Wolf 默认 `none`；`auto` 对同地形阶段恢复完整统计、跨地形阶段只恢复范围。统计版本不兼容时 `auto` 降为 `range`，显式 `full` 报错。当前课程评分为 `tracking_lin_vel` 的实际 episode 累计值，除以 reward weight、policy dt 和 episode 步数。
+课程恢复选项为 `none / range / full / auto`。Black 默认 `range`，Wolf 默认 `none`；`auto` 对同地形阶段恢复完整统计、跨地形阶段只恢复范围。统计版本不兼容时 `auto` 降为 `range`，显式 `full` 报错。当前课程评分读取 Black 的 `tracking_lin_vel`、Wolf 的 `tracking_lin_vel_x` 实际 episode 累计值，除以 reward weight、policy dt 和 episode 步数。
 
 ## Play 与导出
 
@@ -128,7 +128,7 @@ src/alldog_mjlab/
 
 `env_cfg.py` 直接定义完整环境及奖励表；`rl_cfg.py` 定义 PPO/HIM 网络、算法和 runner 参数；`mdp/` 保存各机器人的自定义函数与局部配置类型。任务之间不引用另一机器人的奖励或环境配置。
 
-Black 的 8 项和 Wolf 的 15 项奖励在各自 `env_cfg.py` 中逐项可见。每个奖励返回每环境 raw 值，统一由 RewardManager 乘以 weight 和 policy dt，不进行总奖励非负裁剪。Wolf 的 collision 按 9 个 body 聚合，feet_stumble 使用 4 个轮碰撞 geom 的世界系 net force。
+Black 的 8 项和 Wolf 的 16 项奖励在各自 `env_cfg.py` 中逐项可见。每个奖励返回每环境 raw 值，统一由 RewardManager 乘以 weight 和 policy dt，不进行总奖励非负裁剪。Wolf 的 collision 按 9 个 body 聚合，feet_stumble 使用 4 个轮碰撞 geom 的世界系 net force。
 
 `train` 默认启用项目的 EPA 数值过滤和终端 warning 控制。可用 `MJWARP_EPA_PATCH=0` 关闭过滤，`MJWARP_SUPPRESS_WARNINGS=0` 保留警告打印；结构化 overflow 指标继续保留。
 

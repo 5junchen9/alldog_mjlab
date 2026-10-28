@@ -183,7 +183,7 @@ WOLF_TEMPLATE_ROOT_BODY = "robot/base_link"
 
 WOLF_COMMAND_NAME = "twist"
 
-WOLF_TRACKING_VELOCITY_REWARD_TERM = "tracking_lin_vel"
+WOLF_TRACKING_VELOCITY_REWARD_TERM = "tracking_lin_vel_x"
 
 WOLF_LEG_ACTION_JOINT_NAMES = {
     leg: tuple(WOLF_LEG_JOINT_NAMES[leg][:3]) for leg in WOLF_LEG_ORDER
@@ -859,7 +859,7 @@ def make_env_cfg(
                 func=WolfForwardSpeedCommandCurriculum,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
-                    "reward_term_name": "tracking_lin_vel",
+                    "reward_term_name": WOLF_TRACKING_VELOCITY_REWARD_TERM,
                     "stage": "rough" if rough else "flat",
                     "robot": "wolf",
                     "curriculum_params": COMMAND_CURRICULUM,
@@ -925,9 +925,14 @@ def make_env_cfg(
             )
         },
         rewards={
-            "tracking_lin_vel": RewardTermCfg(
-                func=rewards.track_linear_velocity_xy,
-                weight=1.5,
+            "tracking_lin_vel_x": RewardTermCfg(
+                func=rewards.track_linear_velocity_x,
+                weight=1.0,
+                params={"command_name": WOLF_COMMAND_NAME, "sigma": 0.25},
+            ),
+            "tracking_lin_vel_y": RewardTermCfg(
+                func=rewards.track_linear_velocity_y,
+                weight=1.0,
                 params={"command_name": WOLF_COMMAND_NAME, "sigma": 0.25},
             ),
             "tracking_ang_vel": RewardTermCfg(
