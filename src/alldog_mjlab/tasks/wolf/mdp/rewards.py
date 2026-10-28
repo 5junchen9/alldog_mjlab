@@ -120,7 +120,11 @@ def hip_default(env, asset_cfg: SceneEntityCfg) -> torch.Tensor:
 
 
 def stand_still(
-    env, command_name: str, asset_cfg: SceneEntityCfg, command_threshold: float
+    env,
+    command_name: str,
+    asset_cfg: SceneEntityCfg,
+    command_threshold: float,
+    yaw_threshold: float,
 ) -> torch.Tensor:
     asset = env.scene[asset_cfg.name]
     error = (
@@ -128,7 +132,10 @@ def stand_still(
         - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
     )
     command = env.command_manager.get_command(command_name)
-    return error.abs().sum(dim=1) * (command[:, :2].norm(dim=1) < command_threshold)
+    standing = (command[:, :2].norm(dim=1) < command_threshold) & (
+        command[:, 2].abs() < yaw_threshold
+    )
+    return error.abs().sum(dim=1) * standing
 
 
 def run_still(

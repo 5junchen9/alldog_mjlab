@@ -98,7 +98,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 | dof_acc | -1e-7 |
 | run_still | -0.05 |
 
-Wolf 高度目标 0.40 m。Hip default 计算四个 hip 的位置误差平方和；stand_still 在 norm(command_xy)<0.1 时计算 12 腿关节位置误差 L1；run_still 在 norm(command_xy)>0.1 时启用相同 L1。两者不使用 yaw 门控，排除轮关节。
+Wolf 高度目标 0.40 m。Hip default 计算四个 hip 的位置误差平方和；stand_still 在 norm(command_xy)<0.1 m/s 且 abs(command_yaw)<0.1 rad/s 时计算 12 腿关节位置误差 L1；run_still 在 norm(command_xy)>0.1 时启用相同 L1，不使用 yaw 门控。两项均排除轮关节。
 
 Collision 的 body 选择为 base_link，以及 FL/FR/RL/RR 的 Link2、Link3；这些 body 分别承载 thigh/calf 关节。每个 body 聚合 terrain 接触净力，norm(force)>0.1 N 计 1 次，按 9 个 body 求和。
 
@@ -138,6 +138,7 @@ Black flat/rough nconmax=35/128，Wolf flat/rough nconmax=64/128；njmax 均为 
 - STATIC CHECKED：Python 语法、imports、注册、精确奖励表、无内部 tasks.velocity 引用、代码文本检查。
 - CONFIG CHECKED：八任务 train/play 与 RL 配置；与重构开始时的冻结配置快照逐项比较。
 - CPU PASS：独立奖励公式、阈值、门控、全维动作变化率和状态不变性数值检查；两机器人纯模型 PPO→HIM warm start、复制列及补零列验证通过。
+- Stand-still XY+yaw 门控：`tests/check_wolf_stand_still.py` 的四任务 train/play 配置及 CPU/CUDA 数值检查通过，覆盖正负 yaw、阈值边界和轮关节排除；未进行此奖励变更的 rollout 或训练评估。
 - CUDA LIGHT TEST PASS / SIM VERIFIED limited：black-flat、wolf-flat、black-rough-him、wolf-rough-him 各 1 env，reset 和 3 步 rollout；rough 验证将地形行数缩为 2。
 - HIM terminal/history、课程评分缩放与版本恢复、实际 PPO/HIM runner 单步采样数据流通过。
 - Wolf rough HIM 的单个 checkpoint 在新 runner 中恢复；错误算法拒绝加载；TorchScript 创建、reload 和数值一致性探针通过。

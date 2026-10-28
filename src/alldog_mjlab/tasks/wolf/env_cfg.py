@@ -976,6 +976,7 @@ def make_env_cfg(
                         preserve_order=True,
                     ),
                     "command_threshold": 0.1,
+                    "yaw_threshold": 0.1,
                 },
             ),
             "collision": RewardTermCfg(
