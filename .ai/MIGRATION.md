@@ -108,6 +108,20 @@ Leg/wheel action rate 分别选择 12/4 个 raw action 通道计算相邻帧平�
 
 Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 15 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
 
+## Wolf 轮地滑移诊断
+
+Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → RL → RR 显式匹配四个轮碰撞 geom；原生 maxforce reduction 每轮保留一个最强接触，读取 found、contact-frame force 和 world-frame pos/normal/tangent。Rough 的原有 netforce 传感器继续独立服务 wheel_force_lift。
+
+`mdp/metrics.py` 使用 `v_contact = v_link + omega_wheel × (p_contact - p_link)` 计算轮上当前接触材料点相对静止地面的速度。omega 为轮体总角速度，包含机身、腿和轮关节运动。轮轴来自实际轮体姿态下的 MJCF local Z；与接触法线构造滚动和侧向基。仅统计 found>0、法向力绝对值>1 N 且滚动方向有效的接触；离地和未承重轮输出零。
+
+`wheel_lateral_slip_l2` / `wheel_longitudinal_slip_l2` 分别为四轮侧向/纵向滑移速度平方和，单位 m²/s²，由原生 MetricsManager 记录 episode 的 policy-step 均值，不乘 reward weight 或 dt。当前只监测，不加入奖励；reward、actor/critic/history、action、PD 与 checkpoint contract 均未因诊断修改。原生 step metrics 在最后一次 forward 前计算，派生量滞后一个 physics substep；本地回放 trace 采样于 forward 后。
+
+验证：`tests/check_wolf_wheel_slip.py --device cpu/cuda` 的物理数值用例均 PASS，覆盖纯滚动、贴地空转、横向滑移、接触门控、总角速度、镜像轮轴与坐标变换；八任务 train/play/RL 快照对比确认只有 Wolf 新增上述 sensor/metrics。CUDA 回放 `2026-11-01_15-57-14_wolf_flat_him/model_1000.pt`，8 env ×600 policy steps，hip PD 按训练值设为 90/3.3，其余使用当前 play 配置并保留 actuator delay；全程状态与输出有限。接触点速度与 C MuJoCo Jacobian 独立比较，最大误差 5.7e-6 m/s 以内。Wolf rough HIM 另以缩小地形的 1 env reset+2 步验证 native metrics 有限。
+
+回放去除前 2 s 后，vx=0.5 的侧滑 RMS 为 0.0029 m/s，yaw=+1/-1 时为 0.1178/0.1296 m/s，yaw=+2/-2 时为 0.2068/0.1970 m/s；RMS 以承重轮样本为分母。+1 yaw 下四髋平均绝对偏角约 10.6°/12.1°/13.6°/15.8°，请求目标约 4.3°/0.7°/3.1°/6.7°，存在明显目标跟踪误差与持续力矩。小 yaw 的方向差异明显，-0.5 指令下平均实际 yaw 仅 -0.021 rad/s。结果来自单 seed、每指令一个环境的短回放，尚未验证训练改善；最强单接触也不能覆盖整块轮胎接触区域，零滑移不能排除髋部静态受力。
+
+本地工具 `tests/trace_wolf_wheel_slip.py` 输出 trace.npz、summary.json；结果位于 `tests/wolf_wheel_slip_results/`，不提交。下一 behavior unit 为以侧滑诊断量为依据进行奖励权重和单项消融评估，当前不声称已学会抬腿转向。
+
 ## 课程、DR、训练状态
 
 Command 使用 body-frame velocity sampler，每 10 s 重采样；standing fraction=0.1、forward fraction=0.2、world fraction=0、heading 关闭。

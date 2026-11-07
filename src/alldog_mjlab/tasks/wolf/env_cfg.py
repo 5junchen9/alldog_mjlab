@@ -57,6 +57,7 @@ from alldog_mjlab.robots.wolf.wolf_constants import (
     WOLF_WHEEL_JOINT_NAMES,
 )
 
+from .mdp import metrics as wolf_metrics
 from .mdp import rewards
 from .mdp.curriculums import (
     CURRICULUM_TERM_NAME,
@@ -173,6 +174,8 @@ _WOLF_ACTOR_TERM_NOISE = {
 WOLF_ILLEGAL_CONTACT_SENSOR = "illegal_ground_contact"
 
 WOLF_WHEEL_FORCE_CONTACT_SENSOR = "wheel_force_contact"
+
+WOLF_WHEEL_SLIP_CONTACT_SENSOR = "wheel_slip_contact"
 
 WOLF_TERRAIN_SCAN_SENSOR = "terrain_scan"
 
@@ -795,6 +798,16 @@ def make_env_cfg(
             num_slots=1,
             history_length=4,
         ),
+        ContactSensorCfg(
+            name=WOLF_WHEEL_SLIP_CONTACT_SENSOR,
+            primary=ContactMatch(
+                mode="geom", pattern=WOLF_WHEEL_COLLISION_GEOM_NAMES, entity="robot"
+            ),
+            secondary=ContactMatch(mode="body", pattern="terrain"),
+            fields=("found", "force", "pos", "normal", "tangent"),
+            reduce="maxforce",
+            num_slots=1,
+        ),
     ]
     if rough:
         sensors.append(
@@ -851,6 +864,20 @@ def make_env_cfg(
                 },
             )
     metrics = {"mean_action_acc": MetricsTermCfg(func=mdp.mean_action_acc)}
+    for name, func in (
+        ("wheel_lateral_slip_l2", wolf_metrics.wheel_lateral_slip_l2),
+        ("wheel_longitudinal_slip_l2", wolf_metrics.wheel_longitudinal_slip_l2),
+    ):
+        metrics[name] = MetricsTermCfg(
+            func=func,
+            params={
+                "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
+                ),
+                "contact_force_threshold": 1.0,
+            },
+        )
     if rough and not play:
         metrics.update(
             {
