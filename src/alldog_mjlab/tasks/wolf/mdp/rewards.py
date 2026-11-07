@@ -88,13 +88,14 @@ def base_height_l2_flat(
     target_height: float,
     asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
 ) -> torch.Tensor:
+    """Absolute world-height error; retain the existing callable name."""
     asset: Entity = env.scene[asset_cfg.name]
     base_height = asset.data.root_link_pos_w[:, 2]
-    return torch.square(base_height - target_height)
+    return torch.abs(base_height - target_height)
 
 
 class base_height_l2_terrain(ManagerTermBase):
-    """Squared height error using the mean clearance of the central 35 terrain rays."""
+    """Absolute height error using the mean clearance of the central 35 terrain rays."""
 
     def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRlEnv) -> None:
         super().__init__(env)
@@ -127,7 +128,7 @@ class base_height_l2_terrain(ManagerTermBase):
         del kwargs
         raw_scan = envs_mdp.height_scan(env, sensor_name=sensor_name)
         base_height = raw_scan[:, self._indices].mean(dim=1)
-        return torch.square(base_height - target_height)
+        return torch.abs(base_height - target_height)
 
 
 def stand_still(

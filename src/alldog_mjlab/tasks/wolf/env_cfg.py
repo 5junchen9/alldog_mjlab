@@ -936,7 +936,7 @@ def make_env_cfg(
                 func=rewards.base_height_l2_terrain
                 if rough
                 else rewards.base_height_l2_flat,
-                weight=-1.0,
+                weight=-10.0,
                 params={
                     "target_height": 0.40,
                     **({"sensor_name": WOLF_TERRAIN_SCAN_SENSOR} if rough else {}),

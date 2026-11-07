@@ -88,7 +88,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 | lin_vel_z | -0.8 |
 | ang_vel_xy | -0.05 |
 | orientation | -0.5 |
-| base_height | -1.0 |
+| base_height | -10.0 |
 | leg_action_rate | -0.01 |
 | wheel_action_rate | -0.005 |
 | hip_default | -0.3 |
@@ -106,7 +106,7 @@ Stand_still 在 norm(command_xy)<0.1 m/s 且 abs(command_yaw)<0.1 rad/s 时计�
 
 Leg/wheel action rate 分别选择 12/4 个 raw action 通道计算相邻帧平方差；leg/wheel torques 分别选择 12/4 个 actuator 的实际力矩计算平方和，选择集合互不重叠。Dof_pos_limits 仅惩罚 12 个腿关节超出 soft position limit 的距离，soft limit factor=0.9。
 
-Flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两种地形共用上述 15 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
+Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 15 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
 
 ## 课程、DR、训练状态
 
@@ -133,6 +133,8 @@ Black flat/rough nconmax=35/128，Wolf flat/rough nconmax=64/128；njmax 均为 
 项目 train 入口默认启用 EPA 数值过滤与终端 warning 控制；overflow bit 与结构化 metrics 保留。此任务未修改物理资产、碰撞几何、仿真补丁或求解器。
 
 奖励验证工具：`tests/check_wolf_reward_restore.py --light`，仅本地使用，不提交。
+
+Wolf 高度绝对值误差与 -10.0 权重由 `tests/check_wolf_height_l1.py` 单独验证（本地、不提交）：四任务 train/play 配置 PASS；CPU PASS，覆盖目标上下偏差、中央 35 ray 均值、地形整体升高与加权惩罚；CUDA SKIPPED（当前不可用）。本次高度调整未运行环境 rollout 或训练；下一步仍为奖励审查和训练评估。
 
 - IMPLEMENTED：机器人独立任务架构、八任务注册、Black 8 项及 Wolf flat 15 / rough 16 项奖励、课程版本、runner 与文档。
 - STATIC CHECKED：Python 语法、imports、八任务注册、精确奖励表和无内部 tasks.velocity 引用。
