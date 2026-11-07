@@ -56,11 +56,11 @@ WOLF_IMU_BODY_OFFSET = (0.0, 0.0, 0.05975)
 
 
 # Actuator configuration
-WOLF_LEG_STIFFNESS = {"hip": 90.0, "thigh": 80.0, "calf": 80.0}
-WOLF_LEG_DAMPING = {"hip": 3.3, "thigh": 3.0, "calf": 3.0}
+WOLF_LEG_STIFFNESS = {"hip": 80.0, "thigh": 80.0, "calf": 80.0}
+WOLF_LEG_DAMPING = {"hip": 2.0, "thigh": 2.0, "calf": 2.0}
 WOLF_LEG_EFFORT_LIMIT = 60.0
 WOLF_WHEEL_STIFFNESS = 0.0
-WOLF_WHEEL_DAMPING = 2.0
+WOLF_WHEEL_DAMPING = 0.6
 WOLF_WHEEL_EFFORT_LIMIT = 17.0
 
 

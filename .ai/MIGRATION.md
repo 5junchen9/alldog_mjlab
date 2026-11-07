@@ -24,11 +24,11 @@ Policy 腿顺序为 FL → FR → RL → RR。Black 每腿 hip → thigh → cal
 | Action 维度 | 12 | 16，每腿 3 个位置通道 + 1 个轮速通道 |
 | Physics dt / decimation | 0.005 s / 4 | 0.005 s / 4 |
 | Policy period | 0.02 s，50 Hz | 0.02 s，50 Hz |
-| 腿动作 | q_default + 0.25 × raw action | q_default + 0.25 × raw action |
-| 腿 Kp / Kd | 40 / 1.2 | hip 90 / 3.3；thigh 80 / 3；calf 80 / 3 |
+| 腿动作 | q_default + 0.25 × raw action | hip: q_default + 0.125 × raw action；thigh/calf: q_default + 0.25 × raw action |
+| 腿 Kp / Kd | 40 / 1.2 | hip/thigh/calf 均为 80 / 2 |
 | 腿 effort limit | 20 N·m | 60 N·m |
-| 轮控制 | 无 | Kp=0，Kd=2，effort limit=17 N·m |
-| 轮速目标 | 无 | sign × 10 × raw action，单位 rad/s |
+| 轮控制 | 无 | Kp=0，Kd=0.6，effort limit=17 N·m |
+| 轮速目标 | 无 | sign × 5 × raw action，单位 rad/s |
 | 轮速方向 sign | 无 | FL:+1 / FR:-1 / RL:+1 / RR:-1 |
 | 默认 root z | 0.45 m | 0.4432 m |
 
@@ -107,7 +107,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 
 Wolf flat 注册上述 22 项，rough 另加 wheel_force_lift，权重 0.5，共 23 项。
 
-本次转向迁移开始时，工作区已有两项用户覆盖：hip PD=80/3.0、两项物理滑移奖励权重=0。迁移保留这些未提交覆盖；上表滑移权重与控制表的 hip 90/3.3 描述 Git 提交基线。本次验证使用含用户覆盖的实际工作区。
+当前工作区有两项物理滑移奖励权重=0 的用户覆盖，继续保留为未提交修改；上表 -2/-0.5 描述 Git 提交基线。转向迁移时保留的用户 hip 80/3 已由当前 M20 对照控制基线 80/2 替换。本地验证使用含滑移权重覆盖的实际工作区。
 
 Wolf 高度目标 0.40 m，orientation 使用 projected gravity XY 的 L1 和。Hip default 为四个 hip 位置误差 L1，乘以 `clamp(1 - 0.2×min(abs(vy_cmd)/0.5,1) - 0.35×min(abs(yaw_cmd)/1.0,1), 0.5, 1)`；横移和转向指令下放宽回中约束。
 
@@ -147,7 +147,7 @@ Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → 
 - `rotation_gait_status`：norm(cmd_xy)<0.5 且 abs(yaw)>0.05 时，奖励 FL+RR 支撑且另一对平均轮心高出 >0.05 m，或反向组合，权重 +2。它本身不强制时间交替。
 - `rotation_gait_symmetry`：上述门控下，5 s 滑动窗口内两组对角轮平均接触占空比接近 0.5，std=0.2，权重 +15。沿用官方窗口和核函数；修正为每环境独立有效样本计数与 warmup，空缓冲不视作腾空，partial reset 只清对应环境。这是接触奖励，不是 policy mirror loss。
 
-有意区别于官方：新增转向奖励直接按配置生效，不乘其全局 `gait_level`（该值依赖地形课程，flat 关闭地形课程时会保持初始零）。保留 Wolf 的基础 tracking、高度绝对值 -10、姿态、动作平滑、终止、DR、vx 课程和 HIM；不迁移整套 M20 rough 参数、joint_mirror 或执行器规格。Actor/critic/history、16 通道 action 顺序、尺度、默认姿态、PD、effort 与 checkpoint shape 均未由本次迁移改变。训练分布和优化目标已改变，需要新训练评估。
+有意区别于官方：新增转向奖励直接按配置生效，不乘其全局 `gait_level`（该值依赖地形课程，flat 关闭地形课程时会保持初始零）。保留 Wolf 的基础 tracking、高度绝对值 -10、姿态、动作平滑、终止、DR、vx 课程和 HIM；不迁移整套 M20 rough 参数、joint_mirror 或电机限幅。Actor/critic/history、16 通道 action 顺序、默认姿态、effort 与 checkpoint shape 保持。PD 和动作尺度采用下述 M20 对照控制基线；训练分布、优化目标和控制响应的改善仍需训练评估。
 
 用户确认腿部为 RobStride RS03、轮端为 RS01。本机手册 RS03(260713)、RS01(260410) 的第 6 页电气特性及机械特性页，和 Wolf 原始 URDF 的 limit 对照如下；空载转速为输出轴数值，内部减速比不再重复乘入关节参数。
 
@@ -157,21 +157,38 @@ Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → 
 | 手册峰值转矩 | 60 N·m | 17 N·m | 配置 effort 76.4 / 21.6 N·m |
 | 手册空载转速 | 195 rpm≈20.42 rad/s，±10% | 315 rpm≈32.99 rad/s，±10% | 配置 velocity 22.4 / 79.3 rad/s |
 | 内部减速比 | 9:1 | 7.75:1 | 不从 actuator 配置推断 |
-| 当前名义 Kp/Kd | 80/3（用户工作区） | 0/2 | 80/2；0/0.6 |
-| Action scale | 0.25 rad | 10 rad/s | hip-x 0.125、其他腿 0.25；轮 5 |
+| 当前名义 Kp/Kd | 80/2 | 0/0.6 | 80/2；0/0.6 |
+| Action scale | hip 0.125、thigh/calf 0.25 rad | 5 rad/s | hip-x 0.125、其他腿 0.25；轮 5 |
 | Armature | MJCF 未指定，编译值 0 | MJCF 未指定，编译值 0 | 0 / 0.00243216 kg·m² |
 | 最大命令延迟 | 12 physics steps=60 ms | 16 physics steps=80 ms | 两者 1 physics step=5 ms |
 | 延迟采样 | 每 policy step 重采样 | 每 policy step 重采样 | reset 时采样 |
 
 当前 IdealPdActuator 的力矩是 `clamp(Kp*position_error+Kd*velocity_error, ±effort_limit)`。60/17 是峰值限幅，尚无连续额定、热模型或转速相关转矩包络。URDF 的 20.42/32.99 rad/s 未成为当前 MjLab 理想 PD 的速度约束；不能把 URDF velocity 当成已经执行的速度保护。官方 DelayedPD 同样不是 DC torque-speed 模型；其 velocity 配置不能等同于已标定的实机转矩-转速曲线。
 
-静止且忽略 DR/限幅时，Wolf 轮目标产生的力矩约为 `2*10*a=20a` N·m，M20 为 `0.6*5*a=3a` N·m；Wolf 在 abs(a)>0.85 时即可触及 17 N·m。该比较说明动作增益差异，不代表两机器人闭环运动能力相差同样倍数。部署侧实际路径为 `../Sim_Deploy/quadruped_control`，其 Wolf test policy 轮 Kd=1，与训练 Kd=2 不同；本次未更改部署配置。
+当前 Wolf 腿 PD=80/2、轮 PD=0/0.6、hip action scale=0.125、thigh/calf=0.25、wheel=5，与 M20 对照设置一致。静止且忽略 DR/限幅时，两者轮目标产生的力矩均为 `0.6*5*a=3a` N·m；Wolf 17 N·m 限幅对应 abs(a)>5.67。相比之前 Wolf 轮 Kd=2、scale=10 的 `20a` N·m，此处改变了输出对应的轮速和闭环增益，不能直接解释为相同比例的运动改善。
 
-本地验证工具 `tests/check_wolf_m20_turning.py`（不提交）覆盖八任务 train/play/RL 配置差分、100000 次互斥采样与正负 yaw、课程范围隔离、纯 yaw 门控、落地事件与短腾空负值、抬升和接触组合、5 s 窗口语义、warmup 与 partial reset。CPU 数值检查 PASS；CPU 原生 flat/rough HIM 各 2 env，reset+8 步+partial reset，22/23 项 RewardManager 加权/dt/总和一致，观测和 reward 有限。CUDA SKIPPED：当前无可用设备。未运行 PPO/HIM update 或长程训练。
+本次控制 unit 同时采用腿部与轮部设置，后续再做消融。仅修改 `robots/wolf/wolf_constants.py` 的名义 PD、`tasks/wolf/env_cfg.py` 的原生按名称 action scale；calf backlash 与 wheel target bias/scale 可选 action 分支共用相同尺度。Effort 60/17、armature、delay、DR 比例和全部奖励均保持。MjLab 1.6.0 原生支持 scale dict，无需自定义 action 或改依赖。
+
+当前 policy/deployment 顺序仍是 FL/FR/RL/RR，每腿 hip/thigh/calf/foot。新策略部署需要：
+
+```text
+kp:           [80, 80, 80, 0] × 4
+kd:           [2, 2, 2, 0.6] × 4
+action_scale: [0.125, 0.25, 0.25,  5,
+               0.125, 0.25, 0.25, -5,
+               0.125, 0.25, 0.25,  5,
+               0.125, 0.25, 0.25, -5]
+```
+
+默认姿态与轮速观测 forward sign 保持。部署侧实际路径为 `../Sim_Deploy/quadruped_control`，其现有 Wolf test policy 腿 PD=80/3、轮 PD=0/1、hip scale=0.25、wheel scale=10，与新训练控制 contract 不同；本次未修改部署仓库或已有 policy.pt。新策略使用独立配置同步上述参数，历史策略回放使用各自保存的训练配置。PPO/HIM 输入输出 shape 仍为 53→16、318→16，旧 checkpoint 虽能按结构加载，动作与闭环语义已改变；本次不执行历史 checkpoint 迁移或新训练。
+
+控制 unit 的本地验证工具为 `tests/check_wolf_m20_control.py`（不提交）。八任务 train/play/RL 的逐字段快照仅允许 Wolf damping 和 action scale 发生变化，其余含奖励、DR、delay、effort、观测与 RL 配置完全一致。CPU 原生 flat HIM、rough HIM、flat PPO（启用可选 calf backlash 与 wheel target bias/scale）各 2 env，检查正负动作的实际目标、默认 offset、四腿顺序与轮符号、初始化后执行器的 PD 输出和 60/17 限幅，再完成 8 步非零动作及 partial reset，状态和观测均有限：CPU PASS。CUDA SKIPPED（无可用设备）。命令为 `MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_m20_control.py --device cpu --smoke`；同工具 `--device cuda` 记录跳过。未执行训练或消融，下一步使用这组完整参数训练。
+
+转向奖励 unit（控制参数调整前）的本地验证工具 `tests/check_wolf_m20_turning.py`（不提交）覆盖八任务 train/play/RL 配置差分、100000 次互斥采样与正负 yaw、课程范围隔离、纯 yaw 门控、落地事件与短腾空负值、抬升和接触组合、5 s 窗口语义、warmup 与 partial reset。CPU 数值检查 PASS；CPU 原生 flat/rough HIM 各 2 env，reset+8 步+partial reset，22/23 项 RewardManager 加权/dt/总和一致，观测和 reward 有限。CUDA SKIPPED：当前无可用设备。未运行 PPO/HIM update 或长程训练。
 
 验证命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_m20_turning.py --device cpu --smoke`；另运行同脚本 `--device cuda`（SKIPPED）与 `tests/check_wolf_height_l1.py`（CPU PASS）。旧 `tests/check_wolf_posture_rewards.py` 仍引用已移除的 `tasks.velocity.wolf`，执行因旧路径 FAIL；本次未重写该历史工具。
 
-下一 behavior unit：新训练与同条件转向消融，固定命令检查 yaw MAE、承重横纵滑移、hip target/actual 偏差与力矩、轮离地高度和接触时序；随后单独评估轮 Kd/action scale、延迟与 RS03/RS01 速度-转矩包络，保留明确的训练/部署 contract。
+下一 behavior unit：先用当前完整转向奖励与 M20 对照 PD/尺度训练，固定命令检查 yaw MAE、承重横纵滑移、hip target/actual 偏差与力矩、轮离地高度和接触时序；后续再对奖励、PD/尺度做消融，并单独评估延迟与 RS03/RS01 速度-转矩包络。
 
 ## 课程、DR、训练状态
 

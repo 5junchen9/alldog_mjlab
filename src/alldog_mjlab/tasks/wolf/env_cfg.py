@@ -398,7 +398,11 @@ def _actions(dr: DomainRandomizationParams) -> dict:
         base = dict(
             entity_name="robot",
             actuator_names=WOLF_LEG_ACTION_JOINT_NAMES[leg],
-            scale=0.25,
+            scale={
+                f"{leg}_hip": 0.125,
+                f"{leg}_thigh": 0.25,
+                f"{leg}_calf": 0.25,
+            },
             use_default_offset=True,
         )
         if not backlash_on:
@@ -416,7 +420,7 @@ def _actions(dr: DomainRandomizationParams) -> dict:
         base = dict(
             entity_name="robot",
             actuator_names=WOLF_WHEEL_JOINT_NAME[leg],
-            scale={WOLF_LEG_JOINT_NAMES[leg][3]: 10.0 * WOLF_WHEEL_FORWARD_SIGN[leg]},
+            scale={WOLF_LEG_JOINT_NAMES[leg][3]: 5.0 * WOLF_WHEEL_FORWARD_SIGN[leg]},
             use_default_offset=True,
         )
         if not wheel_target_on:

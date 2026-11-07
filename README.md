@@ -94,7 +94,9 @@ PPO TorchScript 输入为 `[B,45]` 或 `[B,53]`，dtype 为 float32。HIM 环境
 
 Policy 腿顺序固定为 `FL → FR → RL → RR`。Black 每腿 `hip → thigh → calf`；Wolf 每腿 `hip → thigh → calf → foot`，`foot` 是驱动轮。所有部署后端必须显式映射模型顺序与 policy 顺序。
 
-控制周期为 0.02 s（50 Hz），physics dt 为 0.005 s，decimation 为 4。腿动作采用 `q_target = q_default + 0.25 × action`。Wolf 轮动作采用 `dq_target = forward_sign × 10 × action`，符号为 `FL:+1 / FR:-1 / RL:+1 / RR:-1`，轮部 Kp=0。PD 和力矩上限在机器人 constants 中定义。
+控制周期为 0.02 s（50 Hz），physics dt 为 0.005 s，decimation 为 4。腿动作采用 `q_target = q_default + scale × action`：Black scale=0.25；Wolf hip scale=0.125，thigh/calf scale=0.25。Wolf 轮动作采用 `dq_target = forward_sign × 5 × action`，符号为 `FL:+1 / FR:-1 / RL:+1 / RR:-1`。Wolf 腿 Kp/Kd=80/2，轮 Kp/Kd=0/0.6，腿/轮 effort limit=60/17 N·m。PD 和力矩上限在机器人 constants 中定义。
+
+Wolf 当前 PD 和动作尺度采用 M20 对照设置；旧 checkpoint 的 hip/轮动作换算及闭环响应与当前设置不同，加载成功不代表控制语义一致。部署新策略时须同步上述参数，历史策略回放则使用各自训练保存的配置。
 
 Black actor 布局为 command、base angular velocity、projected gravity、joint position error、joint velocity、previous action；critic 末尾包含 187 维 height scan。Black critic 的关节项有独立且显式的排列。
 
