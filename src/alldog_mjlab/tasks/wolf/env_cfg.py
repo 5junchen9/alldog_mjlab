@@ -939,7 +939,7 @@ def make_env_cfg(
                 rel_standing_envs=0.2,
                 rel_forward_envs=0.0,
                 rel_pure_lateral_envs=0.02,
-                rel_pure_longitudinal_envs=0.02,
+                rel_pure_longitudinal_envs=0.20,
                 rel_pure_yaw_envs=0.2,
                 rel_world_envs=0.0,
                 init_velocity_prob=0.0,
@@ -959,7 +959,7 @@ def make_env_cfg(
             ),
             "tracking_ang_vel": RewardTermCfg(
                 func=rewards.track_angular_velocity_z,
-                weight=1.0,
+                weight=3.0,
                 params={"command_name": WOLF_COMMAND_NAME, "sigma": 0.25},
             ),
             "lin_vel_z": RewardTermCfg(
@@ -1004,7 +1004,7 @@ def make_env_cfg(
             ),
             "stand_still": RewardTermCfg(
                 func=rewards.stand_still,
-                weight=-0.40,
+                weight=-2.0,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1018,7 +1018,7 @@ def make_env_cfg(
             ),
             "run_still": RewardTermCfg(
                 func=rewards.run_still_leg_l1,
-                weight=-0.20,
+                weight=-1.0,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1086,8 +1086,31 @@ def make_env_cfg(
                     "contact_force_threshold": 1.0,
                 },
             ),
-            # M20 turn behavior: coefficients are applied directly on flat/rough,
-            # without the upstream global terrain-level multiplier.
+            "stand_joint_vel": RewardTermCfg(
+                func=rewards.stand_still_joint_velocity_l2,
+                weight=-0.05,
+                params={
+                    "command_name": WOLF_COMMAND_NAME,
+                    "asset_cfg": SceneEntityCfg(
+                        "robot",
+                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
+                        preserve_order=True,
+                    ),
+                    "command_threshold": 0.1,
+                    "yaw_threshold": 0.1,
+                },
+            ),
+            "stand_wheel_air": RewardTermCfg(
+                func=rewards.stand_still_wheel_air,
+                weight=-1.0,
+                params={
+                    "command_name": WOLF_COMMAND_NAME,
+                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
+                    "command_threshold": 0.1,
+                    "yaw_threshold": 0.1,
+                },
+            ),
+            # M20-derived gait regularizers are subordinate to yaw tracking.
             "turn_hip_default": RewardTermCfg(
                 func=turning.turn_hip_default,
                 weight=-3.0,
@@ -1104,7 +1127,7 @@ def make_env_cfg(
             ),
             "feet_air_time_ang_z": RewardTermCfg(
                 func=turning.FeetAirTimeYaw,
-                weight=50.0,
+                weight=5.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
@@ -1113,12 +1136,16 @@ def make_env_cfg(
                     ),
                     "threshold": 0.2,
                     "cmd_threshold": 0.1,
-                    "foot_height_threshold": 0.0,
+                    "foot_height_threshold": 0.02,
+                    "lin_vel_threshold": 0.1,
+                    "max_air_time": 0.4,
+                    "max_foot_height": 0.08,
+                    "height_penalty_scale": 100.0,
                 },
             ),
             "feet_slide_ang_z": RewardTermCfg(
                 func=turning.feet_slide_ang_z_cmd,
-                weight=-2.0,
+                weight=-0.2,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
@@ -1131,29 +1158,30 @@ def make_env_cfg(
             ),
             "rotation_gait_status": RewardTermCfg(
                 func=turning.rotation_gait_status,
-                weight=2.0,
+                weight=0.5,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
                     "asset_cfg": SceneEntityCfg(
                         "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
                     ),
-                    "target_height": 0.05,
-                    "lin_vel_threshold": 0.5,
-                    "ang_vel_threshold": 0.05,
+                    "target_height": 0.04,
+                    "height_std": 0.02,
+                    "lin_vel_threshold": 0.1,
+                    "ang_vel_threshold": 0.1,
                 },
             ),
             "rotation_gait_symmetry": RewardTermCfg(
                 func=turning.RotationGaitSymmetry,
-                weight=15.0,
+                weight=0.5,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
                     "target_duty": 0.5,
                     "std": 0.2,
                     "window_s": 5.0,
-                    "lin_vel_threshold": 0.5,
-                    "ang_vel_threshold": 0.05,
+                    "lin_vel_threshold": 0.1,
+                    "ang_vel_threshold": 0.1,
                 },
             ),
         },

@@ -84,7 +84,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 |---|---:|
 | tracking_lin_vel_x | 1.0 |
 | tracking_lin_vel_y | 1.0 |
-| tracking_ang_vel | 1.0 |
+| tracking_ang_vel | 3.0 |
 | lin_vel_z | -0.8 |
 | ang_vel_xy | -0.05 |
 | orientation | -0.5 |
@@ -92,30 +92,36 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 | leg_action_rate | -0.01 |
 | wheel_action_rate | -0.005 |
 | hip_default | -0.3 |
-| stand_still | -0.4 |
-| run_still | -0.2 |
+| stand_still | -2.0 |
+| run_still | -1.0 |
+| stand_joint_vel | -0.05 |
+| stand_wheel_air | -1.0 |
 | dof_pos_limits | -0.2 |
 | leg_torques | -1e-4 |
 | wheel_torques | -5e-4 |
 | wheel_lateral_slip_l2 | -2.0 |
 | wheel_longitudinal_slip_l2 | -0.5 |
 | turn_hip_default | -3.0 |
-| feet_air_time_ang_z | 50.0 |
-| feet_slide_ang_z | -2.0 |
-| rotation_gait_status | 2.0 |
-| rotation_gait_symmetry | 15.0 |
+| feet_air_time_ang_z | 5.0 |
+| feet_slide_ang_z | -0.2 |
+| rotation_gait_status | 0.5 |
+| rotation_gait_symmetry | 0.5 |
 
-Wolf flat 注册上述 22 项，rough 另加 wheel_force_lift，权重 0.5，共 23 项。
+Wolf flat 注册上述 24 项，rough 另加 wheel_force_lift，权重 0.5，共 25 项。
 
 当前工作区有两项物理滑移奖励权重=0 的用户覆盖，继续保留为未提交修改；上表 -2/-0.5 描述 Git 提交基线。转向迁移时保留的用户 hip 80/3 已由当前 M20 对照控制基线 80/2 替换。本地验证使用含滑移权重覆盖的实际工作区。
+
+用户另有 RL 覆盖 entropy_coef=0.006、num_steps_per_env=64（提交基线为 0.01、100），本次同样保留为未提交修改，不调整 PPO/HIM 参数。
 
 Wolf 高度目标 0.40 m，orientation 使用 projected gravity XY 的 L1 和。Hip default 为四个 hip 位置误差 L1，乘以 `clamp(1 - 0.2×min(abs(vy_cmd)/0.5,1) - 0.35×min(abs(yaw_cmd)/1.0,1), 0.5, 1)`；横移和转向指令下放宽回中约束。
 
 Stand_still 在 norm(command_xy)<0.1 m/s 且 abs(command_yaw)<0.1 rad/s 时计算 12 腿关节位置误差 L1。Run_still 在 abs(command_x)>0.1 m/s、abs(command_y)<0.1 m/s 且 abs(command_yaw)<0.15 rad/s 时启用相同 L1。两项均排除轮关节。
 
+零指令还启用 stand_joint_vel（12 腿关节速度平方和，排除轮）和 stand_wheel_air（四轮中 current_contact_time<=0 的数量），门控与 stand_still 相同。相同姿态下，持续循环摆腿和离地不再与静止四轮支撑等价。两项在转向/正常直行时为零，不直接限幅动作或钳制关节。
+
 Leg/wheel action rate 分别选择 12/4 个 raw action 通道计算相邻帧平方差；leg/wheel torques 分别选择 12/4 个 actuator 的实际力矩计算平方和，选择集合互不重叠。Dof_pos_limits 仅惩罚 12 个腿关节超出 soft position limit 的距离，soft limit factor=0.9。
 
-Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 17 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
+Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 24 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
 
 ## Wolf 轮地滑移奖励与诊断
 
@@ -139,15 +145,16 @@ Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → 
 
 四个 Wolf 任务的 train/play 共用以下行为：
 
-- `WolfVelocityCommand` 继承原生 UniformVelocityCommand，仅补足互斥特殊指令采样：20% 站立、2% 纯横移、2% 纯前后、20% 纯 yaw、56% 混合。特殊指令沿用初始化范围，不随 vx 课程扩展；原生 reset、GUI 和 command metrics 保留。Wolf 继续直接采样 body-frame yaw 速度，不引入官方 heading 目标和小 XY 指令清零。
+- `WolfVelocityCommand` 继承原生 UniformVelocityCommand，互斥特殊指令采样为 20% 站立、2% 纯横移、20% 纯前后、20% 纯 yaw、38% 混合。纯前后从最初沿用 M20 的 2% 提高到 20%，加强直行回中任务覆盖。特殊指令沿用初始化范围，不随 vx 课程扩展；原生 reset、GUI 和 command metrics 保留。Wolf 继续直接采样 body-frame yaw 速度，不引入官方 heading 目标和小 XY 指令清零。
 - `wheel_slip_contact.track_air_time=True`，复用原生每 physics step 接触/腾空计时，四轮显式顺序仍为 FL/FR/RL/RR。
 - `turn_hip_default`：norm(cmd_xy)<0.1 且 abs(cmd_yaw)>0.1 时，惩罚四髋相对默认值的 L2 范数，权重 -3；叠加既有弱 hip_default。Thigh/calf 继续可在 yaw 下自由屈伸。官方 hip-x 在所有运动模式下回中，Wolf 将新增强约束限定于纯 yaw。
-- `feet_air_time_ang_z`：有 abs(yaw)>0.1 时，在首次落地累加 `(last_air_time-0.2)*cleared_ground`，权重 +50；高度取该轮离开上次接触后到达的最大 world z，高度差阈值沿用官方 0。首次下落和环境 reset 不继承上一 episode 的离地高度状态。
-- `feet_slide_ang_z`：纯 yaw 门控同 turn_hip_default。当前最强接触力范数>1 N 的轮，body-link 速度减 root-link 平移，转到 body frame 后累加 XY 范数，权重 -2；官方使用 net force 的短历史门控。此项沿用官方步态约束含义，不扣轮自转；既有接触材料点物理滑移函数、诊断及用户权重保持。
-- `rotation_gait_status`：norm(cmd_xy)<0.5 且 abs(yaw)>0.05 时，奖励 FL+RR 支撑且另一对平均轮心高出 >0.05 m，或反向组合，权重 +2。它本身不强制时间交替。
-- `rotation_gait_symmetry`：上述门控下，5 s 滑动窗口内两组对角轮平均接触占空比接近 0.5，std=0.2，权重 +15。沿用官方窗口和核函数；修正为每环境独立有效样本计数与 warmup，空缓冲不视作腾空，partial reset 只清对应环境。这是接触奖励，不是 policy mirror loss。
+- 三项步态收益共用纯 yaw 门控 norm(cmd_xy)<0.1、abs(cmd_yaw)>0.1，避免与零指令停止代价重叠。收益乘 `progress=clamp(actual_yaw*sign(cmd_yaw)/abs(cmd_yaw),0,1)`；不转或反向转时没有步态正收益，超过指令转速不继续提高收益。
+- `feet_air_time_ang_z`：首次落地累加 `(min(last_air_time,0.4)-0.2)*cleared_ground`，要求摆腿峰值相对该轮上次接触高度 >0.02 m 且 <=0.08 m。另在腾空期间持续减去 `100*sum(relu(current_clearance-0.08)^2)`；该高度代价不乘 progress。整体权重 +5，落地收益乘 progress。8 cm 是奖励软上限，不是物理限位；大幅摆腿不能靠落地前降脚取回奖励。首次下落、reset 不继承上一 episode 的高度状态。
+- `feet_slide_ang_z`：纯 yaw 门控同 turn_hip_default。当前最强接触力范数>1 N 的轮，body-link 速度减 root-link 平移，转到 body frame 后累加 XY 范数，权重降为 -0.2；官方使用 net force 的短历史门控。此项没有扣除轮自转，正常原地转向也会产生轮心运动，因此只保留较弱步态约束。既有接触材料点物理滑移函数、诊断及用户权重保持。
+- `rotation_gait_status`：一组对角轮均接触、另一组均离地时，对两组轮心平均高度差应用目标 0.04 m、std=0.02 m 的高斯核，取两种组合最大值，再乘 progress，权重 +0.5。抬得更高会降低收益；它本身不强制时间交替。
+- `rotation_gait_symmetry`：纯 yaw 下，5 s 滑动窗口内两组对角轮平均接触占空比接近 0.5，std=0.2，乘 progress，权重 +0.5。每环境独立有效样本计数与 warmup，空缓冲不视作腾空，partial reset 只清对应环境；离开纯转向模式清除该环境窗口。这是接触奖励，不是 policy mirror loss。
 
-有意区别于官方：新增转向奖励直接按配置生效，不乘其全局 `gait_level`（该值依赖地形课程，flat 关闭地形课程时会保持初始零）。保留 Wolf 的基础 tracking、高度绝对值 -10、姿态、动作平滑、终止、DR、vx 课程和 HIM；不迁移整套 M20 rough 参数、joint_mirror 或电机限幅。Actor/critic/history、16 通道 action 顺序、默认姿态、effort 与 checkpoint shape 保持。PD 和动作尺度采用下述 M20 对照控制基线；训练分布、优化目标和控制响应的改善仍需训练评估。
+有意区别于官方：转向奖励直接生效，不乘全局地形 `gait_level`；步态权重、门控和高度/时间收益已针对 Wolf 限制。Yaw tracking 从 1 提高到 3，stand_still 从 -0.4 提高到 -2，run_still 从 -0.2 提高到 -1；另增加停止动态代价。保留 Wolf 的 X/Y tracking、高度绝对值 -10、姿态、动作平滑、终止、DR、vx 课程和 HIM，不迁移整套 M20 rough 参数、joint_mirror 或电机限幅。Actor/critic/history、16 通道 action 顺序、默认姿态、effort 与 checkpoint shape 保持。PD 和动作尺度仍采用下述 M20 对照基线。
 
 用户确认腿部为 RobStride RS03、轮端为 RS01。本机手册 RS03(260713)、RS01(260410) 的第 6 页电气特性及机械特性页，和 Wolf 原始 URDF 的 limit 对照如下；空载转速为输出轴数值，内部减速比不再重复乘入关节参数。
 
@@ -167,7 +174,7 @@ Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → 
 
 当前 Wolf 腿 PD=80/2、轮 PD=0/0.6、hip action scale=0.125、thigh/calf=0.25、wheel=5，与 M20 对照设置一致。静止且忽略 DR/限幅时，两者轮目标产生的力矩均为 `0.6*5*a=3a` N·m；Wolf 17 N·m 限幅对应 abs(a)>5.67。相比之前 Wolf 轮 Kd=2、scale=10 的 `20a` N·m，此处改变了输出对应的轮速和闭环增益，不能直接解释为相同比例的运动改善。
 
-本次控制 unit 同时采用腿部与轮部设置，后续再做消融。仅修改 `robots/wolf/wolf_constants.py` 的名义 PD、`tasks/wolf/env_cfg.py` 的原生按名称 action scale；calf backlash 与 wheel target bias/scale 可选 action 分支共用相同尺度。Effort 60/17、armature、delay、DR 比例和全部奖励均保持。MjLab 1.6.0 原生支持 scale dict，无需自定义 action 或改依赖。
+控制 unit 同时采用腿部与轮部设置，后续再做消融。PD 定义位于 `robots/wolf/wolf_constants.py`，按名称 action scale 位于 `tasks/wolf/env_cfg.py`；calf backlash 与 wheel target bias/scale 可选 action 分支共用相同尺度。Effort 60/17、armature、delay、DR 比例保持。MjLab 1.6.0 原生支持 scale dict，无需自定义 action 或改依赖。
 
 当前 policy/deployment 顺序仍是 FL/FR/RL/RR，每腿 hip/thigh/calf/foot。新策略部署需要：
 
@@ -188,7 +195,15 @@ action_scale: [0.125, 0.25, 0.25,  5,
 
 验证命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_m20_turning.py --device cpu --smoke`；另运行同脚本 `--device cuda`（SKIPPED）与 `tests/check_wolf_height_l1.py`（CPU PASS）。旧 `tests/check_wolf_posture_rewards.py` 仍引用已移除的 `tasks.velocity.wolf`，执行因旧路径 FAIL；本次未重写该历史工具。
 
-下一 behavior unit：先用当前完整转向奖励与 M20 对照 PD/尺度训练，固定命令检查 yaw MAE、承重横纵滑移、hip target/actual 偏差与力矩、轮离地高度和接触时序；后续再对奖励、PD/尺度做消融，并单独评估延迟与 RS03/RS01 速度-转矩包络。
+最新问题来源已确认是 MjLab play 的 `2026-11-07_19-46-26_wolf_flat_him/model_1000.pt`，其保存配置采用当前 M20 PD/尺度和最初的步态权重。CPU 固定策略 4 env×600 steps（12 s），第 6 s 将两组 ±1 yaw 切为零：切换前末 2 s，实际 yaw 均值 +0.548/-0.507 rad/s、脚峰值离地 0.221/0.210 m；切换后 4～6 s，腿速度 RMS 3.174/2.932 rad/s，四轮仍反复离地，但三项步态奖励均为零。冷启动零指令环境腿速度约 0.0016 rad/s 且四轮全接触。纯 vx=0.5 的实际 vx≈0.361，左右前轮前后差约 6.7 cm。问题是已学到的持续踏步状态与目标失衡，不能解释为零指令奖励门控泄漏。
+
+权重校正依据：最新运行末 50 iterations 的三项步态 episode reward 合计约 1.205，yaw tracking≈0.312（混合指令统计）；固定纯 yaw 回放中三项合计约 3.29/4.18，yaw tracking≈0.467/0.456。原迁移沿用 M20 大步态权重、去掉地形系数，却保留 Wolf yaw tracking=1，且腾空时长未封顶、高度仅有下限；已按上文调整收益与停止/直行目标。PD、动作、观测、HIM、DR、termination 与用户 RL 覆盖保持。
+
+本地工具 `tests/check_wolf_turn_stop.py`（不提交）验证八任务 train/play/RL 快照仅有明确的 Wolf 奖励/纯前后采样变化；覆盖 2～8 cm 峰值窗口、过高摆腿连续代价、0.4 s 腾空收益封顶、同向转速比例与反向/不转零收益、小 yaw 与停止门控互斥、离开转向清窗口、停止速度/触地代价和直行姿态。CPU PASS；原生 flat/rough HIM 各 2 env×8 steps、yaw→zero 和 partial reset，24/25 项 raw reward 全部有限，weight/dt/总和一致。CUDA SKIPPED（无可用设备）。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_turn_stop.py --device cpu --smoke`。
+
+诊断工具 `tests/replay_wolf_turn_stop.py` 将修改前与重新计分结果保存在 `tests/wolf_turn_stop_before/`、`tests/wolf_turn_stop_rescored/`（均不提交）。同一旧 checkpoint 的物理轨迹逐项完全一致；新目标下高抬腿项由 +0.89/+1.12 变为约 -3.40/-3.12，零指令持续踏步新增关节速度代价约 -6.04/-5.16、离地代价约 -2.66/-2.65，直行回中代价为原来的 5 倍。上述为固定旧策略的重新计分，不代表已经学会停止或低抬腿；本次未重新训练。
+
+下一 behavior unit：用修正后的目标重新训练或继续训练，按相同 yaw→zero、纯直行协议检查实际转速、脚离地高度、停止后腿速度/接触和左右前后差；之后再做奖励/PD 消融及电机包络评估。
 
 ## 课程、DR、训练状态
 
@@ -218,17 +233,17 @@ Black flat/rough nconmax=35/128，Wolf flat/rough nconmax=64/128；njmax 均为 
 
 Wolf 高度绝对值误差与 -10.0 权重由 `tests/check_wolf_height_l1.py` 单独验证（本地、不提交）：四任务 train/play 配置 PASS；CPU PASS，覆盖目标上下偏差、中央 35 ray 均值、地形整体升高与加权惩罚；CUDA SKIPPED（当前不可用）。本次高度调整未运行环境 rollout 或训练；下一步仍为奖励审查和训练评估。
 
-- IMPLEMENTED：机器人独立任务架构、八任务注册、Black 8 项及 Wolf flat 22 / rough 23 项奖励、Wolf M20 转向采样/奖励、课程版本、runner 与文档。
+- IMPLEMENTED：机器人独立任务架构、八任务注册、Black 8 项及 Wolf flat 24 / rough 25 项奖励、Wolf 转向高度/进度约束与停止目标、课程版本、runner 与文档。
 - STATIC CHECKED：Python 语法、imports、八任务注册、精确奖励表和无内部 tasks.velocity 引用。
 - CONFIG CHECKED：Wolf 四任务 train/play 的奖励权重、参数和 selector；八任务 train/play 的控制、观测、DR、终止、课程、仿真、机器人及 RL 配置与修改前快照一致。课程、runner 和 RL 源码未变。
 - CPU PASS / CUDA PASS：姿态 L1、hip 指令缩放、stand_still 的 XY+yaw 门控、run_still 的直线门控、腿轮动作变化率与力矩分组、抬轮力阈值及向上速度截断。
 - CUDA LIGHT TEST PASS / SIM VERIFIED limited：此前奖励恢复验证中，wolf-flat 和 wolf-rough-him 各 1 env，reset 和 2 步 rollout，原有全部 15/16 项奖励输出为有限的一维 Tensor。实际力矩 selector 为互不重叠的 12/4 个 actuator；轮接触匹配四个指定 geom，force shape=[1,4,3]。Rough 验证将地形行数缩为 2。新增两项滑移奖励的验证见上节。
-- TRAIN VERIFIED：NOT RUN。没有执行 PPO/HIM update、长程训练、收敛验证或实机测试。
+- TRAIN VERIFIED：已读取用户最新 1000-iteration 训练的日志/配置并复现其三项行为问题；当前奖励修正未执行 PPO/HIM update、重新训练或实机验证。
 
 已知限制和待审查项：
 
-1. 新奖励基线尚无训练收敛证据；需要独立 Code Review 后再安排训练评估。
+1. 当前奖励修正尚无重新训练后的收敛证据；需要独立 Code Review 后再安排训练评估。
 2. 未执行全部历史 checkpoint、warm-start 与 exporter 的组合矩阵；结构兼容的文件仍需按实际来源显式加载。
-3. 未执行长程/大规模接触场景或 CPU 环境 rollout。接触力 world frame 的依据为 native netforce 实现、配置与真实输出检查，未新增独立斜面接触实验。
+3. 已完成有限 CPU 环境 rollout 与固定 checkpoint 回放，未执行长程/大规模接触或独立斜面接触实验。接触力 world frame 的依据为 native netforce 实现、配置与真实输出检查。
 4. EPA 过滤不保证覆盖所有退化碰撞，初始 polytope 面和极端复杂接触仍有数值风险；持续监控 NaN 和 overflow。
 5. 硬件参数和实机行为未确认；部署 safety 配置不属于训练奖励或 action contract。

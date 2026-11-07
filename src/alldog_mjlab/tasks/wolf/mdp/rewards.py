@@ -150,6 +150,39 @@ def stand_still(
     return error.abs().sum(dim=1) * standing
 
 
+def stand_still_joint_velocity_l2(
+    env: ManagerBasedRlEnv,
+    command_name: str,
+    asset_cfg: SceneEntityCfg,
+    command_threshold: float,
+    yaw_threshold: float,
+) -> torch.Tensor:
+    """Penalize leg cycling at zero command, even near the default pose."""
+    command = env.command_manager.get_command(command_name)
+    standing = (command[:, :2].norm(dim=1) < command_threshold) & (
+        command[:, 2].abs() < yaw_threshold
+    )
+    velocity = env.scene[asset_cfg.name].data.joint_vel[:, asset_cfg.joint_ids]
+    return velocity.square().sum(dim=1) * standing
+
+
+def stand_still_wheel_air(
+    env: ManagerBasedRlEnv,
+    command_name: str,
+    sensor_name: str,
+    command_threshold: float,
+    yaw_threshold: float,
+) -> torch.Tensor:
+    """Favor four-wheel support when no planar motion is requested."""
+    sensor = env.scene[sensor_name]
+    assert tuple(sensor.primary_names) == WOLF_WHEEL_COLLISION_GEOM_NAMES
+    command = env.command_manager.get_command(command_name)
+    standing = (command[:, :2].norm(dim=1) < command_threshold) & (
+        command[:, 2].abs() < yaw_threshold
+    )
+    return (sensor.data.current_contact_time <= 0).sum(dim=1) * standing
+
+
 # Policy action channels are interleaved as hip/thigh/calf/wheel for each leg.
 _BLOCK_DIM = len(WOLF_JOINTS_PER_LEG)
 _LEG_CHANNELS = tuple(
