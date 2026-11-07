@@ -1,4 +1,4 @@
-"""Wolf wheel contact diagnostics; these terms do not contribute to rewards."""
+"""Shared Wolf wheel contact kinematics and raw slip costs for metrics/rewards."""
 
 from __future__ import annotations
 

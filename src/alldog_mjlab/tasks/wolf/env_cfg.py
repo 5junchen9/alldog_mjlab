@@ -1054,6 +1054,28 @@ def make_env_cfg(
                     )
                 },
             ),
+            "wheel_lateral_slip_l2": RewardTermCfg(
+                func=wolf_metrics.wheel_lateral_slip_l2,
+                weight=-2.0,
+                params={
+                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
+                    "asset_cfg": SceneEntityCfg(
+                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
+                    ),
+                    "contact_force_threshold": 1.0,
+                },
+            ),
+            "wheel_longitudinal_slip_l2": RewardTermCfg(
+                func=wolf_metrics.wheel_longitudinal_slip_l2,
+                weight=-0.5,
+                params={
+                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
+                    "asset_cfg": SceneEntityCfg(
+                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
+                    ),
+                    "contact_force_threshold": 1.0,
+                },
+            ),
         },
         terminations=terminations,
         curriculum=curriculum,
