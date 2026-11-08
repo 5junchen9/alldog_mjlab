@@ -94,6 +94,8 @@ HIM 策略使用 Viser play 时，`Controls → Info` 自动显示 `HIM velocity
 
 PPO TorchScript 输入为 `[B,45]` 或 `[B,53]`，dtype 为 float32。HIM 环境 history 为 oldest→newest；部署输入按 newest→oldest 展平。两种机器人的 estimator velocity target 均为 3 维。
 
+HIM source encoder 在输入前移除六帧中每帧开头的三维速度指令：Black encoder 输入为 `6×42=252`，Wolf 为 `6×50=300`。环境观测和 history 保留完整指令，actor 当前帧仍接收指令，TorchScript 外部输入仍为 270/318 维。旧 HIM checkpoint 的 encoder 首层尺寸不兼容，需要重新训练；新结构 checkpoint 可以正常恢复和导出。
+
 Policy 腿顺序固定为 `FL → FR → RL → RR`。Black 每腿 `hip → thigh → calf`；Wolf 每腿 `hip → thigh → calf → foot`，`foot` 是驱动轮。所有部署后端必须显式映射模型顺序与 policy 顺序。
 
 控制周期为 0.02 s（50 Hz），physics dt 为 0.005 s，decimation 为 4。腿动作采用 `q_target = q_default + scale × action`：Black scale=0.25；Wolf hip scale=0.125，thigh/calf scale=0.25。Wolf 轮动作采用 `dq_target = forward_sign × 5 × action`，符号为 `FL:+1 / FR:-1 / RL:+1 / RR:-1`。Wolf 腿 Kp/Kd=80/2，轮 Kp/Kd=0/0.6，腿/轮 effort limit=60/17 N·m。PD 和力矩上限在机器人 constants 中定义。
@@ -103,6 +105,8 @@ Wolf 当前 PD 和动作尺度采用 M20 对照设置；旧 checkpoint 的 hip/�
 Black actor 布局为 command、base angular velocity、projected gravity、joint position error、joint velocity、previous action；critic 末尾包含 187 维 height scan。Black critic 的关节项有独立且显式的排列。
 
 Wolf actor 布局为 command、IMU angular velocity、IMU projected gravity、12 腿关节位置误差、12 腿关节速度、4 个带方向符号的轮速、16 维 previous action；critic 在相同无噪声布局后追加 3 维 base linear velocity。
+
+Wolf 自定义奖励统一在 `tasks/wolf/mdp/rewards.py` 中实现，公共接触数据、轮接触点运动学和指令判定在 `mdp/common.py`。`soft_landing` 在首次落地时惩罚四轮接触合力范数之和，权重 `-1e-5`，所有指令下生效；使用公共 netforce 传感器，rough 的 `wheel_force_lift` 也读取该传感器。纵向滑移仅保留诊断 metric，已从奖励配置中移除。
 
 默认 actor running normalization 关闭，critic normalization 开启。部署必须匹配 observation scales、默认姿态、动作尺度和 previous-action 更新时机。部署侧的 clipping、关节保护和 torque safety 与策略动作语义分别配置。
 

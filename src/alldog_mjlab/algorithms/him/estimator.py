@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from rsl_rl.modules import MLP
 from rsl_rl.utils import resolve_optimizer
 
-from .spec import HIMSpec
+from .spec import HIMSpec, encoder_history
 
 
 class HIMEstimator(nn.Module):
@@ -35,7 +35,7 @@ class HIMEstimator(nn.Module):
         self.temperature = temperature
         self.num_prototypes = num_prototypes
         self.encoder = MLP(
-            spec.history_dim,
+            spec.encoder_input_dim,
             spec.velocity_dim + spec.latent_dim,
             hidden_dims=list(encoder_hidden_dims),
             activation=activation,
@@ -53,7 +53,13 @@ class HIMEstimator(nn.Module):
         )
 
     def encode(self, history: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        parts = self.encoder(history)
+        encoder_input = encoder_history(
+            history,
+            self.spec.history_length,
+            self.spec.single_frame_dim,
+            self.spec.command_dim,
+        )
+        parts = self.encoder(encoder_input)
         velocity = parts[..., : self.spec.velocity_dim]
         latent = F.normalize(parts[..., self.spec.velocity_dim :], dim=-1, p=2)
         return (velocity, latent)

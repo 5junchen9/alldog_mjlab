@@ -1,10 +1,15 @@
 # Third-party notices
 
 The Wolf turning reward implementation in
-`src/alldog_mjlab/tasks/wolf/mdp/turning.py` adapts the M20 rewards from
+`src/alldog_mjlab/tasks/wolf/mdp/rewards.py` adapts the M20 rewards from
 DeepRoboticsLab/rl_training at commit
 `9c0e710421b165a444b2c73e5a9d65ee3fafa299`. The upstream file also credits
 Ziqi Fan / robot_lab. The following notices and licenses are retained.
+
+The `soft_landing` kernel in the same file adapts the instantaneous landing-force
+cost from MjLab v1.6.0, `mjlab/tasks/velocity/mdp/rewards.py`.
+Copyright 2025, The mjlab Developers. Licensed under Apache-2.0; the full
+Apache-2.0 license text is reproduced in the robot_lab section below.
 
 ## DeepRoboticsLab/rl_training
 

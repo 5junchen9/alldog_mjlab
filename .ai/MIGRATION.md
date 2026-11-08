@@ -61,6 +61,10 @@ Actor raw 均匀噪声幅值：angular velocity ±0.3、gravity ±0.05、joint p
 
 环境 history 为 oldest→newest；HIM 导出输入为 newest→oldest 展平。Estimator velocity target 的 scale=2。HIM terminal frame 在 reset 前记录，history 由 observation manager 在 reset 时重置。
 
+HIM source encoder 的内部输入已按用户要求排除全部六帧的 command：`encoder_input_dim = history_length × (single_frame_dim - command_dim)`，Wolf 为 300（6×50），Black 为 252（6×42）。切片集中在 `algorithms/him/spec.py:encoder_history`，训练推理通过 `HIMEstimator.encode` 调用，TorchScript 使用相同 helper。完整观测、rollout storage history、canonical history 与外部 TorchScript 270/318 维输入均保留指令；actor 当前帧仍接收 command，target encoder 输入、velocity target、终止 successor 覆盖与 PPO/estimator 梯度边界保持。
+
+这项修改有意改变此前 HIM source encoder 含 command 的行为。旧 HIM checkpoint 的 encoder 首层尺寸不兼容，严格加载会拒绝，不自动裁剪权重或迁移 optimizer；需重新训练。PPO checkpoint 与 PPO→HIM 显式 warm start 的 actor 映射不受 encoder 切片影响。部署侧继续构造完整 observation/history，新 TorchScript 内部负责切片；尚未运行部署后端 sim2sim。
+
 TorchScript exporter 使用 runner 原生能力，重新加载并检查数值等价。模型 shape、joint mapping、scales、默认姿态及动作语义必须与部署后端显式匹配。ONNX metadata 对多 action term 的支持有限，不修改训练接口来适配它。
 
 ## HIM play 速度面板
@@ -69,7 +73,7 @@ TorchScript exporter 使用 runner 原生能力，重新加载并检查数值等
 
 估计值通过仅在 play 中注册的 encoder forward hook 获取，不额外推理，并读取 `estimator_velocity/base_lin_vel` 的实际 scale 还原单位。真实速度读取 `robot.data.root_link_lin_vel_b`，与原生 base_lin_vel 观测同源。显示沿用原生状态刷新节奏；暂停时保留最近估计，GUI reset、环境 reset 和 checkpoint reload 后清空估计，下一次推理恢复。切换 policy 时重绑 hook，关闭时移除。PPO、zero/random agent 和 native viewer 的显示保持；训练、checkpoint、观测与动作接口保持。
 
-来源为本地锁定的 MjLab 1.6.0 viewer、play、base_lin_vel 及项目 HIMPolicy。Local verification：`tests/check_him_viser_velocity.py`（不提交）；CPU PASS / CUDA PASS，覆盖 Wolf 53-D/Black 45-D history frame、估计 scale、真实值、环境切换、两类 reset、policy 替换、hook 清理、逐位相同的动作/参数，以及 CLI viewer 注入与恢复。最新 Wolf `2026-11-07_19-46-26_wolf_flat_him/model_1000.pt` 在两种设备上均完成原生 2 env ×8 steps、Viser setup、两行读数及 GUI partial/all reset 检查。浏览器连接工具报错，排版尚未完成目视验收。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_him_viser_velocity.py --device cpu --smoke`，CUDA 使用同命令的 `--device cuda`。下一步在实际 Viser play 中对照估计与真实速度，检查转向时的估计偏差。
+来源为本地锁定的 MjLab 1.6.0 viewer、play、base_lin_vel 及项目 HIMPolicy。Local verification：`tests/check_him_viser_velocity.py`（不提交）；CPU PASS / CUDA PASS，覆盖 Wolf 53-D/Black 45-D history frame、估计 scale、真实值、环境切换、两类 reset、policy 替换、hook 清理、逐位相同的动作/参数，以及 CLI viewer 注入与恢复。面板初次接入时，Wolf `2026-11-07_19-46-26_wolf_flat_him/model_1000.pt` 在两种设备上均完成原生 2 env ×8 steps、Viser setup、两行读数及 GUI partial/all reset 检查。浏览器连接工具报错，排版尚未完成目视验收。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_him_viser_velocity.py --device cpu --smoke`，CUDA 使用同命令的 `--device cuda`。当前去指令 encoder 的面板数值验证见下文；上述旧 HIM checkpoint 已不兼容，下一步使用新训练模型在 Viser 中对照估计与真实速度。
 
 ## 奖励基线
 
@@ -109,7 +113,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 | leg_torques | -1e-4 |
 | wheel_torques | -5e-4 |
 | wheel_lateral_slip_l2 | -2.0 |
-| wheel_longitudinal_slip_l2 | -0.5 |
+| soft_landing | -1e-5 |
 | turn_hip_default | -3.0 |
 | feet_air_time_ang_z | 5.0 |
 | feet_slide_ang_z | -0.2 |
@@ -118,7 +122,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 
 Wolf flat 注册上述 25 项，rough 另加 wheel_force_lift，权重 0.5，共 26 项。
 
-当前工作区有两项物理滑移奖励权重=0 的用户覆盖，继续保留为未提交修改；上表 -2/-0.5 描述 Git 提交基线。转向迁移时保留的用户 hip 80/3 已由当前 M20 对照控制基线 80/2 替换。本地验证使用含滑移权重覆盖的实际工作区。
+当前工作区的侧向滑移奖励权重=0 用户覆盖继续保留为未提交修改；上表 -2 描述 Git 提交基线。纵向滑移奖励已按用户要求移除。转向迁移时保留的用户 hip 80/3 已由当前 M20 对照控制基线 80/2 替换。本地验证使用含滑移权重覆盖的实际工作区。
 
 用户另有 RL 覆盖 entropy_coef=0.006、num_steps_per_env=64（提交基线为 0.01、100），本次同样保留为未提交修改，不调整 PPO/HIM 参数。
 
@@ -136,13 +140,23 @@ Leg/wheel action rate 分别选择 12/4 个 raw action 通道计算相邻帧平�
 
 Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 25 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
 
+## Wolf 奖励组织与软落地
+
+Wolf 自定义奖励统一在 `tasks/wolf/mdp/rewards.py`，已移除 `turning.py`。`common.py` 提供四轮传感器的显式 FL/FR/RL/RR 解析、站立/纯 yaw 指令判定、yaw progress 和接触点运动学。奖励与 metrics 读取公共数据，各自计算返回值；软落地不调用抬腿、滑移或其他奖励。MjLab 原生 joint torque/limit 奖励继续由框架提供。原有 M20 转向奖励的公式、参数、状态、warmup、模式清理及 partial reset 保持，许可证路径已更新。
+
+四个 Wolf 任务的 train/play 新增 `soft_landing`：`sum(norm(net_wheel_force, dim=-1) × compute_first_contact(step_dt))`，权重 -1e-5，无 command 门控，零指令也生效。公共 netforce 传感器与原生 Go1 语义一致，取每轮所有地面接触的合力；原有 rough wheel_force_lift 继续使用相同 netforce。记录 `Metrics/landing_force_mean`。本项采用 MjLab 1.6.0 当前力范数语义，不计算冲量、子步峰值或超阈值平方；20 ms 采样可能漏掉已消退的瞬时冲击。
+
+验证工具 `tests/check_wolf_landing_encoder.py`（本地、不提交）：CPU PASS / CUDA PASS。八任务 train/play/RL 全配置差分仅允许上述 Wolf 奖励/公共合力传感器变化，完整 observation/action 与用户覆盖保持；soft_landing 数值与原生无指令门控版本一致，覆盖 first-contact、三维力范数、求和、日志、weight/dt。原版与搬迁后转向核均通过原有高度/时间窗口、yaw 正反向与停止/partial reset 数值断言；共享滑移运动学通过纯滚动、空转、侧滑、镜像轴与坐标变换检查。
+
+HIM 检查覆盖全部六帧 command 扰动下 encoder 输入/输出逐位不变、command 梯度为零、actor 当前指令保留、原始 history 不变、target/梯度边界、Black/Wolf 动态 batch TorchScript 等价、新 state 重载与旧尺寸拒绝。Viser 单元检查确认新 encoder 下两行速度显示、scale、环境选择、reset 与 hook 清理正常。CPU/CUDA 各完成 Wolf flat HIM、rough HIM、flat PPO 与 Black flat HIM 的 2 env ×8 steps、一次 PPO/HIM 更新；HIM 覆盖 terminal successor、严格 checkpoint 重载、原生 runner JIT 导出并重新加载比对。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_landing_encoder.py --device cpu --smoke`，CUDA 使用 `--device cuda`。来源为用户明确的 encoder 设计变更、当前项目 HIM/M20 实现与本地 MjLab 1.6.0；未修改依赖或部署仓库。下一步从新 HIM 结构训练，评估软落地对转向、落地力与抬腿意愿的影响；本次短优化检查不代表训练收敛。
+
 ## Wolf 轮地滑移奖励与诊断
 
-Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → RL → RR 显式匹配四个轮碰撞 geom；原生 maxforce reduction 每轮保留一个最强接触，读取 found、contact-frame force 和 world-frame pos/normal/tangent。Rough 的原有 netforce 传感器继续独立服务 wheel_force_lift。
+Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → RL → RR 显式匹配四个轮碰撞 geom；原生 maxforce reduction 每轮保留一个最强接触，读取 found、contact-frame force 和 world-frame pos/normal/tangent。公共 `wheel_force_contact` 在四任务中均使用 netforce，fields=(found, force)、track_air_time=True；供 soft_landing 与 rough 的 wheel_force_lift 独立读取。maxforce 滑移传感器保持。
 
-`mdp/metrics.py` 使用 `v_contact = v_link + omega_wheel × (p_contact - p_link)` 计算轮上当前接触材料点相对静止地面的速度。omega 为轮体总角速度，包含机身、腿和轮关节运动。轮轴来自实际轮体姿态下的 MJCF local Z；与接触法线构造滚动和侧向基。仅统计 found>0、法向力绝对值>1 N 且滚动方向有效的接触；离地和未承重轮输出零。
+`mdp/common.py` 提供共享轮接触点运动学，rewards 与 metrics 分别计算自身 cost，不互相调用。其使用 `v_contact = v_link + omega_wheel × (p_contact - p_link)` 计算轮上当前接触材料点相对静止地面的速度。omega 为轮体总角速度，包含机身、腿和轮关节运动。轮轴来自实际轮体姿态下的 MJCF local Z；与接触法线构造滚动和侧向基。仅统计 found>0、法向力绝对值>1 N 且滚动方向有效的接触；离地和未承重轮输出零。
 
-`wheel_lateral_slip_l2` / `wheel_longitudinal_slip_l2` 分别为四轮侧向/纵向滑移速度平方和，单位 m²/s²。四任务 train/play 同时将这两个 raw 函数注册为 RewardTerm 和 MetricsTerm：奖励初始权重分别为 -2.0、-0.5，原生 RewardManager 再乘 policy dt；MetricsManager 独立记录未加权、未乘 dt 的 episode policy-step 均值。接触门控适用于所有指令，无 yaw 或预设步态门控。Actor/critic/history、action、PD 与 checkpoint contract 保持。原生 reward/step metrics 在最后一次 forward 前计算，派生量滞后一个 physics substep；本地回放 trace 采样于 forward 后。
+`wheel_lateral_slip_l2` / `wheel_longitudinal_slip_l2` 分别为四轮侧向/纵向滑移速度平方和，单位 m²/s²。四任务 train/play 均保留两个 MetricsTerm，MetricsManager 独立记录未加权、未乘 dt 的 episode policy-step 均值。当前仅侧向项注册 RewardTerm（Git 权重基线 -2.0，工作区用户覆盖为 0）；纵向奖励已删除，原生 RewardManager 对有效奖励乘 weight 和 policy dt。接触门控适用于所有指令，无 yaw 或预设步态门控。Actor/critic/history、action、PD 与 checkpoint contract 保持。原生 reward/step metrics 在最后一次 forward 前计算，派生量滞后一个 physics substep；本地回放 trace 采样于 forward 后。
 
 验证：`tests/check_wolf_wheel_slip.py --device cpu/cuda` 的物理数值用例均 PASS，覆盖纯滚动、贴地空转、横向滑移、接触门控、总角速度、镜像轮轴与坐标变换；八任务 train/play/RL 快照对比确认只有 Wolf 新增上述 sensor/metrics。CUDA 回放 `2026-11-01_15-57-14_wolf_flat_him/model_1000.pt`，8 env ×600 policy steps，hip PD 按训练值设为 90/3.3，其余使用当前 play 配置并保留 actuator delay；全程状态与输出有限。接触点速度与 C MuJoCo Jacobian 独立比较，最大误差 5.7e-6 m/s 以内。Wolf rough HIM 另以缩小地形的 1 env reset+2 步验证 native metrics 有限。
 
@@ -200,7 +214,7 @@ action_scale: [0.125, 0.25, 0.25,  5,
                0.125, 0.25, 0.25, -5]
 ```
 
-默认姿态与轮速观测 forward sign 保持。部署侧实际路径为 `../Sim_Deploy/quadruped_control`，其现有 Wolf test policy 腿 PD=80/3、轮 PD=0/1、hip scale=0.25、wheel scale=10，与新训练控制 contract 不同；本次未修改部署仓库或已有 policy.pt。新策略使用独立配置同步上述参数，历史策略回放使用各自保存的训练配置。PPO/HIM 输入输出 shape 仍为 53→16、318→16，旧 checkpoint 虽能按结构加载，动作与闭环语义已改变；本次不执行历史 checkpoint 迁移或新训练。
+默认姿态与轮速观测 forward sign 保持。部署侧实际路径为 `../Sim_Deploy/quadruped_control`，其现有 Wolf test policy 腿 PD=80/3、轮 PD=0/1、hip scale=0.25、wheel scale=10，与新训练控制 contract 不同；本次未修改部署仓库或已有 policy.pt。新策略使用独立配置同步上述参数，历史策略回放使用各自保存的训练配置。PPO/HIM 输入输出 shape 仍为 53→16、318→16，该控制 unit 当时的旧 checkpoint 能按结构加载，但动作与闭环语义已改变；当前 HIM encoder 结构又已变更，旧 HIM checkpoint 不再兼容，见前文接口说明。
 
 控制 unit 的本地验证工具为 `tests/check_wolf_m20_control.py`（不提交）。八任务 train/play/RL 的逐字段快照仅允许 Wolf damping 和 action scale 发生变化，其余含奖励、DR、delay、effort、观测与 RL 配置完全一致。CPU 原生 flat HIM、rough HIM、flat PPO（启用可选 calf backlash 与 wheel target bias/scale）各 2 env，检查正负动作的实际目标、默认 offset、四腿顺序与轮符号、初始化后执行器的 PD 输出和 60/17 限幅，再完成 8 步非零动作及 partial reset，状态和观测均有限：CPU PASS。CUDA SKIPPED（无可用设备）。命令为 `MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_m20_control.py --device cpu --smoke`；同工具 `--device cuda` 记录跳过。未执行训练或消融，下一步使用这组完整参数训练。
 

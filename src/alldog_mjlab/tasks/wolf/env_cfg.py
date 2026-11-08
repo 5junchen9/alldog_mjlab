@@ -59,7 +59,6 @@ from alldog_mjlab.robots.wolf.wolf_constants import (
 
 from .mdp import metrics as wolf_metrics
 from .mdp import rewards
-from .mdp import turning
 from .mdp.commands import WolfVelocityCommandCfg
 from .mdp.curriculums import (
     CURRICULUM_TERM_NAME,
@@ -815,20 +814,20 @@ def make_env_cfg(
             num_slots=1,
             track_air_time=True,
         ),
+        # Net wheel force is shared by independent landing/lift reward terms.
+        ContactSensorCfg(
+            name=WOLF_WHEEL_FORCE_CONTACT_SENSOR,
+            primary=ContactMatch(
+                mode="geom", pattern=WOLF_WHEEL_COLLISION_GEOM_NAMES, entity="robot"
+            ),
+            secondary=ContactMatch(mode="body", pattern="terrain"),
+            fields=("found", "force"),
+            reduce="netforce",
+            num_slots=1,
+            track_air_time=True,
+        ),
     ]
     if rough:
-        sensors.append(
-            ContactSensorCfg(
-                name=WOLF_WHEEL_FORCE_CONTACT_SENSOR,
-                primary=ContactMatch(
-                    mode="geom", pattern=WOLF_WHEEL_COLLISION_GEOM_NAMES, entity="robot"
-                ),
-                secondary=ContactMatch(mode="body", pattern="terrain"),
-                fields=("force",),
-                reduce="netforce",
-                num_slots=1,
-            )
-        )
         sensors.append(
             RayCastSensorCfg(
                 name=WOLF_TERRAIN_SCAN_SENSOR,
@@ -1076,7 +1075,7 @@ def make_env_cfg(
                 },
             ),
             "wheel_lateral_slip_l2": RewardTermCfg(
-                func=wolf_metrics.wheel_lateral_slip_l2,
+                func=rewards.wheel_lateral_slip_l2,
                 weight=-2.0,
                 params={
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
@@ -1086,16 +1085,10 @@ def make_env_cfg(
                     "contact_force_threshold": 1.0,
                 },
             ),
-            "wheel_longitudinal_slip_l2": RewardTermCfg(
-                func=wolf_metrics.wheel_longitudinal_slip_l2,
-                weight=-0.5,
-                params={
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
-                    ),
-                    "contact_force_threshold": 1.0,
-                },
+            "soft_landing": RewardTermCfg(
+                func=rewards.soft_landing,
+                weight=-1e-5,
+                params={"sensor_name": WOLF_WHEEL_FORCE_CONTACT_SENSOR},
             ),
             "stand_joint_vel": RewardTermCfg(
                 func=rewards.stand_still_joint_velocity_l2,
@@ -1123,7 +1116,7 @@ def make_env_cfg(
             ),
             # M20-derived gait regularizers are subordinate to yaw tracking.
             "turn_hip_default": RewardTermCfg(
-                func=turning.turn_hip_default,
+                func=rewards.turn_hip_default,
                 weight=-3.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
@@ -1137,7 +1130,7 @@ def make_env_cfg(
                 },
             ),
             "feet_air_time_ang_z": RewardTermCfg(
-                func=turning.FeetAirTimeYaw,
+                func=rewards.FeetAirTimeYaw,
                 weight=5.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
@@ -1155,7 +1148,7 @@ def make_env_cfg(
                 },
             ),
             "feet_slide_ang_z": RewardTermCfg(
-                func=turning.feet_slide_ang_z_cmd,
+                func=rewards.feet_slide_ang_z_cmd,
                 weight=-0.2,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
@@ -1168,7 +1161,7 @@ def make_env_cfg(
                 },
             ),
             "rotation_gait_status": RewardTermCfg(
-                func=turning.rotation_gait_status,
+                func=rewards.rotation_gait_status,
                 weight=0.5,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
@@ -1183,7 +1176,7 @@ def make_env_cfg(
                 },
             ),
             "rotation_gait_symmetry": RewardTermCfg(
-                func=turning.RotationGaitSymmetry,
+                func=rewards.RotationGaitSymmetry,
                 weight=0.5,
                 params={
                     "command_name": WOLF_COMMAND_NAME,

@@ -13,7 +13,7 @@ from rsl_rl.utils import resolve_callable
 from tensordict import TensorDict
 
 from .estimator import HIMEstimator
-from .spec import HIMSpec, canonical_history
+from .spec import HIMSpec, canonical_history, encoder_history
 
 
 class _HimActorJit(nn.Module):
@@ -23,6 +23,8 @@ class _HimActorJit(nn.Module):
         self.frame_dim: int = spec.single_frame_dim
         self.velocity_dim: int = spec.velocity_dim
         self.history_dim: int = spec.history_dim
+        self.history_length: int = spec.history_length
+        self.command_dim: int = spec.command_dim
         self.encoder = copy.deepcopy(policy.estimator.encoder)
         self.mlp = copy.deepcopy(policy.mlp)
         if policy.distribution is not None:
@@ -42,7 +44,14 @@ class _HimActorJit(nn.Module):
                 % self.history_dim
             )
         current = canonical_history[:, : self.frame_dim]
-        encoded = self.encoder(canonical_history)
+        encoded = self.encoder(
+            encoder_history(
+                canonical_history,
+                self.history_length,
+                self.frame_dim,
+                self.command_dim,
+            )
+        )
         velocity = encoded[:, : self.velocity_dim]
         latent = F.normalize(encoded[:, self.velocity_dim :], dim=-1, p=2.0)
         return self.deterministic_output(

@@ -22,6 +22,10 @@ class HIMSpec:
         return self.history_length * self.single_frame_dim
 
     @property
+    def encoder_input_dim(self) -> int:
+        return self.history_length * (self.single_frame_dim - self.command_dim)
+
+    @property
     def target_encoder_input_dim(self) -> int:
         return self.single_frame_dim - self.command_dim + self.velocity_dim
 
@@ -75,6 +79,21 @@ def him_spec_from_obs(
 
 def canonical_history(history: torch.Tensor) -> torch.Tensor:
     return history.flip(1).flatten(1)
+
+
+def encoder_history(
+    history: torch.Tensor,
+    history_length: int,
+    single_frame_dim: int,
+    command_dim: int,
+) -> torch.Tensor:
+    """Remove each frame's command only at the source encoder boundary.
+
+    Input retains the complete canonical newest-to-oldest history used by play,
+    storage and deployment. Actor observations and target inputs are unchanged.
+    """
+    frames = history.reshape(-1, history_length, single_frame_dim)
+    return frames[..., command_dim:].flatten(1)
 
 
 def estimator_target_input(

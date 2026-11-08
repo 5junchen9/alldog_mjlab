@@ -1,4 +1,12 @@
-"""Wolf custom reward kernels; return unweighted per-environment values."""
+# Copyright (c) 2025 Deep Robotics
+# Copyright (c) 2024-2025 Ziqi Fan
+# Copyright 2025, The mjlab Developers
+# SPDX-License-Identifier: BSD-3-Clause AND Apache-2.0
+"""Wolf reward kernels; return unweighted per-environment values.
+
+Turning rewards adapt DeepRoboticsLab/rl_training@9c0e710.
+Licenses and provenance: THIRD_PARTY_NOTICES.md.
+"""
 
 from __future__ import annotations
 
@@ -9,11 +17,19 @@ from mjlab.envs import mdp as envs_mdp
 from mjlab.managers import ManagerTermBase
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.managers.scene_entity_config import SceneEntityCfg
+from mjlab.utils.lab_api.math import quat_apply_inverse
 
 from alldog_mjlab.robots.wolf.wolf_constants import (
     WOLF_JOINTS_PER_LEG,
     WOLF_LEG_ORDER,
-    WOLF_WHEEL_COLLISION_GEOM_NAMES,
+)
+
+from .common import (
+    pure_yaw_command,
+    standing_command,
+    wheel_contact_sensor,
+    wheel_slip_velocities,
+    yaw_tracking_progress,
 )
 
 if TYPE_CHECKING:
@@ -157,10 +173,7 @@ def stand_still(
         asset.data.joint_pos[:, asset_cfg.joint_ids]
         - asset.data.default_joint_pos[:, asset_cfg.joint_ids]
     )
-    command = env.command_manager.get_command(command_name)
-    standing = (command[:, :2].norm(dim=1) < command_threshold) & (
-        command[:, 2].abs() < yaw_threshold
-    )
+    standing = standing_command(env, command_name, command_threshold, yaw_threshold)
     return error.abs().sum(dim=1) * standing
 
 
@@ -172,10 +185,7 @@ def stand_still_joint_velocity_l2(
     yaw_threshold: float,
 ) -> torch.Tensor:
     """Penalize leg cycling at zero command, even near the default pose."""
-    command = env.command_manager.get_command(command_name)
-    standing = (command[:, :2].norm(dim=1) < command_threshold) & (
-        command[:, 2].abs() < yaw_threshold
-    )
+    standing = standing_command(env, command_name, command_threshold, yaw_threshold)
     velocity = env.scene[asset_cfg.name].data.joint_vel[:, asset_cfg.joint_ids]
     return velocity.square().sum(dim=1) * standing
 
@@ -188,12 +198,8 @@ def stand_still_wheel_air(
     yaw_threshold: float,
 ) -> torch.Tensor:
     """Favor four-wheel support when no planar motion is requested."""
-    sensor = env.scene[sensor_name]
-    assert tuple(sensor.primary_names) == WOLF_WHEEL_COLLISION_GEOM_NAMES
-    command = env.command_manager.get_command(command_name)
-    standing = (command[:, :2].norm(dim=1) < command_threshold) & (
-        command[:, 2].abs() < yaw_threshold
-    )
+    sensor = wheel_contact_sensor(env, sensor_name)
+    standing = standing_command(env, command_name, command_threshold, yaw_threshold)
     return (sensor.data.current_contact_time <= 0).sum(dim=1) * standing
 
 
@@ -295,10 +301,7 @@ def wheel_force_lift(
     asset_cfg: SceneEntityCfg,
     min_horizontal_force: float,
 ) -> torch.Tensor:
-    sensor = env.scene[sensor_name]
-    assert list(sensor.primary_names) == list(WOLF_WHEEL_COLLISION_GEOM_NAMES), (
-        f"wheel contact sensor primary order {sensor.primary_names} != policy wheel order {WOLF_WHEEL_COLLISION_GEOM_NAMES}"
-    )
+    sensor = wheel_contact_sensor(env, sensor_name)
     contact_force = sensor.data.force
     assert contact_force is not None
     horizontal_force = torch.norm(contact_force[..., :2], dim=-1)
@@ -307,3 +310,227 @@ def wheel_force_lift(
     wheel_velocity_w = asset.data.body_link_lin_vel_w[:, asset_cfg.body_ids]
     upward_velocity = torch.clamp(wheel_velocity_w[..., 2], min=0.0)
     return torch.sum(contact_gate * upward_velocity, dim=1)
+
+
+def wheel_lateral_slip_l2(
+    env: ManagerBasedRlEnv,
+    sensor_name: str,
+    asset_cfg: SceneEntityCfg,
+    contact_force_threshold: float = 1.0,
+) -> torch.Tensor:
+    """Penalize loaded-wheel lateral material-point speed squared, in m²/s²."""
+    lateral, _, _ = wheel_slip_velocities(
+        env, sensor_name, asset_cfg, contact_force_threshold
+    )
+    return lateral.square().sum(dim=1)
+
+
+def soft_landing(env: ManagerBasedRlEnv, sensor_name: str) -> torch.Tensor:
+    """Penalize net wheel force on first contact, including at zero command.
+
+    Uses MjLab 1.6.0 soft_landing's instantaneous force-norm semantics.
+    This is not a substep peak-force or impulse measurement.
+    """
+    sensor = wheel_contact_sensor(env, sensor_name)
+    force = sensor.data.force
+    assert force is not None
+    landed = sensor.compute_first_contact(env.step_dt)
+    impact = force.norm(dim=-1) * landed
+    env.extras["log"]["Metrics/landing_force_mean"] = (
+        impact.sum() / landed.sum().clamp_min(1)
+    )
+    return impact.sum(dim=1)
+
+
+# M20-derived yaw rewards; shared contact/command inputs come from common.py.
+_DIAGONAL_A = (0, 3)
+_DIAGONAL_B = (1, 2)
+
+
+def turn_hip_default(
+    env: ManagerBasedRlEnv,
+    command_name: str,
+    asset_cfg: SceneEntityCfg,
+    lin_vel_threshold: float,
+    ang_vel_threshold: float,
+) -> torch.Tensor:
+    """Keep hip-roll near default during pure yaw; leave sagittal joints free."""
+    data = env.scene[asset_cfg.name].data
+    error = data.joint_pos[:, asset_cfg.joint_ids] - data.default_joint_pos[
+        :, asset_cfg.joint_ids
+    ]
+    return error.norm(dim=1) * pure_yaw_command(
+        env, command_name, lin_vel_threshold, ang_vel_threshold
+    )
+
+
+def feet_slide_ang_z_cmd(
+    env: ManagerBasedRlEnv,
+    command_name: str,
+    sensor_name: str,
+    asset_cfg: SceneEntityCfg,
+    lin_vel_threshold: float,
+    ang_vel_threshold: float,
+) -> torch.Tensor:
+    """Upstream wheel-body motion cost, distinct from contact-point slip.
+
+    Subtract root translation, express in the body frame, and penalize both
+    planar components while a wheel touches the ground. Wheel spin is not
+    subtracted: this term deliberately favors unloading wheels during yaw.
+    """
+    sensor = wheel_contact_sensor(env, sensor_name)
+    # Upstream uses a >1 N net-force history gate; here the native maxforce
+    # representative provides the current contact force for each wheel.
+    contacts = sensor.data.force.norm(dim=-1) > 1.0
+    data = env.scene[asset_cfg.name].data
+    velocity = data.body_link_lin_vel_w[:, asset_cfg.body_ids] - (
+        data.root_link_lin_vel_w[:, None, :]
+    )
+    quat = data.root_link_quat_w[:, None, :].expand(-1, velocity.shape[1], -1)
+    velocity_b = quat_apply_inverse(quat, velocity)
+    cost = (velocity_b[..., :2].norm(dim=-1) * contacts).sum(dim=1)
+    return cost * pure_yaw_command(env, command_name, lin_vel_threshold, ang_vel_threshold)
+
+
+class FeetAirTimeYaw(ManagerTermBase):
+    """Bound yaw air time/clearance and penalize excessive swing height."""
+
+    def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRlEnv):
+        super().__init__(env)
+        self._ground_height = torch.zeros(self.num_envs, 4, device=self.device)
+        self._max_air_height = torch.zeros_like(self._ground_height)
+        self._initialized = torch.zeros(
+            self.num_envs, dtype=torch.bool, device=self.device
+        )
+
+    def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+        ids = slice(None) if env_ids is None else env_ids
+        self._ground_height[ids] = 0.0
+        self._max_air_height[ids] = 0.0
+        self._initialized[ids] = False
+
+    def __call__(
+        self,
+        env: ManagerBasedRlEnv,
+        command_name: str,
+        sensor_name: str,
+        asset_cfg: SceneEntityCfg,
+        threshold: float,
+        cmd_threshold: float,
+        foot_height_threshold: float,
+        lin_vel_threshold: float,
+        max_air_time: float,
+        max_foot_height: float,
+        height_penalty_scale: float,
+    ) -> torch.Tensor:
+        sensor = wheel_contact_sensor(env, sensor_name)
+        data = env.scene[asset_cfg.name].data
+        height = data.body_link_pos_w[:, asset_cfg.body_ids, 2]
+        initialized = self._initialized[:, None]
+        ground = torch.where(initialized, self._ground_height, height)
+        maximum = torch.where(initialized, self._max_air_height, height)
+        in_contact = sensor.data.current_contact_time > 0.0
+        maximum = torch.where(in_contact, maximum, torch.maximum(maximum, height))
+        peak_clearance = maximum - ground
+        cleared = (peak_clearance > foot_height_threshold) & (
+            peak_clearance <= max_foot_height
+        )
+        landing_bonus = (
+            (sensor.data.last_air_time.clamp(max=max_air_time) - threshold)
+            * sensor.compute_first_contact(env.step_dt)
+            * cleared
+        ).sum(dim=1)
+        # A continuous cost is needed: merely removing the landing bonus above
+        # a ceiling would still leave high stepping unpenalized during flight.
+        clearance = height - ground
+        height_cost = (
+            (clearance - max_foot_height).clamp_min(0).square() * ~in_contact
+        ).sum(dim=1)
+        self._ground_height.copy_(torch.where(in_contact, height, ground))
+        self._max_air_height.copy_(torch.where(in_contact, height, maximum))
+        self._initialized.fill_(True)
+        gate = pure_yaw_command(env, command_name, lin_vel_threshold, cmd_threshold)
+        return gate * (
+            landing_bonus * yaw_tracking_progress(env, command_name)
+            - height_penalty_scale * height_cost
+        )
+
+
+def rotation_gait_status(
+    env: ManagerBasedRlEnv,
+    command_name: str,
+    sensor_name: str,
+    asset_cfg: SceneEntityCfg,
+    target_height: float,
+    height_std: float,
+    lin_vel_threshold: float,
+    ang_vel_threshold: float,
+) -> torch.Tensor:
+    """Favor a modest diagonal swing height while actually turning."""
+    sensor = wheel_contact_sensor(env, sensor_name)
+    contact = sensor.data.current_contact_time > 0.0
+    z = env.scene[asset_cfg.name].data.body_link_pos_w[:, asset_cfg.body_ids, 2]
+    difference = z[:, _DIAGONAL_B].mean(1) - z[:, _DIAGONAL_A].mean(1)
+    a_supports = contact[:, _DIAGONAL_A].all(1) & ~contact[:, _DIAGONAL_B].any(1)
+    b_supports = contact[:, _DIAGONAL_B].all(1) & ~contact[:, _DIAGONAL_A].any(1)
+    a_score = a_supports * torch.exp(
+        -((difference - target_height) / height_std).square()
+    )
+    b_score = b_supports * torch.exp(
+        -((-difference - target_height) / height_std).square()
+    )
+    return (
+        torch.maximum(a_score, b_score)
+        * pure_yaw_command(env, command_name, lin_vel_threshold, ang_vel_threshold)
+        * yaw_tracking_progress(env, command_name)
+    )
+
+
+class RotationGaitSymmetry(ManagerTermBase):
+    """Match each diagonal's contact duty while tracking a turn command.
+
+    A running sum avoids reducing the full window each step. Counts and warmup
+    are per environment, including after partial resets and leaving turn mode.
+    Empty buffer slots do not count as airborne samples.
+    """
+
+    def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRlEnv):
+        super().__init__(env)
+        self._window = max(1, round(cfg.params["window_s"] / env.step_dt))
+        self._buffer = torch.zeros(self.num_envs, 2, self._window, device=self.device)
+        self._sum = torch.zeros(self.num_envs, 2, device=self.device)
+        self._count = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
+        self._index = 0
+
+    def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+        ids = slice(None) if env_ids is None else env_ids
+        self._buffer[ids] = 0.0
+        self._sum[ids] = 0.0
+        self._count[ids] = 0
+
+    def __call__(
+        self,
+        env: ManagerBasedRlEnv,
+        command_name: str,
+        sensor_name: str,
+        target_duty: float,
+        std: float,
+        window_s: float,
+        lin_vel_threshold: float,
+        ang_vel_threshold: float,
+    ) -> torch.Tensor:
+        sensor = wheel_contact_sensor(env, sensor_name)
+        gate = pure_yaw_command(env, command_name, lin_vel_threshold, ang_vel_threshold)
+        self.reset(~gate)
+        contact = (sensor.data.current_contact_time > 0.0).float()
+        groups = torch.stack(
+            (contact[:, _DIAGONAL_A].mean(1), contact[:, _DIAGONAL_B].mean(1)), dim=1
+        ) * gate[:, None]
+        self._sum.add_(groups - self._buffer[:, :, self._index])
+        self._buffer[:, :, self._index] = groups
+        self._index = (self._index + 1) % self._window
+        self._count.add_(gate).clamp_(max=self._window)
+        duty = self._sum / self._count[:, None].clamp_min(1)
+        reward = torch.exp(-((duty - target_duty) / std).square().sum(dim=1))
+        reward *= self._count / self._window
+        return reward * gate * yaw_tracking_progress(env, command_name)
