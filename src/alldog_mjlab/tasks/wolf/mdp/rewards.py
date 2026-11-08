@@ -131,6 +131,20 @@ class base_height_l2_terrain(ManagerTermBase):
         return torch.abs(base_height - target_height)
 
 
+def all_position_default(
+    env: ManagerBasedRlEnv,
+    asset_cfg: SceneEntityCfg,
+) -> torch.Tensor:
+    """Sum squared leg-position errors from default, for every command mode."""
+    data = env.scene[asset_cfg.name].data
+    default_joint_pos = data.default_joint_pos
+    assert default_joint_pos is not None
+    error = data.joint_pos[:, asset_cfg.joint_ids] - default_joint_pos[
+        :, asset_cfg.joint_ids
+    ]
+    return error.square().sum(dim=1)
+
+
 def stand_still(
     env,
     command_name: str,

@@ -92,6 +92,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 | leg_action_rate | -0.01 |
 | wheel_action_rate | -0.005 |
 | hip_default | -0.3 |
+| all_position_default | -0.1 |
 | stand_still | -2.0 |
 | run_still | -1.0 |
 | stand_joint_vel | -0.05 |
@@ -107,7 +108,7 @@ Black 高度目标 0.43 m；joint_power=Σ|τ·q̇|，使用关节空间 qfrc_ac
 | rotation_gait_status | 0.5 |
 | rotation_gait_symmetry | 0.5 |
 
-Wolf flat 注册上述 24 项，rough 另加 wheel_force_lift，权重 0.5，共 25 项。
+Wolf flat 注册上述 25 项，rough 另加 wheel_force_lift，权重 0.5，共 26 项。
 
 当前工作区有两项物理滑移奖励权重=0 的用户覆盖，继续保留为未提交修改；上表 -2/-0.5 描述 Git 提交基线。转向迁移时保留的用户 hip 80/3 已由当前 M20 对照控制基线 80/2 替换。本地验证使用含滑移权重覆盖的实际工作区。
 
@@ -115,13 +116,17 @@ Wolf flat 注册上述 24 项，rough 另加 wheel_force_lift，权重 0.5，共
 
 Wolf 高度目标 0.40 m，orientation 使用 projected gravity XY 的 L1 和。Hip default 为四个 hip 位置误差 L1，乘以 `clamp(1 - 0.2×min(abs(vy_cmd)/0.5,1) - 0.35×min(abs(yaw_cmd)/1.0,1), 0.5, 1)`；横移和转向指令下放宽回中约束。
 
+`all_position_default` 是全局腿姿态惩罚：raw cost=`sum((joint_pos-default_joint_pos)^2)`，明确选择 FL/FR/RL/RR 的 hip/thigh/calf 共 12 个关节，排除 4 个驱动轮；无 command、速度或接触门控，在四个 Wolf 任务的 train/play 下始终生效，权重 -0.1。保留已有 hip_default、stand_still、run_still 等项。MjLab 1.6.0 原生 posture 为指数正奖励，本项以任务本地简单函数表达平方和，再由原生 RewardManager 乘 weight 与 dt。除新增该奖励外，旧奖励、控制、观测和 RL 配置保持。
+
+本地验证 `tests/check_wolf_all_position_default.py`（不提交）：八任务 train/play/RL 快照仅允许 Wolf 新增该项；CPU PASS，覆盖非零默认位置、正负偏差对称、平方和而非均值、轮关节排除、跨指令一致与 weight/dt。原生 flat/rough HIM 各 1 env reset+2 steps，25/26 项注册、selector、观测 shape 与奖励累计 PASS；CUDA SKIPPED（无可用设备）。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_all_position_default.py --device cpu --smoke`；未执行训练，下一步随当前奖励组验证训练效果。
+
 Stand_still 在 norm(command_xy)<0.1 m/s 且 abs(command_yaw)<0.1 rad/s 时计算 12 腿关节位置误差 L1。Run_still 在 abs(command_x)>0.1 m/s、abs(command_y)<0.1 m/s 且 abs(command_yaw)<0.15 rad/s 时启用相同 L1。两项均排除轮关节。
 
 零指令还启用 stand_joint_vel（12 腿关节速度平方和，排除轮）和 stand_wheel_air（四轮中 current_contact_time<=0 的数量），门控与 stand_still 相同。相同姿态下，持续循环摆腿和离地不再与静止四轮支撑等价。两项在转向/正常直行时为零，不直接限幅动作或钳制关节。
 
 Leg/wheel action rate 分别选择 12/4 个 raw action 通道计算相邻帧平方差；leg/wheel torques 分别选择 12/4 个 actuator 的实际力矩计算平方和，选择集合互不重叠。Dof_pos_limits 仅惩罚 12 个腿关节超出 soft position limit 的距离，soft limit factor=0.9。
 
-Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 24 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
+Wolf flat 高度使用 world z；rough 使用中央 7×5=35 条 terrain ray 的局部离地高度均值。两者的高度误差均为 `abs(height - 0.40)`，权重 -10.0；沿用 `base_height_l2_flat` / `base_height_l2_terrain` 函数名。两种地形共用上述 25 项权重和高度目标。Rough 的 wheel_force_lift 显式选择四个轮碰撞 geom 的 world-frame net force：水平力范数 ≥15 N 时，累加对应轮 body 的向上竖直速度（负速度裁为 0）。
 
 ## Wolf 轮地滑移奖励与诊断
 
@@ -233,7 +238,7 @@ Black flat/rough nconmax=35/128，Wolf flat/rough nconmax=64/128；njmax 均为 
 
 Wolf 高度绝对值误差与 -10.0 权重由 `tests/check_wolf_height_l1.py` 单独验证（本地、不提交）：四任务 train/play 配置 PASS；CPU PASS，覆盖目标上下偏差、中央 35 ray 均值、地形整体升高与加权惩罚；CUDA SKIPPED（当前不可用）。本次高度调整未运行环境 rollout 或训练；下一步仍为奖励审查和训练评估。
 
-- IMPLEMENTED：机器人独立任务架构、八任务注册、Black 8 项及 Wolf flat 24 / rough 25 项奖励、Wolf 转向高度/进度约束与停止目标、课程版本、runner 与文档。
+- IMPLEMENTED：机器人独立任务架构、八任务注册、Black 8 项及 Wolf flat 25 / rough 26 项奖励、Wolf 全局腿姿态惩罚、转向高度/进度约束与停止目标、课程版本、runner 与文档。
 - STATIC CHECKED：Python 语法、imports、八任务注册、精确奖励表和无内部 tasks.velocity 引用。
 - CONFIG CHECKED：Wolf 四任务 train/play 的奖励权重、参数和 selector；八任务 train/play 的控制、观测、DR、终止、课程、仿真、机器人及 RL 配置与修改前快照一致。课程、runner 和 RL 源码未变。
 - CPU PASS / CUDA PASS：姿态 L1、hip 指令缩放、stand_still 的 XY+yaw 门控、run_still 的直线门控、腿轮动作变化率与力矩分组、抬轮力阈值及向上速度截断。

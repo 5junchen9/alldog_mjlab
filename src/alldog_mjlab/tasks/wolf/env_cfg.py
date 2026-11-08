@@ -1002,6 +1002,17 @@ def make_env_cfg(
                     "min_scale": 0.5,
                 },
             ),
+            "all_position_default": RewardTermCfg(
+                func=rewards.all_position_default,
+                weight=-0.1,
+                params={
+                    "asset_cfg": SceneEntityCfg(
+                        "robot",
+                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
+                        preserve_order=True,
+                    ),
+                },
+            ),
             "stand_still": RewardTermCfg(
                 func=rewards.stand_still,
                 weight=-2.0,
