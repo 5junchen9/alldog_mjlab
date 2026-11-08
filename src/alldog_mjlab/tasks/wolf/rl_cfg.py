@@ -84,7 +84,7 @@ def make_rl_cfg(stage: Literal["flat", "rough"] = "flat", him_enabled: bool = Fa
                 "value_loss_coef": 1.0,
                 "use_clipped_value_loss": True,
                 "clip_param": 0.2,
-                "entropy_coef": 0.01,
+                "entropy_coef": 0.006,
                 "num_learning_epochs": 5,
                 "num_mini_batches": 4,
                 "learning_rate": 1e-4,
@@ -100,7 +100,7 @@ def make_rl_cfg(stage: Literal["flat", "rough"] = "flat", him_enabled: bool = Fa
         run_name=run_name,
         load_run=load_run,
         save_interval=50,
-        num_steps_per_env=100,
+        num_steps_per_env=64,
         max_iterations=10000,
         **({"warm_start_supported": stage == "flat"} if him_enabled else {}),
     )

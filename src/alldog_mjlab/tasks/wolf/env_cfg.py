@@ -1076,7 +1076,7 @@ def make_env_cfg(
             ),
             "wheel_lateral_slip_l2": RewardTermCfg(
                 func=rewards.wheel_lateral_slip_l2,
-                weight=-2.0,
+                weight=-0.0,
                 params={
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
                     "asset_cfg": SceneEntityCfg(
