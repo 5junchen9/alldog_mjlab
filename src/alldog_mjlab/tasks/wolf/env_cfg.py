@@ -983,7 +983,7 @@ def make_env_cfg(
             ),
             "hip_default": RewardTermCfg(
                 func=rewards.hip_default_l2,
-                weight=-0.5,
+                weight=-0.1,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1019,7 +1019,7 @@ def make_env_cfg(
             ),
             "leg_torques": RewardTermCfg(
                 func=envs_mdp.joint_torques_l2,
-                weight=-0.0005,
+                weight=-1e-5,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1030,7 +1030,7 @@ def make_env_cfg(
             ),
             "wheel_torques": RewardTermCfg(
                 func=envs_mdp.joint_torques_l2,
-                weight=-0.0005,
+                weight=-1e-4,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",

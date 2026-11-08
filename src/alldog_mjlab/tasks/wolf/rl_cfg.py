@@ -34,16 +34,6 @@ class WolfHimModelCfg(RslRlModelCfg):
 
 
 @dataclass
-class WolfMirrorLossCfg:
-    use_data_augmentation: bool = False
-    use_mirror_loss: bool = True
-    mirror_loss_coeff: float = 0.1
-    data_augmentation_func: str = (
-        "alldog_mjlab.tasks.wolf.mdp.symmetry:left_right_mirror"
-    )
-
-
-@dataclass
 class WolfHimAlgorithmCfg(RslRlPpoAlgorithmCfg):
     class_name: str = "alldog_mjlab.algorithms.him.ppo:HIMPPO"
     symmetry_cfg: WolfMirrorLossCfg | None = field(default_factory=WolfMirrorLossCfg)
@@ -67,6 +57,15 @@ class WolfHimRunnerCfg(WolfRunnerCfg):
     him: HimRunnerParams = field(default_factory=HimRunnerParams)
     warm_start: bool = False
     warm_start_supported: bool = True
+
+@dataclass
+class WolfMirrorLossCfg:
+    use_data_augmentation: bool = False
+    use_mirror_loss: bool = True
+    mirror_loss_coeff: float = 0.1
+    data_augmentation_func: str = (
+        "alldog_mjlab.tasks.wolf.mdp.symmetry:left_right_mirror"
+    )
 
 
 def make_rl_cfg(stage: Literal["flat", "rough"] = "flat", him_enabled: bool = False):
@@ -111,7 +110,7 @@ def make_rl_cfg(stage: Literal["flat", "rough"] = "flat", him_enabled: bool = Fa
         run_name=run_name,
         load_run=load_run,
         save_interval=50,
-        num_steps_per_env=64,
+        num_steps_per_env=100,
         max_iterations=10000,
         **({"warm_start_supported": stage == "flat"} if him_enabled else {}),
     )
