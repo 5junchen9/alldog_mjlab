@@ -69,6 +69,7 @@ from .mdp.events import (
     BiasedSignedWheelVelocity,
     CalfBacklashPositionActionCfg,
     DomainRandomizationParams,
+    RootBodyFrameImpulse,
     ScaledBiasedWheelVelocityActionCfg,
     randomize_body_inertia_scale,
     randomize_ground_friction,
@@ -614,7 +615,6 @@ def _dr_event_terms(
             params={
                 "ranges": dr.link_inertia_scale_range,
                 "asset_cfg": link_bodies,
-                "shared_random": False,
             },
         )
     if dr.wheel_inertia_enabled:
@@ -624,7 +624,6 @@ def _dr_event_terms(
             params={
                 "ranges": dr.wheel_inertia_scale_range,
                 "asset_cfg": wheel_bodies,
-                "shared_random": True,
             },
         )
     if dr.base_com_enabled:
@@ -693,13 +692,13 @@ def _dr_event_terms(
     if dr.disturbance_enabled:
         disturbance_interval_s = dr.disturbance_interval_policy_steps * 0.02
         terms["dr_disturbance"] = EventTermCfg(
-            func=envs_mdp.apply_external_force_torque,
-            mode="interval",
-            interval_range_s=(disturbance_interval_s, disturbance_interval_s),
-            is_global_time=True,
+            func=RootBodyFrameImpulse,
+            mode="step",
             params={
                 "force_range": dr.disturbance_force_range,
                 "torque_range": (0.0, 0.0),
+                "duration_s": (0.02, 0.02),
+                "cooldown_s": (disturbance_interval_s, disturbance_interval_s),
                 "asset_cfg": base_body,
             },
         )

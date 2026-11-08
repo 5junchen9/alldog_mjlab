@@ -15,9 +15,10 @@ from mjlab.envs.mdp.actions import (
     JointVelocityAction,
     JointVelocityActionCfg,
 )
+from mjlab.envs.mdp.events import apply_body_impulse
 from mjlab.managers.event_manager import RecomputeLevel, requires_model_fields
 from mjlab.managers.scene_entity_config import SceneEntityCfg
-from mjlab.utils.lab_api.math import sample_uniform
+from mjlab.utils.lab_api.math import quat_apply, sample_uniform
 
 from alldog_mjlab.robots.wolf.wolf_constants import WOLF_WHEEL_RADIUS
 from alldog_mjlab.tasks.wolf.mdp.observations import signed_wheel_velocity
@@ -61,8 +62,8 @@ class DomainRandomizationParams:
     wheel_inertia_enabled: bool = True
     wheel_inertia_scale_range: tuple[float, float] = (0.8, 1.2)
     ground_friction_enabled: bool = True
-    ground_friction_range: tuple[float, float] = (0.25, 1.25)
-    wheel_friction_enabled: bool = True
+    ground_friction_range: tuple[float, float] = (0.8, 1.2)
+    wheel_friction_enabled: bool = False
     wheel_friction_scale_range: tuple[float, float] = (0.4, 1.0)
     kp_enabled: bool = True
     kp_scale_range: tuple[float, float] = (0.9, 1.1)
@@ -87,6 +88,7 @@ class DomainRandomizationParams:
     push_interval_s: tuple[float, float] = (15.0, 15.0)
     push_velocity_xy: tuple[float, float] = (-1.0, 1.0)
     disturbance_enabled: bool = True
+    # Root-local force reference for one physics step; preserve its impulse.
     disturbance_force_range: tuple[float, float] = (-35.0, 35.0)
     disturbance_interval_policy_steps: int = 8
     initial_joint_pos_enabled: bool = True
@@ -205,8 +207,8 @@ def randomize_body_inertia_scale(
     env_ids: torch.Tensor | None,
     ranges: tuple[float, float],
     asset_cfg: SceneEntityCfg,
-    shared_random: bool = False,
 ) -> None:
+    """Scale each body's principal moments together, preserving rigid-body validity."""
     env_ids = _resolve_env_ids(env, env_ids)
     asset = env.scene[asset_cfg.name]
     from mjlab.envs.mdp.dr._core import _get_entity_indices
@@ -218,13 +220,58 @@ def randomize_body_inertia_scale(
     env_grid, body_grid = torch.meshgrid(env_ids, entity_indices, indexing="ij")
     defaults = env.sim.get_default_field("body_inertia")
     base = defaults[body_grid]
-    if shared_random:
-        scale = sample_uniform(
-            ranges[0], ranges[1], (*base.shape[:-1], 1), device=env.device
-        )
-    else:
-        scale = sample_uniform(ranges[0], ranges[1], base.shape, device=env.device)
+    scale = sample_uniform(
+        ranges[0], ranges[1], (*base.shape[:-1], 1), device=env.device
+    )
     env.sim.model.body_inertia[env_grid, body_grid] = base * scale
+
+
+class RootBodyFrameImpulse(apply_body_impulse):
+    """Native impulse lifecycle with a root-local, one-physics-step force reference.
+
+    MjLab 1.6 ticks events once per policy step. Spread the reference impulse
+    over one policy step and reduce the wrench by physics_dt / step_dt.
+    Expiration and per-environment reset are handled by apply_body_impulse.
+    The selected body is the robot's root body (base_link).
+    """
+
+    def _sample_cooldown(self, n: int) -> torch.Tensor:
+        # Match EventManager's 1e-6 s interval tolerance: repeated float32
+        # subtraction must not turn an exact 8-step cooldown into 9 steps.
+        return super()._sample_cooldown(n) - 1e-6
+
+    def __call__(
+        self,
+        env: ManagerBasedRlEnv,
+        env_ids: torch.Tensor | None,
+        force_range: tuple[float, float],
+        torque_range: tuple[float, float],
+        duration_s: tuple[float, float],
+        cooldown_s: tuple[float, float],
+        asset_cfg: SceneEntityCfg,
+    ) -> None:
+        continuing = self._active & (self._time_remaining > env.step_dt)
+        super().__call__(
+            env, env_ids, force_range, torque_range, duration_s, cooldown_s, asset_cfg
+        )
+        triggered = (self._active & ~continuing).nonzero(as_tuple=False).squeeze(-1)
+        if not len(triggered):
+            return
+
+        # Read the current free-joint quaternion: derived xquat is one physics
+        # substep old when events run, before the environment's final forward().
+        pose = env.sim.data.qpos[
+            triggered[:, None], self._asset.indexing.free_joint_q_adr
+        ]
+        quat = pose[:, None, 3:7].expand(-1, self._num_bodies, -1)
+        wrench = self._asset.data.body_external_wrench[triggered][:, self._body_ids]
+        scale = env.physics_dt / env.step_dt
+        self._asset.write_external_wrench_to_sim(
+            quat_apply(quat, wrench[..., :3]) * scale,
+            quat_apply(quat, wrench[..., 3:]) * scale,
+            env_ids=triggered,
+            body_ids=self._body_ids,
+        )
 
 
 def _actuator_gains(

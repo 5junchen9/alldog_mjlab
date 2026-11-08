@@ -247,7 +247,15 @@ Black 初始 vx/vy=[-1,1]，yaw=[-π,π]，课程 vx 上限 ±2。Wolf 初始 vx
 
 默认 DR profile 的开关、范围和调用频率保留在机器人 mdp/events.py。Black 默认开启摩擦、payload、COM、PD gain、encoder bias 和周期推力。Wolf 默认开启质量、惯性、摩擦、PD/motor strength、轮半径、控制延迟、推力、外力和初始腿姿态缩放；hip motor strength、calf backlash、wheel target bias/scale 和 wheel observation bias 默认关闭。
 
-Wolf 腿/轮最大延迟分别为 3/4 个 policy step，采样更新周期仍为 decimation；外力间隔为 8 个 policy step。Play 移除 DR events、关闭 actor noise 与课程，但保留现有 reset 分布和 actuator delay 配置。
+Wolf 腿和轮的惯量随机化均对每个刚体独立采样一个正缩放系数，三个主惯量共用该系数；腿范围 [0.9,1.1]、轮范围 [0.8,1.2]，保持主惯量比例与三角不等式。各次 reset 从 nominal 惯量采样，不累积缩放；仍使用原有 set_const_0 重计算。名义质量、惯量和资产未改。
+
+Wolf 默认接触摩擦范围改为 [0.8,1.2]，以 nominal/play 的 1.0 为中心；额外 wheel_friction 乘数默认关闭，显式开启选项保留。训练沿用轮/机器人碰撞 geom 赋值、terrain sliding friction 置零的方式，使 MuJoCo 的接触组合读取实际采样值。Play 仍使用 nominal 摩擦，不新增随机化。
+
+Wolf 外力使用任务本地 RootBodyFrameImpulse，复用本地锁定 MjLab 1.6.0 apply_body_impulse 的触发、到期清零和 partial reset。disturbance_force_range=[-35,35] N 表示机体局部坐标系中持续一个 physics step（5 ms）的参考力；适配器读取当前 free-joint quaternion，将新采样力旋转到世界系，缩放为 physics_dt/step_dt=0.25，并持续一个 policy step（20 ms），保持参考冲量。当前实际局部力幅值为 ±8.75 N；这不是 5 ms 力波形的精确复现。每 8 个 policy step（160 ms）触发，使用与原生 EventManager 一致的 1e-6 s 容差避免浮点计时多等一步。零指令也可受扰动；每个环境 reset 后重新计时，力只作用于 base_link 质心，不额外施加力矩。
+
+Wolf 腿/轮最大延迟分别为 3/4 个 policy step，采样更新周期仍为 decimation。Play 移除 DR events、关闭 actor noise 与课程，但保留现有 reset 分布和 actuator delay 配置。奖励、HIM encoder、观测/动作、PD、延迟与求解器均不属于本次三项 DR 修正。
+
+本单元来源为本地锁定的 MjLab 1.6.0 事件实现、HIMLoco-for-Go2W 的施力调用和 Isaac Gym SDK 对 immediate timestep 的定义。Local verification：tests/check_wolf_dr_fixes.py（不提交），CPU PASS / CUDA PASS。八任务 train/play/RL 完整快照仅允许上述 Wolf DR 变化；每种设备各检查 64 env ×16 bodies ×4 resets=4096 组惯量，三角不等式违规为 0，并验证摩擦范围、均值、跨 reset 无累积和 partial reset 隔离。四组姿态覆盖未 forward 的新 qpos；记录四个真实 physics substep 的施力，用全机器人动量变化核对参考冲量，误差 <3e-5 N·s；触发步为 8/16/24/32/40，下一步清零，partial reset 不影响其他环境。另完成 Wolf flat HIM、rough HIM、flat PPO、Black flat HIM 各 2 env ×8 steps、一次 PPO/HIM 更新、终止目标、checkpoint 重载和原生 JIT 导出等价。命令：MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_dr_fixes.py --device cpu --smoke；CUDA 使用 --device cuda。尚未重新训练验证步态改善，下一步用修正后的物理配置训练并对照 yaw、横移和髋部偏转。
 
 Black run_name=flat/rough/flat_him/rough_him，Wolf run_name=wolf_flat/wolf_rough/wolf_flat_him/wolf_rough_him。新实验为 black_locomotion/wolf_locomotion，默认不加载 checkpoint。Black num_steps_per_env=64，Wolf=100。网络均为 512/256/128，HIM encoder=128/64、latent=16、prototypes=32、temperature=3。
 

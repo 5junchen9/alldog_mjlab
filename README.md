@@ -81,6 +81,8 @@ uv run export --task-id wolf-flat-him --checkpoint '/absolute/path/model_500.pt'
 
 省略 play 的 checkpoint 时，只在当前任务 experiment 中搜索匹配 stage 的最新模型。Play 关闭 actor noise、课程和 DR events，保留 reset。Wolf actuator delay 仍按当前默认 profile 配置。
 
+Wolf 训练摩擦默认在 `[0.8,1.2]` 采样，额外轮端摩擦乘数关闭；play 的名义值为 1.0。惯量随机化让每个刚体的三个主惯量共用一个正缩放系数。周期扰动在机体局部系采样，每 160 ms 触发并在一个 20 ms 控制步后清零；参考力范围 `[-35,35] N` 按 5 ms 冲量定义，实际施力幅值缩为四分之一以保持冲量。
+
 HIM 策略使用 Viser play 时，`Controls → Info` 自动显示 `HIM velocity`，下方为 `Actual velocity`。两行均按 `vx / vy / vz` 排列，单位为机身坐标系下的 m/s，显示当前选中环境的速度。估计值取自本次策略推理的 encoder 输出，按 estimator target scale 换算；真实值取自仿真器。重置或切换 checkpoint 后，估计值先显示 `—`，下一次推理后更新。
 
 导出默认生成 `<run>/exported/policy.pt`，可用 `--output-dir` 指定其他目录。导出使用 runner 的 TorchScript 能力，重新加载结果并检查数值等价。训练 checkpoint `model_*.pt` 与可独立推理的 TorchScript `policy.pt` 是两种文件。
