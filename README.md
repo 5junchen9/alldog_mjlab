@@ -108,7 +108,7 @@ Black actor 布局为 command、base angular velocity、projected gravity、join
 
 Wolf actor 布局为 command、IMU angular velocity、IMU projected gravity、12 腿关节位置误差、12 腿关节速度、4 个带方向符号的轮速、16 维 previous action；critic 在相同无噪声布局后追加 3 维 base linear velocity。
 
-Wolf 自定义奖励统一在 `tasks/wolf/mdp/rewards.py` 中实现，公共接触数据、轮接触点运动学和指令判定在 `mdp/common.py`。`soft_landing` 在首次落地时惩罚四轮接触合力范数之和，权重 `-1e-5`，所有指令下生效；使用公共 netforce 传感器，rough 的 `wheel_force_lift` 也读取该传感器。纵向滑移仅保留诊断 metric，已从奖励配置中移除。既有转向奖励恢复为 2026-11-07 训练基线，rotation_gait_status 的最低高度门槛改为 4 cm；新增奖励及 HIM encoder 机制保持。此门槛不限制最大抬腿高度。Viser 奖励条显示全部已注册项。
+Wolf 当前 flat/rough、PPO/HIM 共用 14 项基础奖励：X/Y/yaw 跟踪、竖直速度、roll/pitch 角速度、倾斜、高度、腿/轮动作变化率、hip 回中、站立回中、腿关节限位和腿/轮力矩。高度目标 0.40 m，高度、倾斜和 hip 回中均使用平方误差；站立回中只在 XY 与 yaw 指令都接近零时启用。额外转向、抬腿、滑移、软落地、全局腿姿态及停止动态约束已移出当前组合，实现保留在 `tasks/wolf/mdp/rewards.py` 供消融；公共数据在 `mdp/common.py`，滑移 metrics 保持。Viser 显示当前全部 14 项奖励。
 
 默认 actor running normalization 关闭，critic normalization 开启。部署必须匹配 observation scales、默认姿态、动作尺度和 previous-action 更新时机。部署侧的 clipping、关节保护和 torque safety 与策略动作语义分别配置。
 

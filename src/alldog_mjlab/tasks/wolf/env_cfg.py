@@ -957,16 +957,16 @@ def make_env_cfg(
             ),
             "tracking_ang_vel": RewardTermCfg(
                 func=rewards.track_angular_velocity_z,
-                weight=1.0,
+                weight=0.75,
                 params={"command_name": WOLF_COMMAND_NAME, "sigma": 0.25},
             ),
             "lin_vel_z": RewardTermCfg(
-                func=rewards.vertical_linear_velocity_l2, weight=-0.8
+                func=rewards.vertical_linear_velocity_l2, weight=-1.0
             ),
             "ang_vel_xy": RewardTermCfg(
                 func=rewards.angular_velocity_xy_l2, weight=-0.05
             ),
-            "orientation": RewardTermCfg(func=rewards.orientation_l1, weight=-0.5),
+            "orientation": RewardTermCfg(func=rewards.orientation_l2, weight=-0.5),
             "base_height": RewardTermCfg(
                 func=rewards.base_height_l2_terrain
                 if rough
@@ -981,39 +981,22 @@ def make_env_cfg(
                 func=rewards.leg_action_rate_l2, weight=-0.01
             ),
             "wheel_action_rate": RewardTermCfg(
-                func=rewards.wheel_action_rate_l2, weight=-0.005
+                func=rewards.wheel_action_rate_l2, weight=-0.01
             ),
             "hip_default": RewardTermCfg(
-                func=rewards.hip_default_l1,
-                weight=-0.30,
+                func=rewards.hip_default_l2,
+                weight=-0.5,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
                         joint_names=tuple(f"{leg}_hip" for leg in WOLF_LEG_ORDER),
                         preserve_order=True,
                     ),
-                    "command_name": WOLF_COMMAND_NAME,
-                    "y_ref": 0.5,
-                    "yaw_ref": 1.0,
-                    "y_scale": 0.2,
-                    "yaw_scale": 0.35,
-                    "min_scale": 0.5,
-                },
-            ),
-            "all_position_default": RewardTermCfg(
-                func=rewards.all_position_default,
-                weight=-0.1,
-                params={
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
-                        preserve_order=True,
-                    ),
                 },
             ),
             "stand_still": RewardTermCfg(
                 func=rewards.stand_still,
-                weight=-0.4,
+                weight=-0.5,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1023,21 +1006,6 @@ def make_env_cfg(
                     "command_name": WOLF_COMMAND_NAME,
                     "command_threshold": 0.1,
                     "yaw_threshold": 0.1,
-                },
-            ),
-            "run_still": RewardTermCfg(
-                func=rewards.run_still_leg_l1,
-                weight=-0.2,
-                params={
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
-                        preserve_order=True,
-                    ),
-                    "command_name": WOLF_COMMAND_NAME,
-                    "x_threshold": 0.1,
-                    "y_threshold": 0.1,
-                    "yaw_threshold": 0.15,
                 },
             ),
             "dof_pos_limits": RewardTermCfg(
@@ -1053,7 +1021,7 @@ def make_env_cfg(
             ),
             "leg_torques": RewardTermCfg(
                 func=envs_mdp.joint_torques_l2,
-                weight=-0.0001,
+                weight=-0.0005,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1071,115 +1039,6 @@ def make_env_cfg(
                         actuator_names=WOLF_WHEEL_JOINT_NAMES,
                         preserve_order=True,
                     )
-                },
-            ),
-            "wheel_lateral_slip_l2": RewardTermCfg(
-                func=rewards.wheel_lateral_slip_l2,
-                weight=-0.0,
-                params={
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
-                    ),
-                    "contact_force_threshold": 1.0,
-                },
-            ),
-            "soft_landing": RewardTermCfg(
-                func=rewards.soft_landing,
-                weight=-1e-5,
-                params={"sensor_name": WOLF_WHEEL_FORCE_CONTACT_SENSOR},
-            ),
-            "stand_joint_vel": RewardTermCfg(
-                func=rewards.stand_still_joint_velocity_l2,
-                weight=-0.05,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        joint_names=WOLF_LEGS_FL_FIRST_JOINT_NAMES,
-                        preserve_order=True,
-                    ),
-                    "command_threshold": 0.1,
-                    "yaw_threshold": 0.1,
-                },
-            ),
-            "stand_wheel_air": RewardTermCfg(
-                func=rewards.stand_still_wheel_air,
-                weight=-1.0,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "command_threshold": 0.1,
-                    "yaw_threshold": 0.1,
-                },
-            ),
-            # Restore the original M20-derived turn rewards; tune only the height threshold.
-            "turn_hip_default": RewardTermCfg(
-                func=rewards.turn_hip_default,
-                weight=-3.0,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot",
-                        joint_names=tuple(f"{leg}_hip" for leg in WOLF_LEG_ORDER),
-                        preserve_order=True,
-                    ),
-                    "lin_vel_threshold": 0.1,
-                    "ang_vel_threshold": 0.1,
-                },
-            ),
-            "feet_air_time_ang_z": RewardTermCfg(
-                func=rewards.FeetAirTimeYaw,
-                weight=50.0,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
-                    ),
-                    "threshold": 0.2,
-                    "cmd_threshold": 0.1,
-                    "foot_height_threshold": 0.0,
-                },
-            ),
-            "feet_slide_ang_z": RewardTermCfg(
-                func=rewards.feet_slide_ang_z_cmd,
-                weight=-2.0,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
-                    ),
-                    "lin_vel_threshold": 0.1,
-                    "ang_vel_threshold": 0.1,
-                },
-            ),
-            "rotation_gait_status": RewardTermCfg(
-                func=rewards.rotation_gait_status,
-                weight=2.0,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "asset_cfg": SceneEntityCfg(
-                        "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
-                    ),
-                    "target_height": 0.04,
-                    "lin_vel_threshold": 0.5,
-                    "ang_vel_threshold": 0.05,
-                },
-            ),
-            "rotation_gait_symmetry": RewardTermCfg(
-                func=rewards.RotationGaitSymmetry,
-                weight=15.0,
-                params={
-                    "command_name": WOLF_COMMAND_NAME,
-                    "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
-                    "target_duty": 0.5,
-                    "std": 0.2,
-                    "window_s": 5.0,
-                    "lin_vel_threshold": 0.5,
-                    "ang_vel_threshold": 0.05,
                 },
             ),
         },
@@ -1203,18 +1062,6 @@ def make_env_cfg(
         episode_length_s=int(1e9) if play else 20.0,
         scale_rewards_by_dt=True,
     )
-    if rough:
-        cfg.rewards["wheel_force_lift"] = RewardTermCfg(
-            func=rewards.wheel_force_lift,
-            weight=0.5,
-            params={
-                "sensor_name": WOLF_WHEEL_FORCE_CONTACT_SENSOR,
-                "min_horizontal_force": 15.0,
-                "asset_cfg": SceneEntityCfg(
-                    "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
-                ),
-            },
-        )
     if him_enabled:
         configure_him_observations(cfg)
         configure_him_terminal_targets(cfg)

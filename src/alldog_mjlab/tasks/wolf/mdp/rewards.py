@@ -103,14 +103,14 @@ def base_height_l2_flat(
     target_height: float,
     asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
 ) -> torch.Tensor:
-    """Absolute world-height error; retain the existing callable name."""
+    """Squared world-height error from the nominal base height."""
     asset: Entity = env.scene[asset_cfg.name]
     base_height = asset.data.root_link_pos_w[:, 2]
-    return torch.abs(base_height - target_height)
+    return torch.square(base_height - target_height)
 
 
 class base_height_l2_terrain(ManagerTermBase):
-    """Absolute height error using the mean clearance of the central 35 terrain rays."""
+    """Squared error of the mean clearance of the central 35 terrain rays."""
 
     def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRlEnv) -> None:
         super().__init__(env)
@@ -143,7 +143,7 @@ class base_height_l2_terrain(ManagerTermBase):
         del kwargs
         raw_scan = envs_mdp.height_scan(env, sensor_name=sensor_name)
         base_height = raw_scan[:, self._indices].mean(dim=1)
-        return torch.abs(base_height - target_height)
+        return torch.square(base_height - target_height)
 
 
 def all_position_default(
@@ -226,6 +226,25 @@ def wheel_action_rate_l2(env) -> torch.Tensor:
     prev_action = env.action_manager.prev_action
     diff = action[:, list(_WHEEL_CHANNELS)] - prev_action[:, list(_WHEEL_CHANNELS)]
     return torch.sum(torch.square(diff), dim=1)
+
+
+def orientation_l2(
+    env: ManagerBasedRlEnv, asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG
+) -> torch.Tensor:
+    asset: Entity = env.scene[asset_cfg.name]
+    return asset.data.projected_gravity_b[:, :2].square().sum(dim=1)
+
+
+def hip_default_l2(
+    env: ManagerBasedRlEnv,
+    asset_cfg: SceneEntityCfg,
+) -> torch.Tensor:
+    """Unconditional squared error of the four hip joints from their defaults."""
+    data = env.scene[asset_cfg.name].data
+    error = data.joint_pos[:, asset_cfg.joint_ids] - data.default_joint_pos[
+        :, asset_cfg.joint_ids
+    ]
+    return error.square().sum(dim=1)
 
 
 def orientation_l1(
