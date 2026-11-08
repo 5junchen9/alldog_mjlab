@@ -37,6 +37,8 @@ uv run train wolf-flat-him --env.scene.num-envs 4096 --agent.max-iterations 500 
 
 默认采样长度为 Black / Wolf 每环境均为 64 步；保存间隔 50 iterations。网络和算法参数集中在各机器人 `rl_cfg.py`。
 
+Wolf 速度指令对全部环境独立均匀采样，每 10 s 和 reset 时重采样，初始范围为 vx/vy∈[-1,1] m/s、yaw∈[-3.14,3.14] rad/s。采样后若 XY 范数≤0.2 m/s，则同时清零 vx/vy，保留 yaw；阈值由 `small_xy_threshold` 调整。没有站立/直行/横移/旋转比例分组或普通/高速分组；已有 vx 课程对所有环境使用同一范围。yaw 继续作为角速度直接采样。
+
 同算法续训，显式指定来源 run：
 
 ```bash

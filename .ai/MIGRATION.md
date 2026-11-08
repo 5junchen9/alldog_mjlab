@@ -145,9 +145,9 @@ Wolf 四任务的 train/play 均注册 `wheel_slip_contact`，按 FL → FR → 
 
 来源为 DeepRoboticsLab/rl_training `9c0e710421b165a444b2c73e5a9d65ee3fafa299` 的 M20 rough 配置、velocity/mdp/{commands,rewards,curriculums}.py 和 assets/deeprobotics.py；执行器语义核对其 README 指定的 Isaac Lab v2.3.2 `actuator_pd.py`。许可证保留在根目录 `THIRD_PARTY_NOTICES.md`。迁移使用当前安装的 MjLab 1.6.0 原生 CommandTerm、ContactSensor、ManagerTermBase 和 RewardManager，未改依赖源码。
 
-指令采样与传感器保持。以下转向奖励段记录此前 M20 对照版本的公式和权重；对应函数保留，当前 14 项基础奖励组不启用这些转向项：
+以下记录历史 M20 对照版本的采样、转向奖励公式和权重；转向奖励函数保留，当前 14 项基础奖励组不启用这些转向项。当前统一随机采样见“课程、DR、训练状态”。传感器保持：
 
-- `WolfVelocityCommand` 继承原生 UniformVelocityCommand，互斥特殊指令采样为 20% 站立、2% 纯横移、20% 纯前后、20% 纯 yaw、38% 混合。纯前后从最初沿用 M20 的 2% 提高到 20%，加强直行回中任务覆盖。特殊指令沿用初始化范围，不随 vx 课程扩展；原生 reset、GUI 和 command metrics 保留。Wolf 继续直接采样 body-frame yaw 速度，不引入官方 heading 目标和小 XY 指令清零。
+- 历史 WolfVelocityCommand 曾使用 20% 站立、2% 纯横移、20% 纯前后、20% 纯 yaw、38% 混合，特殊指令范围不随课程扩展。该分层逻辑现已移除，rel_pure_lateral_envs / rel_pure_longitudinal_envs / rel_pure_yaw_envs 配置字段已删除。
 - `wheel_slip_contact.track_air_time=True`，复用原生每 physics step 接触/腾空计时，四轮显式顺序仍为 FL/FR/RL/RR。
 - `turn_hip_default`：norm(cmd_xy)<0.1 且 abs(cmd_yaw)>0.1 时，惩罚四髋相对默认值的 L2 范数，权重 -3；叠加既有弱 hip_default。Thigh/calf 继续可在 yaw 下自由屈伸。官方 hip-x 在所有运动模式下回中，Wolf 将新增强约束限定于纯 yaw。
 - `feet_air_time_ang_z` 恢复原版：首次落地累加 `(last_air_time-0.2)*cleared_ground`，摆腿峰值相对上次接触高度 >0 即认为离地，权重 +50；只要求 abs(cmd_yaw)>0.1，允许混合指令，不封顶腾空时长、不附加 8 cm 高度成本、不乘实际 yaw progress。partial reset 清对应环境的高度状态。
@@ -212,13 +212,17 @@ action_scale: [0.125, 0.25, 0.25,  5,
 
 ## 课程、DR、训练状态
 
-Command 使用 body-frame velocity sampler，每 10 s 重采样。Black standing fraction=0.1、forward fraction=0.2；Wolf 使用上节互斥特殊采样。两者 world fraction=0、heading 关闭。
+Command 使用 body-frame velocity sampler，每 10 s 重采样，reset 时也重采样。Black standing fraction=0.1、forward fraction=0.2 保持。Wolf 所有环境均使用 MjLab 1.6.0 UniformVelocityCommand 的独立均匀采样，不分站立/直行/横移/旋转，也不按普通/高速环境分组；standing/forward/world fractions 均为 0，heading 关闭，yaw 直接采样角速度。
 
-Black 初始 vx/vy=[-1,1]，yaw=[-π,π]，课程 vx 上限 ±2。Wolf 初始 vx/vy=[-1,1]，yaw=[-3.14,3.14]，课程 vx 上限 ±3。性能课程只扩展 vx，每次双边扩展 0.1；其余 sampler 设置保持固定。
+Black 初始 vx/vy=[-1,1]，yaw=[-π,π]，课程 vx 上限 ±2。Wolf 初始 vx/vy=[-1,1]，yaw=[-3.14,3.14]，课程 vx 上限 ±3。性能课程只扩展 vx，每次双边扩展 0.1；Wolf 扩展后的同一范围作用于全部环境，其他轴范围保持。
+
+Wolf 在原生 _resample_command 后增加 small_xy_threshold=0.2 m/s：采样出的 norm(cmd_xy)<=0.2 时同时清零 vx/vy，保留 yaw。阈值为 0 可关闭该清零。初始 [-1,1]×[-1,1] 范围下理论清零比例为 π×0.2²/4≈3.14%，其余约 96.86% 样本保留横向指令；XY 清零样本仍可要求纯旋转，不是固定比例站立。该处理仅作用于随机重采样，原生 Viser 手动指令可设置小速度和全零。相对 Go2W，采用相同的小 XY 清零方式，取消其前 20% 高速组，保留 Wolf 的直接 yaw 速度指令。
 
 课程根据已完成 episode 的实际 tracking 累计值评分：Black 读取 tracking_lin_vel，Wolf 读取 tracking_lin_vel_x，仅用 X 跟踪表现推进 vx 课程；Y 项独立参与奖励。累计值除以 episode policy 步数、dt 和实际 reward weight。Buffer min=256、EMA alpha=0.2、low/high 阈值=0.7/0.6、连续通过 2 次再扩范围。
 
 课程 state version：Black=2，Wolf=4；state 保存评分 reward key、robot、stage、range、EMA、streak 和 buffer。同版本 full 恢复要求评分项一致；不兼容统计版本只允许 range/none，auto full 自动降为 range。跨机器人 state 拒绝恢复。
+
+统一采样验证工具 tests/check_wolf_uniform_commands.py（本地、不提交），CPU PASS / CUDA PASS。八任务 train/play/RL 快照只允许 Wolf 指令配置变化，RL 工作区参数保持。每种设备各采样 200000 次，与同 seed 的原生 UniformVelocityCommand 比较：除小 XY 清零外逐位一致，yaw 不变；验证五个环境 ID 区间同分布、课程扩展覆盖所有区间、阈值边界/关闭、partial reset 与计时隔离、原生 GUI 小指令和全零。Wolf flat/rough PPO/HIM 及 Black flat HIM 各 2 env×8 steps、一次 PPO/HIM update；reward/dt、终止目标、checkpoint 重载、JIT 等价和 partial reset 通过。命令：MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_uniform_commands.py --device cpu --smoke；CUDA 使用 --device cuda。尚未重新训练验证步态，下一步按新分布训练并分非零指令评估实际 vy/yaw。
 
 默认 DR profile 的开关、范围和调用频率保留在机器人 mdp/events.py。Black 默认开启摩擦、payload、COM、PD gain、encoder bias 和周期推力。Wolf 默认开启质量、惯性、摩擦、PD/motor strength、轮半径、控制延迟、推力、外力和初始腿姿态缩放；hip motor strength、calf backlash、wheel target bias/scale 和 wheel observation bias 默认关闭。
 
