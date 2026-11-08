@@ -958,7 +958,7 @@ def make_env_cfg(
             ),
             "tracking_ang_vel": RewardTermCfg(
                 func=rewards.track_angular_velocity_z,
-                weight=3.0,
+                weight=1.0,
                 params={"command_name": WOLF_COMMAND_NAME, "sigma": 0.25},
             ),
             "lin_vel_z": RewardTermCfg(
@@ -1014,7 +1014,7 @@ def make_env_cfg(
             ),
             "stand_still": RewardTermCfg(
                 func=rewards.stand_still,
-                weight=-2.0,
+                weight=-0.4,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1028,7 +1028,7 @@ def make_env_cfg(
             ),
             "run_still": RewardTermCfg(
                 func=rewards.run_still_leg_l1,
-                weight=-1.0,
+                weight=-0.2,
                 params={
                     "asset_cfg": SceneEntityCfg(
                         "robot",
@@ -1114,7 +1114,7 @@ def make_env_cfg(
                     "yaw_threshold": 0.1,
                 },
             ),
-            # M20-derived gait regularizers are subordinate to yaw tracking.
+            # Restore the original M20-derived turn rewards; tune only the height threshold.
             "turn_hip_default": RewardTermCfg(
                 func=rewards.turn_hip_default,
                 weight=-3.0,
@@ -1131,7 +1131,7 @@ def make_env_cfg(
             ),
             "feet_air_time_ang_z": RewardTermCfg(
                 func=rewards.FeetAirTimeYaw,
-                weight=5.0,
+                weight=50.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
@@ -1140,16 +1140,12 @@ def make_env_cfg(
                     ),
                     "threshold": 0.2,
                     "cmd_threshold": 0.1,
-                    "foot_height_threshold": 0.02,
-                    "lin_vel_threshold": 0.1,
-                    "max_air_time": 0.4,
-                    "max_foot_height": 0.08,
-                    "height_penalty_scale": 100.0,
+                    "foot_height_threshold": 0.0,
                 },
             ),
             "feet_slide_ang_z": RewardTermCfg(
                 func=rewards.feet_slide_ang_z_cmd,
-                weight=-0.2,
+                weight=-2.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
@@ -1162,7 +1158,7 @@ def make_env_cfg(
             ),
             "rotation_gait_status": RewardTermCfg(
                 func=rewards.rotation_gait_status,
-                weight=0.5,
+                weight=2.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
@@ -1170,22 +1166,21 @@ def make_env_cfg(
                         "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
                     ),
                     "target_height": 0.04,
-                    "height_std": 0.02,
-                    "lin_vel_threshold": 0.1,
-                    "ang_vel_threshold": 0.1,
+                    "lin_vel_threshold": 0.5,
+                    "ang_vel_threshold": 0.05,
                 },
             ),
             "rotation_gait_symmetry": RewardTermCfg(
                 func=rewards.RotationGaitSymmetry,
-                weight=0.5,
+                weight=15.0,
                 params={
                     "command_name": WOLF_COMMAND_NAME,
                     "sensor_name": WOLF_WHEEL_SLIP_CONTACT_SENSOR,
                     "target_duty": 0.5,
                     "std": 0.2,
                     "window_s": 5.0,
-                    "lin_vel_threshold": 0.1,
-                    "ang_vel_threshold": 0.1,
+                    "lin_vel_threshold": 0.5,
+                    "ang_vel_threshold": 0.05,
                 },
             ),
         },
@@ -1224,6 +1219,7 @@ def make_env_cfg(
     if him_enabled:
         configure_him_observations(cfg)
         configure_him_terminal_targets(cfg)
+    cfg.viewer.reward_bar_max_terms = len(cfg.rewards)
     return cfg
 
 

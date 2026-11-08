@@ -35,7 +35,7 @@ uv run train wolf-flat-him --env.scene.num-envs 4096 --agent.max-iterations 500 
 
 新训练分别写入 `logs/rsl_rl/black_locomotion/`、`logs/rsl_rl/wolf_locomotion/`。Black 的 run_name 为 `flat / rough / flat_him / rough_him`；Wolf 为 `wolf_flat / wolf_rough / wolf_flat_him / wolf_rough_him`。默认训练不自动加载 checkpoint，也不搜索其他 experiment。
 
-默认采样长度为 Black 每环境 64 步、Wolf 每环境 100 步；保存间隔 50 iterations。网络和算法参数集中在各机器人 `rl_cfg.py`。
+默认采样长度为 Black / Wolf 每环境均为 64 步；保存间隔 50 iterations。网络和算法参数集中在各机器人 `rl_cfg.py`。
 
 同算法续训，显式指定来源 run：
 
@@ -106,7 +106,7 @@ Black actor 布局为 command、base angular velocity、projected gravity、join
 
 Wolf actor 布局为 command、IMU angular velocity、IMU projected gravity、12 腿关节位置误差、12 腿关节速度、4 个带方向符号的轮速、16 维 previous action；critic 在相同无噪声布局后追加 3 维 base linear velocity。
 
-Wolf 自定义奖励统一在 `tasks/wolf/mdp/rewards.py` 中实现，公共接触数据、轮接触点运动学和指令判定在 `mdp/common.py`。`soft_landing` 在首次落地时惩罚四轮接触合力范数之和，权重 `-1e-5`，所有指令下生效；使用公共 netforce 传感器，rough 的 `wheel_force_lift` 也读取该传感器。纵向滑移仅保留诊断 metric，已从奖励配置中移除。
+Wolf 自定义奖励统一在 `tasks/wolf/mdp/rewards.py` 中实现，公共接触数据、轮接触点运动学和指令判定在 `mdp/common.py`。`soft_landing` 在首次落地时惩罚四轮接触合力范数之和，权重 `-1e-5`，所有指令下生效；使用公共 netforce 传感器，rough 的 `wheel_force_lift` 也读取该传感器。纵向滑移仅保留诊断 metric，已从奖励配置中移除。既有转向奖励恢复为 2026-11-07 训练基线，rotation_gait_status 的最低高度门槛改为 4 cm；新增奖励及 HIM encoder 机制保持。此门槛不限制最大抬腿高度。Viser 奖励条显示全部已注册项。
 
 默认 actor running normalization 关闭，critic normalization 开启。部署必须匹配 observation scales、默认姿态、动作尺度和 previous-action 更新时机。部署侧的 clipping、关节保护和 torque safety 与策略动作语义分别配置。
 

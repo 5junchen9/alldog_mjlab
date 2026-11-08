@@ -29,7 +29,6 @@ from .common import (
     standing_command,
     wheel_contact_sensor,
     wheel_slip_velocities,
-    yaw_tracking_progress,
 )
 
 if TYPE_CHECKING:
@@ -393,7 +392,7 @@ def feet_slide_ang_z_cmd(
 
 
 class FeetAirTimeYaw(ManagerTermBase):
-    """Bound yaw air time/clearance and penalize excessive swing height."""
+    """Reward yaw air time on landing, with clearance since the last contact."""
 
     def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRlEnv):
         super().__init__(env)
@@ -418,10 +417,6 @@ class FeetAirTimeYaw(ManagerTermBase):
         threshold: float,
         cmd_threshold: float,
         foot_height_threshold: float,
-        lin_vel_threshold: float,
-        max_air_time: float,
-        max_foot_height: float,
-        height_penalty_scale: float,
     ) -> torch.Tensor:
         sensor = wheel_contact_sensor(env, sensor_name)
         data = env.scene[asset_cfg.name].data
@@ -431,29 +426,17 @@ class FeetAirTimeYaw(ManagerTermBase):
         maximum = torch.where(initialized, self._max_air_height, height)
         in_contact = sensor.data.current_contact_time > 0.0
         maximum = torch.where(in_contact, maximum, torch.maximum(maximum, height))
-        peak_clearance = maximum - ground
-        cleared = (peak_clearance > foot_height_threshold) & (
-            peak_clearance <= max_foot_height
-        )
-        landing_bonus = (
-            (sensor.data.last_air_time.clamp(max=max_air_time) - threshold)
+        cleared = maximum - ground > foot_height_threshold
+        reward = (
+            (sensor.data.last_air_time - threshold)
             * sensor.compute_first_contact(env.step_dt)
             * cleared
-        ).sum(dim=1)
-        # A continuous cost is needed: merely removing the landing bonus above
-        # a ceiling would still leave high stepping unpenalized during flight.
-        clearance = height - ground
-        height_cost = (
-            (clearance - max_foot_height).clamp_min(0).square() * ~in_contact
         ).sum(dim=1)
         self._ground_height.copy_(torch.where(in_contact, height, ground))
         self._max_air_height.copy_(torch.where(in_contact, height, maximum))
         self._initialized.fill_(True)
-        gate = pure_yaw_command(env, command_name, lin_vel_threshold, cmd_threshold)
-        return gate * (
-            landing_bonus * yaw_tracking_progress(env, command_name)
-            - height_penalty_scale * height_cost
-        )
+        command = env.command_manager.get_command(command_name)
+        return reward * (command[:, 2].abs() > cmd_threshold)
 
 
 def rotation_gait_status(
@@ -462,36 +445,27 @@ def rotation_gait_status(
     sensor_name: str,
     asset_cfg: SceneEntityCfg,
     target_height: float,
-    height_std: float,
     lin_vel_threshold: float,
     ang_vel_threshold: float,
 ) -> torch.Tensor:
-    """Favor a modest diagonal swing height while actually turning."""
+    """One diagonal supports while the other is higher, as in upstream M20."""
     sensor = wheel_contact_sensor(env, sensor_name)
     contact = sensor.data.current_contact_time > 0.0
     z = env.scene[asset_cfg.name].data.body_link_pos_w[:, asset_cfg.body_ids, 2]
     difference = z[:, _DIAGONAL_B].mean(1) - z[:, _DIAGONAL_A].mean(1)
-    a_supports = contact[:, _DIAGONAL_A].all(1) & ~contact[:, _DIAGONAL_B].any(1)
-    b_supports = contact[:, _DIAGONAL_B].all(1) & ~contact[:, _DIAGONAL_A].any(1)
-    a_score = a_supports * torch.exp(
-        -((difference - target_height) / height_std).square()
-    )
-    b_score = b_supports * torch.exp(
-        -((-difference - target_height) / height_std).square()
-    )
-    return (
-        torch.maximum(a_score, b_score)
-        * pure_yaw_command(env, command_name, lin_vel_threshold, ang_vel_threshold)
-        * yaw_tracking_progress(env, command_name)
+    a_supports = contact[:, _DIAGONAL_A].all(1) & (difference > target_height)
+    b_supports = contact[:, _DIAGONAL_B].all(1) & (-difference > target_height)
+    return (a_supports | b_supports).float() * pure_yaw_command(
+        env, command_name, lin_vel_threshold, ang_vel_threshold
     )
 
 
 class RotationGaitSymmetry(ManagerTermBase):
-    """Match each diagonal's contact duty while tracking a turn command.
+    """Match each diagonal's contact duty; this is not a policy symmetry loss.
 
     A running sum avoids reducing the full window each step. Counts and warmup
-    are per environment, including after partial resets and leaving turn mode.
-    Empty buffer slots do not count as airborne samples.
+    are per environment, including after partial resets. Empty buffer slots do
+    not count as airborne samples.
     """
 
     def __init__(self, cfg: RewardTermCfg, env: ManagerBasedRlEnv):
@@ -520,17 +494,17 @@ class RotationGaitSymmetry(ManagerTermBase):
         ang_vel_threshold: float,
     ) -> torch.Tensor:
         sensor = wheel_contact_sensor(env, sensor_name)
-        gate = pure_yaw_command(env, command_name, lin_vel_threshold, ang_vel_threshold)
-        self.reset(~gate)
         contact = (sensor.data.current_contact_time > 0.0).float()
         groups = torch.stack(
             (contact[:, _DIAGONAL_A].mean(1), contact[:, _DIAGONAL_B].mean(1)), dim=1
-        ) * gate[:, None]
+        )
         self._sum.add_(groups - self._buffer[:, :, self._index])
         self._buffer[:, :, self._index] = groups
         self._index = (self._index + 1) % self._window
-        self._count.add_(gate).clamp_(max=self._window)
-        duty = self._sum / self._count[:, None].clamp_min(1)
+        self._count.add_(1).clamp_(max=self._window)
+        duty = self._sum / self._count[:, None]
         reward = torch.exp(-((duty - target_duty) / std).square().sum(dim=1))
         reward *= self._count / self._window
-        return reward * gate * yaw_tracking_progress(env, command_name)
+        return reward * pure_yaw_command(
+            env, command_name, lin_vel_threshold, ang_vel_threshold
+        )
