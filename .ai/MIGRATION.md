@@ -63,6 +63,14 @@ Actor raw 均匀噪声幅值：angular velocity ±0.3、gravity ±0.05、joint p
 
 TorchScript exporter 使用 runner 原生能力，重新加载并检查数值等价。模型 shape、joint mapping、scales、默认姿态及动作语义必须与部署后端显式匹配。ONNX metadata 对多 action term 的支持有限，不修改训练接口来适配它。
 
+## HIM play 速度面板
+
+项目 `play` 入口在调用 MjLab 1.6.0 CLI 期间使用本地 `HimViserPlayViewer`，退出后恢复原生 viewer 类。HIM 策略的 `Controls → Info` 在状态信息下显示两行三列读数：上方 `HIM velocity`、下方 `Actual velocity`，列为 vx/vy/vz。两行均为当前选中环境的 body-frame m/s，保留正负号和三位小数。
+
+估计值通过仅在 play 中注册的 encoder forward hook 获取，不额外推理，并读取 `estimator_velocity/base_lin_vel` 的实际 scale 还原单位。真实速度读取 `robot.data.root_link_lin_vel_b`，与原生 base_lin_vel 观测同源。显示沿用原生状态刷新节奏；暂停时保留最近估计，GUI reset、环境 reset 和 checkpoint reload 后清空估计，下一次推理恢复。切换 policy 时重绑 hook，关闭时移除。PPO、zero/random agent 和 native viewer 的显示保持；训练、checkpoint、观测与动作接口保持。
+
+来源为本地锁定的 MjLab 1.6.0 viewer、play、base_lin_vel 及项目 HIMPolicy。Local verification：`tests/check_him_viser_velocity.py`（不提交）；CPU PASS / CUDA PASS，覆盖 Wolf 53-D/Black 45-D history frame、估计 scale、真实值、环境切换、两类 reset、policy 替换、hook 清理、逐位相同的动作/参数，以及 CLI viewer 注入与恢复。最新 Wolf `2026-11-07_19-46-26_wolf_flat_him/model_1000.pt` 在两种设备上均完成原生 2 env ×8 steps、Viser setup、两行读数及 GUI partial/all reset 检查。浏览器连接工具报错，排版尚未完成目视验收。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_him_viser_velocity.py --device cpu --smoke`，CUDA 使用同命令的 `--device cuda`。下一步在实际 Viser play 中对照估计与真实速度，检查转向时的估计偏差。
+
 ## 奖励基线
 
 所有奖励返回 `[num_envs]` raw Tensor，由 RewardManager 统一乘 weight 和 policy dt，不进行总奖励非负裁剪。Tracking sigma=0.25。Black linear tracking 使用 body-frame XY 平方误差和；Wolf 的 X/Y 分别使用对应轴的速度平方误差，两个独立指数奖励的权重均为 1.0。Angular tracking 使用 yaw 平方误差。

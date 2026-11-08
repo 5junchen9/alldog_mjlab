@@ -65,6 +65,8 @@ def main() -> None:
     import mjlab.scripts.play as play_script
     from mjlab.scripts._cli import maybe_print_top_level_help
 
+    from .viser_viewer import HimViserPlayViewer
+
     maybe_print_top_level_help("play")
     tasks = set(list_tasks())
 
@@ -94,4 +96,10 @@ def main() -> None:
                     "[INFO] 未找到可自动注入的最新 checkpoint，"
                     "由 mjlab 处理原逻辑（未提供 --checkpoint-file 将报错）。"
                 )
-    play_script.main()
+    # MjLab 1.6.0 has no viewer factory argument; scope the project UI to this call.
+    stock_viser_viewer = play_script.ViserPlayViewer
+    play_script.ViserPlayViewer = HimViserPlayViewer
+    try:
+        play_script.main()
+    finally:
+        play_script.ViserPlayViewer = stock_viser_viewer

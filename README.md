@@ -72,14 +72,16 @@ uv run train wolf-flat-him --agent.warm-start True --agent.checkpoint-path '/abs
 ## Play 与导出
 
 ```bash
-uv run play wolf-flat-him --checkpoint-file '/absolute/path/model_500.pt' --env.scene.num-envs 1
-uv run play wolf-flat-him --env.scene.num-envs 1
+uv run play wolf-flat-him --checkpoint-file '/absolute/path/model_500.pt' --num-envs 1
+uv run play wolf-flat-him --viewer viser --num-envs 1
 
 uv run export --task-id wolf-flat-him --load-run '<run目录名>' --checkpoint 'model_500.pt'
 uv run export --task-id wolf-flat-him --checkpoint '/absolute/path/model_500.pt'
 ```
 
 省略 play 的 checkpoint 时，只在当前任务 experiment 中搜索匹配 stage 的最新模型。Play 关闭 actor noise、课程和 DR events，保留 reset。Wolf actuator delay 仍按当前默认 profile 配置。
+
+HIM 策略使用 Viser play 时，`Controls → Info` 自动显示 `HIM velocity`，下方为 `Actual velocity`。两行均按 `vx / vy / vz` 排列，单位为机身坐标系下的 m/s，显示当前选中环境的速度。估计值取自本次策略推理的 encoder 输出，按 estimator target scale 换算；真实值取自仿真器。重置或切换 checkpoint 后，估计值先显示 `—`，下一次推理后更新。
 
 导出默认生成 `<run>/exported/policy.pt`，可用 `--output-dir` 指定其他目录。导出使用 runner 的 TorchScript 能力，重新加载结果并检查数值等价。训练 checkpoint `model_*.pt` 与可独立推理的 TorchScript `policy.pt` 是两种文件。
 
