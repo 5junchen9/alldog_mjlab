@@ -7,6 +7,7 @@ from itertools import chain
 import torch
 import torch.nn as nn
 from rsl_rl.algorithms import PPO
+from rsl_rl.extensions import resolve_symmetry_config
 from rsl_rl.models import MLPModel
 from rsl_rl.utils import resolve_callable, resolve_obs_groups, resolve_optimizer
 
@@ -37,9 +38,12 @@ class HIMPPO(PPO):
         **kwargs,
     ) -> None:
         optimizer_name = kwargs.get("optimizer", "adam")
-        if kwargs.get("rnd_cfg") is not None or kwargs.get("symmetry_cfg") is not None:
+        if kwargs.get("rnd_cfg") is not None:
+            raise NotImplementedError("HIMPPO does not support RND.")
+        symmetry_cfg = kwargs.get("symmetry_cfg")
+        if symmetry_cfg and symmetry_cfg.get("use_data_augmentation", False):
             raise NotImplementedError(
-                "HIMPPO does not support RND / symmetry extensions."
+                "HIMPPO supports mirror loss only, not symmetry data augmentation."
             )
         super().__init__(actor, critic, storage, device=device, **kwargs)
         self.spec = spec
@@ -98,10 +102,12 @@ class HIMPPO(PPO):
         mean_entropy = 0.0
         mean_estimation_loss = 0.0
         mean_swap_loss = 0.0
+        mean_symmetry_loss = 0.0 if self.symmetry else None
         generator = self.storage.mini_batch_generator(
             self.num_mini_batches, self.num_learning_epochs
         )
         for batch in generator:
+            original_batch_size = batch.observations.batch_size[0]
             self.actor(
                 batch.observations,
                 masks=batch.masks,
@@ -155,6 +161,15 @@ class HIMPPO(PPO):
                 + self.value_loss_coef * value_loss
                 - self.entropy_coef * entropy.mean()
             )
+            if self.symmetry:
+                # Native compute_loss appends mirrored observations in place.
+                # All PPO and estimator batch computations above retain B samples.
+                symmetry_loss = self.symmetry.compute_loss(
+                    self.actor, batch, original_batch_size
+                )
+                if self.symmetry.use_mirror_loss:
+                    loss = loss + self.symmetry.mirror_loss_coeff * symmetry_loss
+                mean_symmetry_loss += symmetry_loss.item()
             self.optimizer.zero_grad()
             self._zero_estimator_grads()
             loss.backward()
@@ -171,13 +186,16 @@ class HIMPPO(PPO):
         mean_estimation_loss /= num_updates
         mean_swap_loss /= num_updates
         self.storage.clear()
-        return {
+        losses = {
             "value": mean_value_loss,
             "surrogate": mean_surrogate_loss,
             "entropy": mean_entropy,
             "estimation": mean_estimation_loss,
             "swap": mean_swap_loss,
         }
+        if mean_symmetry_loss is not None:
+            losses["symmetry"] = mean_symmetry_loss / num_updates
+        return losses
 
     @staticmethod
     def construct_algorithm(obs, env, cfg: dict, device: str) -> "HIMPPO":
@@ -186,7 +204,7 @@ class HIMPPO(PPO):
         critic_class = resolve_callable(cfg["critic"].pop("class_name"))
         cfg["algorithm"].pop("share_cnn_encoders", None)
         cfg["algorithm"].setdefault("rnd_cfg", None)
-        cfg["algorithm"].setdefault("symmetry_cfg", None)
+        cfg["algorithm"] = resolve_symmetry_config(cfg["algorithm"], env)
         him_cfg = cfg["him"]
         interface = HIMInterface(
             history_group=him_cfg["history_group"],

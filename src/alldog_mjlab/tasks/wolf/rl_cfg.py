@@ -34,8 +34,19 @@ class WolfHimModelCfg(RslRlModelCfg):
 
 
 @dataclass
+class WolfMirrorLossCfg:
+    use_data_augmentation: bool = False
+    use_mirror_loss: bool = True
+    mirror_loss_coeff: float = 0.1
+    data_augmentation_func: str = (
+        "alldog_mjlab.tasks.wolf.mdp.symmetry:left_right_mirror"
+    )
+
+
+@dataclass
 class WolfHimAlgorithmCfg(RslRlPpoAlgorithmCfg):
     class_name: str = "alldog_mjlab.algorithms.him.ppo:HIMPPO"
+    symmetry_cfg: WolfMirrorLossCfg | None = field(default_factory=WolfMirrorLossCfg)
 
 
 @dataclass

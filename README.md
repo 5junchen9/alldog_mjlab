@@ -39,6 +39,8 @@ uv run train wolf-flat-him --env.scene.num-envs 4096 --agent.max-iterations 500 
 
 Wolf 速度指令对全部环境独立均匀采样，每 10 s 和 reset 时重采样，初始范围为 vx/vy∈[-1,1] m/s、yaw∈[-3.14,3.14] rad/s。采样后若 XY 范数≤0.2 m/s，则同时清零 vx/vy，保留 yaw；阈值由 `small_xy_threshold` 调整。没有站立/直行/横移/旋转比例分组或普通/高速分组；已有 vx 课程对所有环境使用同一范围。yaw 继续作为角速度直接采样。
 
+Wolf 的 flat/rough HIM 默认启用 RSL-RL 原生左右镜像损失，系数为 `0.1`，不启用 PPO 数据增强。TensorBoard 的 `Loss/symmetry` 记录未乘系数的镜像 MSE。可用 `--agent.algorithm.symmetry-cfg.mirror-loss-coeff 0.1` 调整系数；`--agent.algorithm.symmetry-cfg.use-mirror-loss False` 关闭该项优化并保留日志。配置位于 `tasks/wolf/rl_cfg.py`。该损失只用于训练，观测、动作、HIM encoder 和导出接口保持。
+
 同算法续训，显式指定来源 run：
 
 ```bash

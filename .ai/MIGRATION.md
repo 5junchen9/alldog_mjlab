@@ -67,6 +67,30 @@ HIM source encoder 的内部输入已按用户要求排除全部六帧的 comman
 
 TorchScript exporter 使用 runner 原生能力，重新加载并检查数值等价。模型 shape、joint mapping、scales、默认姿态及动作语义必须与部署后端显式匹配。ONNX metadata 对多 action term 的支持有限，不修改训练接口来适配它。
 
+## Wolf HIM mirror loss
+
+Wolf flat/rough HIM 默认启用本地锁定 RSL-RL 5.4.2 的 `rsl_rl.extensions.Symmetry`：`use_mirror_loss=True`、`mirror_loss_coeff=0.1`、`use_data_augmentation=False`。配置集中在 `tasks/wolf/rl_cfg.py:WolfMirrorLossCfg`，镜像 callback 位于 `tasks/wolf/mdp/symmetry.py:left_right_mirror`。Wolf PPO 和 Black 的配置保持。
+
+通用 HIMPPO 通过原生 `resolve_symmetry_config` 注入 env。在每个 minibatch 的估计器更新和 PPO 损失计算之后，直接调用原生 `Symmetry.compute_loss`，将 `0.1 × mirror MSE` 加到优化目标。原生实现使用策略动作均值，镜像目标分支 stop-gradient；`Loss/symmetry` 记录未乘系数的 MSE，不乘 policy dt，不加入环境 reward。`use_mirror_loss=False` 时只记录该损失；`symmetry_cfg=None` 完全关闭。HIMPPO 继续拒绝 RND 和 symmetry data augmentation；原生 compute_loss 对观测的临时拼接不用于 PPO surrogate/value 或 estimator 训练。
+
+左右镜像交换 FL↔FR、RL↔RR，保持每条历史帧的时间位置：
+
+| 内容 | 镜像规则 |
+|---|---|
+| command `(vx,vy,yaw)` | `(vx,-vy,-yaw)` |
+| angular velocity `(wx,wy,wz)` | `(-wx,wy,-wz)` |
+| projected gravity、真实/估计目标线速度 | `(x,-y,z)` |
+| 三腿关节位置误差、速度及 raw action | 左右交换，三个通道均取负 |
+| signed wheel velocity、wheel raw action | 左右交换，符号保持 |
+
+镜像覆盖 actor 六帧、critic 和 estimator_velocity 观测。轮关节物理坐标镜像需反号，但当前观测与 wheel action 已用 forward sign 统一方向，所以只交换。HIM source encoder 仍在输入边界删除六帧 command，维度保持 300；mirror loss 不更新 estimator/target/prototypes，也不约束 latent 的分量符号。Estimator 继续使用原始 minibatch 和既有 successor/terminal targets。网络参数形状和 optimizer 参数组不变，当前 300-D encoder checkpoint 可严格加载；TorchScript 仍为 `[B,318]→[B,16]`。
+
+来源：本地锁定的 RSL-RL 5.4.2 `extensions/symmetry.py` 与 `algorithms/ppo.py`、MjLab 1.6.0 config/runner、Wolf MJCF 和现有观测/动作 contract。相对此前 HIM 更新，仅增加可选的原生 mirror loss；未修改依赖源码、奖励、PD、物理配置或部署接口。现有工作区训练调参保持，不纳入此单元提交。
+
+Local verification：`tests/check_wolf_mirror_loss.py`（不提交），CPU PASS / CUDA PASS。八任务 train/play/RL 配置快照只允许两个 Wolf HIM 的 symmetry 配置变化，用户并行调整的三项奖励权重和 rollout 长度单独排除；验证全部符号、镜像两次逐位恢复、六帧时间顺序、输入不变性、原生 MSE 与零损失等变策略、仅 actor 接收 mirror 梯度。100 个随机 MuJoCo 姿态/速度的轮位置镜像最大误差 <6e-6 m。Wolf flat/rough HIM 与关闭 mirror 的 Wolf/Black flat HIM 各 2 env×8 steps、2 epochs×2 minibatches，检查原始 B 个 estimator targets、终止覆盖、参数更新、严格重载、JIT 等价和 partial reset；关闭配置时 loss/actor/critic 更新与修改前逐位一致。另完成 flat HIM 一次原生 runner.learn，确认 TensorBoard `Loss/symmetry` 已写入。`2026-11-08_21-19-36_wolf_flat_him/model_300.pt` 严格加载通过。命令：`MPLCONFIGDIR=/tmp/wolf-m20-mpl WARP_CACHE_PATH=/tmp/wolf-m20-warp .venv/bin/python tests/check_wolf_mirror_loss.py --device cpu --smoke`，CUDA 使用 `--device cuda`。
+
+尚未训练验证步态改善。下一单元：以相同奖励和指令设置对照 mirror loss 开/关，评估左右横移、正负 yaw、身体侧倾和离地占比。
+
 ## HIM play 速度面板
 
 项目 `play` 入口在调用 MjLab 1.6.0 CLI 期间使用本地 `HimViserPlayViewer`，退出后恢复原生 viewer 类。HIM 策略的 `Controls → Info` 在状态信息下显示两行三列读数：上方 `HIM velocity`、下方 `Actual velocity`，列为 vx/vy/vz。两行均为当前选中环境的 body-frame m/s，保留正负号和三位小数。
