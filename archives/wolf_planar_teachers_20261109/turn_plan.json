@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "status": "training_configuration_only_not_a_certified_teacher",
+  "profile": "turn",
+  "base_task": "wolf-flat-him",
+  "source": {
+    "root": "${V2_ROOT}",
+    "release": "wolf_methods_20261109_v2",
+    "manifest_sha256": "11e2df1a3bf5784c81e99149459ccbffed4ea695ae39b05525908e89405e45c7",
+    "files_verified": 608
+  },
+  "command": {
+    "name": "twist",
+    "linear_frame": "body",
+    "angular_axis": "body_z",
+    "units": [
+      "m/s",
+      "m/s",
+      "rad/s"
+    ],
+    "native_cfg": {
+      "resampling_time_range": [
+        10.0,
+        10.0
+      ],
+      "debug_vis": true,
+      "entity_name": "robot",
+      "heading_command": false,
+      "heading_control_stiffness": 0.5,
+      "rel_standing_envs": 0.1,
+      "rel_heading_envs": 0.0,
+      "rel_world_envs": 0.0,
+      "rel_forward_envs": 0.0,
+      "init_velocity_prob": 0.0,
+      "ranges": {
+        "lin_vel_x": [
+          0.0,
+          0.0
+        ],
+        "lin_vel_y": [
+          0.0,
+          0.0
+        ],
+        "ang_vel_z": [
+          -1.5,
+          1.5
+        ],
+        "heading": null
+      },
+      "viz": {
+        "z_offset": 0.2,
+        "scale": 0.5
+      },
+      "small_xy_threshold": 0.2,
+      "profile": "turn"
+    },
+    "sampling": "native_uniform_deadband_then_pure_domain_projection_and_standing",
+    "projection": "vy=0; straight:yaw=0; turn:vx=0; world/heading/forward flags cleared",
+    "endpoint_note": "Native <=0 RNG branch can add rare zero yaw; projection prevents off-domain commands",
+    "deadband_rule": "sampled_xy_norm <= small_xy_threshold => xy=(0,0)",
+    "nonzero_vx_support": [],
+    "nonzero_vx_inner_endpoints_excluded": false,
+    "explicit_standing_probability": 0.1,
+    "expected_total_zero_command_probability": 0.1,
+    "expected_negative_command_probability": 0.45,
+    "expected_positive_command_probability": 0.45,
+    "probability_note": "Continuous-uniform expectation; finite RNG may differ"
+  },
+  "curriculum": {
+    "removed": [
+      "command"
+    ],
+    "remaining": [],
+    "restore": "none",
+    "command_domain_frozen": true
+  },
+  "policy_contract": {
+    "single_frame_dim": 53,
+    "history_frames": 6,
+    "history_dim": 318,
+    "history_tensor_shape": [
+      6,
+      53
+    ],
+    "critic_dim": 56,
+    "action_dim": 16,
+    "action_terms": [
+      "joint_pos_fl",
+      "wheel_vel_fl",
+      "joint_pos_fr",
+      "wheel_vel_fr",
+      "joint_pos_rl",
+      "wheel_vel_rl",
+      "joint_pos_rr",
+      "wheel_vel_rr"
+    ],
+    "policy_joint_order": [
+      "FL_hip",
+      "FL_thigh",
+      "FL_calf",
+      "FL_foot",
+      "FR_hip",
+      "FR_thigh",
+      "FR_calf",
+      "FR_foot",
+      "RL_hip",
+      "RL_thigh",
+      "RL_calf",
+      "RL_foot",
+      "RR_hip",
+      "RR_thigh",
+      "RR_calf",
+      "RR_foot"
+    ],
+    "observation_terms": [
+      "command",
+      "base_ang_vel",
+      "projected_gravity",
+      "leg_joint_pos",
+      "leg_joint_vel",
+      "wheel_vel",
+      "actions"
+    ],
+    "control": {
+      "policy_joint_order": [
+        "FL_hip",
+        "FL_thigh",
+        "FL_calf",
+        "FL_foot",
+        "FR_hip",
+        "FR_thigh",
+        "FR_calf",
+        "FR_foot",
+        "RL_hip",
+        "RL_thigh",
+        "RL_calf",
+        "RL_foot",
+        "RR_hip",
+        "RR_thigh",
+        "RR_calf",
+        "RR_foot"
+      ],
+      "leg_kp": 80.0,
+      "leg_kd": 2.0,
+      "wheel_kp": 0.0,
+      "wheel_kd": 0.6,
+      "hip_action_scale": 0.125,
+      "other_leg_action_scale": 0.25,
+      "wheel_action_scale": 5.0,
+      "wheel_signs": {
+        "FL": 1,
+        "FR": -1,
+        "RL": 1,
+        "RR": -1
+      },
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "soft_joint_pos_limit_factor": 0.9,
+      "default_root_z": 0.4432,
+      "default_angles": {
+        "FL": [
+          0,
+          0.82,
+          1.43,
+          0
+        ],
+        "FR": [
+          0,
+          -0.82,
+          -1.43,
+          0
+        ],
+        "RL": [
+          0,
+          -0.82,
+          -1.43,
+          0
+        ],
+        "RR": [
+          0,
+          0.82,
+          1.43,
+          0
+        ]
+      }
+    },
+    "him": {
+      "history_group": "actor",
+      "velocity_group": "estimator_velocity",
+      "command_dim": 3,
+      "latent_dim": 16,
+      "terminal_ids_key": "him_terminal_env_ids",
+      "terminal_frame_key": "him_terminal_actor_frame",
+      "terminal_velocity_key": "him_terminal_estimator_velocity"
+    },
+    "actor": {
+      "hidden_dims": [
+        512,
+        256,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": false,
+      "cnn_cfg": null,
+      "distribution_cfg": {
+        "class_name": "GaussianDistribution",
+        "init_std": 1.0,
+        "std_type": "scalar"
+      },
+      "rnn_type": null,
+      "rnn_hidden_dim": 256,
+      "rnn_num_layers": 1,
+      "class_name": "mjlab.rl.wolf_him.policy:HIMPolicy",
+      "encoder_hidden_dims": [
+        128,
+        64
+      ],
+      "target_encoder_hidden_dims": [
+        128,
+        64
+      ],
+      "num_prototypes": 32,
+      "temperature": 3.0,
+      "estimator_learning_rate": 0.001,
+      "estimator_max_grad_norm": 10.0,
+      "estimator_optimizer": "adam"
+    },
+    "critic": {
+      "hidden_dims": [
+        512,
+        256,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "cnn_cfg": null,
+      "distribution_cfg": null,
+      "rnn_type": null,
+      "rnn_hidden_dim": 256,
+      "rnn_num_layers": 1,
+      "class_name": "MLPModel"
+    },
+    "physics_rewards_randomization": "unchanged_from_pinned_base_task",
+    "terrain": "plane",
+    "camera": null
+  },
+  "training": {
+    "num_envs": 4096,
+    "rollout": 100,
+    "epochs": 5,
+    "minibatches": 8,
+    "transitions_per_iteration": 409600,
+    "transitions_per_minibatch": 51200,
+    "requested_learning_iterations": 2000,
+    "requested_transitions": 819200000,
+    "seed": 401,
+    "save_interval": 50,
+    "experiment_name": "wolf_planar_turn_him_20261109",
+    "run_name": "wolf_planar_turn_him",
+    "log_root": "${PLANAR_ROOT}/logs",
+    "logger": "tensorboard",
+    "upload_model": false,
+    "gpu_ids": [
+      0
+    ],
+    "pytorch_alloc_conf": "expandable_segments:True",
+    "admitted_allocator": "expandable_segments:True",
+    "algorithm": {
+      "num_learning_epochs": 5,
+      "num_mini_batches": 8,
+      "learning_rate": 0.0001,
+      "schedule": "adaptive",
+      "gamma": 0.99,
+      "lam": 0.95,
+      "entropy_coef": 0.006,
+      "desired_kl": 0.01,
+      "max_grad_norm": 1.0,
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "clip_param": 0.2,
+      "normalize_advantage_per_mini_batch": false,
+      "optimizer": "adam",
+      "share_cnn_encoders": false,
+      "class_name": "mjlab.rl.wolf_him.ppo:HIMPPO",
+      "symmetry_cfg": {
+        "use_data_augmentation": false,
+        "use_mirror_loss": true,
+        "mirror_loss_coeff": 0.5,
+        "data_augmentation_func": "mjlab.tasks.velocity.config.wolf.mdp.symmetry:left_right_mirror"
+      }
+    },
+    "exact_checkpoint": null,
+    "checkpoint_source_sha256": null,
+    "resume_mechanism": "native_checkpoint_path_full_HIM_state_not_warm_start",
+    "checkpoint_domain_provenance": "not_checked_by_this_launcher",
+    "cross_profile_resume": "not_guaranteed_semantically_equivalent",
+    "train_requested": false
+  },
+  "limitations": [
+    "Specialists only: no combined vx+yaw or lateral command coverage",
+    "No terrain/camera teacher claim and no deployment certification",
+    "Configuration/sample checks are not a convergence or GPU admission test",
+    "Pair the printed domain with exact checkpoint path/hash when making a sidecar"
+  ]
+}

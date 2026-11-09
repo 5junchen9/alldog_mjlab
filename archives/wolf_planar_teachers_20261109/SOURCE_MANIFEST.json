@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "archive": "wolf_planar_teachers_20261109",
+  "base_archive_commit": "262854ca4c87ea39ceafe1b1fb4350d2a5c1fe20",
+  "runtime_release": "wolf_methods_20261109_v2",
+  "runtime_manifest_sha256": "11e2df1a3bf5784c81e99149459ccbffed4ea695ae39b05525908e89405e45c7",
+  "files": [
+    {
+      "path": "planar_teachers.py",
+      "source_sha256": "4154e5dc8394a9c58ce321cf9893c58050c7384cd5c39de2f3863a60ec66f439",
+      "public_sha256": "4154e5dc8394a9c58ce321cf9893c58050c7384cd5c39de2f3863a60ec66f439",
+      "publication_text_adjusted": false,
+      "bytes": 13491
+    },
+    {
+      "path": "README.md",
+      "source_sha256": "a9eda262fa46ed6deeb9970aa60a89079182984068bdf9f8a04e91b4c664ab49",
+      "public_sha256": "4d6bf9ef42be13a69ea6f64237d248f450df65ba604c48154b8d033ab0f12d4a",
+      "publication_text_adjusted": true,
+      "bytes": 7319
+    },
+    {
+      "path": "VALIDATION.md",
+      "source_sha256": "997ec9f61a5a4815cb36b5ea52dbb6d8a25296f20c13b38632b0e35d40c9e043",
+      "public_sha256": "0888c59726bb3e6411d662ef30ce5d40c8ff56de404961838a81fa83fa2425df",
+      "publication_text_adjusted": true,
+      "bytes": 4635
+    },
+    {
+      "path": "straight_plan.json",
+      "source_sha256": "3b83d8bc79e003d472b29413e5ba0d77a3a90e11c32a38b422074cb8159f6f89",
+      "public_sha256": "1713a5c22c940b9500f7cde657d83ea0bbff31d46087bb954cec4e5c3796356f",
+      "publication_text_adjusted": true,
+      "bytes": 7829
+    },
+    {
+      "path": "turn_plan.json",
+      "source_sha256": "fd3293dc137c967515a6aa3f7dd97631720d140d2856652aa6e173c2477a8134",
+      "public_sha256": "1a37b1f091590a416f6506b5ebd7ea04cda8a6ac1ea16b3a8807887bedd548ae",
+      "publication_text_adjusted": true,
+      "bytes": 7723
+    }
+  ],
+  "local_only_files": [
+    {
+      "path": "tests/test_planar_teachers.py",
+      "sha256": "a66ccfa87c67ebba89f48750be41e6e7240438a8b95f288ea9338c07f0fbf24f"
+    },
+    {
+      "path": "run_jc.sh",
+      "sha256": "3b3d84a7c060523aa192571e39d867e5228b3d586fea64aa57659bb2361bef9c"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "484c7283d6af9711f13ed028bc15ca8bb7a899c1bcfa15c9370bc943e16c417b"
+    }
+  ],
+  "validation": {
+    "focused_tests_passed": 26,
+    "ruff": "passed",
+    "ty": "passed",
+    "pyright_errors": 0,
+    "pyright_warnings": 0,
+    "plan_previews": [
+      "straight",
+      "turn"
+    ],
+    "source_files_verified_per_preview": 608,
+    "training_dispatch_in_tests": "mocked",
+    "validation_scope": "Configuration and native CPU command sampling only; not a trained-teacher or convergence result"
+  },
+  "excluded": [
+    "tests source",
+    "machine-specific wrappers and project configuration",
+    "training logs",
+    "model checkpoints",
+    "STL meshes",
+    "private absolute paths"
+  ]
+}
