@@ -1,0 +1,230 @@
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -103,6 +103,8 @@
+ constraint-dependencies = [
+   "GitPython>=3.1.59",
+   "lxml>=6.1.0",
++  # TensorBoard 2.20 still imports pkg_resources.
++  "setuptools<81",
+ ]
+ required-environments = [
+   "sys_platform == 'darwin' and platform_machine == 'arm64'",
+--- a/uv.lock
++++ b/uv.lock
+@@ -3,12 +3,12 @@
+ requires-python = ">=3.10, <3.15"
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+     "python_full_version < '3.11' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+-    "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+     "python_full_version < '3.11' and sys_platform == 'darwin'",
+ ]
+ required-markers = [
+@@ -25,6 +25,7 @@
+ constraints = [
+     { name = "gitpython", specifier = ">=3.1.59" },
+     { name = "lxml", specifier = ">=6.1.0" },
++    { name = "setuptools", specifier = "<81" },
+ ]
+ 
+ [[package]]
+@@ -511,10 +512,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ dependencies = [
+@@ -1372,10 +1373,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ dependencies = [
+@@ -2407,10 +2408,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
+@@ -2582,8 +2583,8 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+ ]
+ sdist = { url = "https://files.pythonhosted.org/packages/22/fd/89965aa4ac08c74998539fcbf24fa3540f3e15237fbeb6bcf9c908f4aade/numpy-2.5.1.tar.gz", hash = "sha256:a48a113e6afea91f5608793bafa7ef2ad481fefbda87ec5069f483de61cb9fa3", size = 20755553, upload-time = "2026-07-04T17:08:00.933Z" }
+@@ -4175,10 +4176,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ dependencies = [
+@@ -4251,11 +4252,11 @@
+ 
+ [[package]]
+ name = "setuptools"
+-version = "83.0.0"
+-source = { registry = "https://pypi.org/simple" }
+-sdist = { url = "https://files.pythonhosted.org/packages/34/26/f5d29e25ffdb535afef2d35cdb55b325298f96debd670da4c325e08d70f4/setuptools-83.0.0.tar.gz", hash = "sha256:025bccbbf0fa05b6192bc64ae1e7b16e001fd6d6d4d5de03c97b1c1ade523bef", size = 1154254, upload-time = "2026-07-04T15:31:22.699Z" }
+-wheels = [
+-    { url = "https://files.pythonhosted.org/packages/5d/40/e1e72872c6354b306daef1703549e8e83b4d43cfea356311bf722a043752/setuptools-83.0.0-py3-none-any.whl", hash = "sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3", size = 1008090, upload-time = "2026-07-04T15:31:20.885Z" },
++version = "80.10.2"
++source = { registry = "https://pypi.org/simple" }
++sdist = { url = "https://files.pythonhosted.org/packages/76/95/faf61eb8363f26aa7e1d762267a8d602a1b26d4f3a1e758e92cb3cb8b054/setuptools-80.10.2.tar.gz", hash = "sha256:8b0e9d10c784bf7d262c4e5ec5d4ec94127ce206e8738f29a437945fbc219b70", size = 1200343, upload-time = "2026-01-25T22:38:17.252Z" }
++wheels = [
++    { url = "https://files.pythonhosted.org/packages/94/b8/f1f62a5e3c0ad2ff1d189590bfa4c46b4f3b6e49cef6f26c6ee4e575394d/setuptools-80.10.2-py3-none-any.whl", hash = "sha256:95b30ddfb717250edb492926c92b5221f7ef3fbcc2b07579bcd4a27da21d0173", size = 1064234, upload-time = "2026-01-25T22:38:15.216Z" },
+ ]
+ 
+ [[package]]
+@@ -4401,10 +4402,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ dependencies = [
+@@ -4458,10 +4459,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ dependencies = [
+@@ -4499,10 +4500,10 @@
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
+     "python_full_version >= '3.13' and sys_platform != 'darwin'",
++    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform != 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform == 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform == 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
+ ]
+ dependencies = [
+@@ -4858,14 +4859,14 @@
+ version = "2.14.0"
+ source = { registry = "https://pypi.org/simple" }
+ resolution-markers = [
++    "python_full_version >= '3.13' and sys_platform != 'darwin'",
+     "python_full_version >= '3.13' and sys_platform == 'darwin'",
++    "python_full_version == '3.12.*' and sys_platform != 'darwin'",
+     "python_full_version == '3.12.*' and sys_platform == 'darwin'",
++    "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+     "python_full_version == '3.11.*' and sys_platform == 'darwin'",
++    "python_full_version < '3.11' and sys_platform != 'darwin'",
+     "python_full_version < '3.11' and sys_platform == 'darwin'",
+-    "python_full_version >= '3.13' and sys_platform != 'darwin'",
+-    "python_full_version == '3.12.*' and sys_platform != 'darwin'",
+-    "python_full_version == '3.11.*' and sys_platform != 'darwin'",
+-    "python_full_version < '3.11' and sys_platform != 'darwin'",
+ ]
+ dependencies = [
+     { name = "cuda-bindings", version = "13.4.3", source = { registry = "https://pypi.org/simple" }, marker = "(sys_platform == 'linux' and extra != 'extra-5-mjlab-cpu' and extra != 'extra-5-mjlab-cu126' and extra != 'extra-5-mjlab-cu130') or (extra == 'extra-5-mjlab-cpu' and extra == 'extra-5-mjlab-cu126') or (extra == 'extra-5-mjlab-cpu' and extra == 'extra-5-mjlab-cu130') or (extra == 'extra-5-mjlab-cu126' and extra == 'extra-5-mjlab-cu130')" },
+--- a/docs/source/changelog.rst
++++ b/docs/source/changelog.rst
+@@ -7,6 +7,29 @@
+ 
+ Added
+ ^^^^^
++
++- Added separate Wolf soft/hard support-terrain methods tasks with dual reward
++  critics, global/local terrain representation teaching, one-step proprioceptive
++  prediction, and constrained-domain LIPM/CLF-like shaping. These are method
++  adaptations, not full paper reproductions.
++
++- Added matched Wolf method ablation profiles, including an explicit HIM-off
++  mechanism control, a description-only default launcher, and a 2000-iteration
++  minimum for formal methods training.
++
++- Added opt-in Wolf distillation with MSE/Huber, performance-gated DAgger,
++  bounded replay, frozen same-state teacher labels, and fail-closed
++  control-contract qualification.
++
++- Added an opt-in Wolf URDF-speed software guard experiment with frozen-policy
++  comparisons; original task profiles remain unchanged and no state clipping
++  is applied.
++
++- Added source-pinned Wolf design/control contract checks, preserving the
++  current upstream parameters and documenting older policy incompatibilities.
++
++- Added Wolf flat/rough PPO and HIM task configurations from alldog_mjlab;
++  original Wolf STL assets and URDF are included locally.
+ 
+ - Added a ``cu126`` extra (``uv sync --extra cu126``) that installs torch built for
+   CUDA 12.6, for machines whose NVIDIA driver is older than 580. It does not include
+@@ -26,6 +49,12 @@
+ 
+ Fixed
+ ^^^^^
++
++- Reject nonfinite Wolf HIM estimator and policy losses or gradients before
++  their optimizer step instead of writing invalid parameters.
++
++- Restored Wolf HIM critic observation-normalization updates for RSL-RL 5.5
++  and reject unsupported training options before initialization.
+ 
+ - The viewer now resets recurrent policy hidden state for environments that terminate
+   or time out. Previously it only reset the policy when the user pressed the reset
+--- a/src/mjlab/tasks/velocity/mdp/velocity_command.py
++++ b/src/mjlab/tasks/velocity/mdp/velocity_command.py
+@@ -196,6 +196,8 @@
+       enabled = server.gui.add_checkbox("Enable", initial_value=False)
+ 
+       for label, max_val in axes:
++        # Keep zero command ranges usable in the manual viewer controls.
++        max_val = max(abs(max_val), 0.1)
+         max_input = server.gui.add_slider(
+           f"Max {label}",
+           initial_value=max_val,

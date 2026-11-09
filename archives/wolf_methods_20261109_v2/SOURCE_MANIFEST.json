@@ -1,0 +1,466 @@
+{
+  "schema_version": 1,
+  "release": "wolf_methods_20261109_v2",
+  "role": "archived standalone mjlab overlay, not alldog_mjlab plugin production",
+  "fork_repository": "5junchen9/alldog_mjlab",
+  "fork_parent_commit": "2913d3f449f8eb5b0505156c460ad2f61e4c49fd",
+  "framework_repository": "mujocolab/mjlab",
+  "framework_commit": "45b1e263ec1c3c0d2c3211b458135d80bb7030df",
+  "control_source_commit": "2913d3f449f8eb5b0505156c460ad2f61e4c49fd",
+  "asset_source_commit": "886015aef351f1e5517cd50e47628be35ec315ed",
+  "archive_files": [
+    {
+      "path": "docs/wolf/DESIGN_ALIGNMENT.md",
+      "bytes": 5402,
+      "sha256": "2369bb3b0485465b7eb2d65463d4feb5441e4f24a1d32b895e1685434bbf752a",
+      "validated_source_sha256": "319f691603603b9415f367d5dd7b4f54d59a1d3489be0d03e7aad0775d054fa1",
+      "documentation_paths_sanitized": true
+    },
+    {
+      "path": "docs/wolf/DISTILLATION.md",
+      "bytes": 14865,
+      "sha256": "9bc302a663253c2ba7cbae42f536d0d02441e3283376e7994bd8b3def21b5e50",
+      "validated_source_sha256": "24762fb9a731435302ddf14b98a0a8f820cec81d78398d7d69478d0e7bafa53d",
+      "documentation_paths_sanitized": true
+    },
+    {
+      "path": "docs/wolf/METHODS_INTEGRATION_20261109.md",
+      "bytes": 5943,
+      "sha256": "6ff27c3f2fd724add366eb54574351f71feb053324e34a8901aab4b9b5641f16",
+      "validated_source_sha256": "fe45f33c4a656979d5cfcb85048c14d4470e1b38e97b0fa88e84b9cc42f13b3b",
+      "documentation_paths_sanitized": true
+    },
+    {
+      "path": "docs/wolf/PERCEPTION_PREDICTION_ADAPTERS_20261109.md",
+      "bytes": 7029,
+      "sha256": "80feb42a06338d96ebac9d2b30541cfaa5af7f7785a2ae823003e1deeaf9b6c6",
+      "validated_source_sha256": "80feb42a06338d96ebac9d2b30541cfaa5af7f7785a2ae823003e1deeaf9b6c6",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "docs/wolf/README.md",
+      "bytes": 3618,
+      "sha256": "b5f073edd9f956b92fa67bf965b4e8a2f8adff4a70c45d8071f7f8c0711b6c81",
+      "validated_source_sha256": "0f4a8c27f54e595bdd013c828ca03f2dab036d1d82bbf360f105b48c8c1c16f1",
+      "documentation_paths_sanitized": true
+    },
+    {
+      "path": "docs/wolf/SPEED_GUARD_EXPERIMENT.md",
+      "bytes": 6406,
+      "sha256": "d43b68cf26e1fcd265262585e5d2788c45218aea4f31be62a481cd240b79f29c",
+      "validated_source_sha256": "5a40d9c75116c8ae9b82b98bfa2deb63a0019396eab73a2f5c0cacd655570ba5",
+      "documentation_paths_sanitized": true
+    },
+    {
+      "path": "docs/wolf/TERRAIN_TEACHER_ADAPTATION_20261109.md",
+      "bytes": 7765,
+      "sha256": "49eb3aa35d574732d8acdc65162966783568161b777ddad1d710c7382d18bf54",
+      "validated_source_sha256": "49eb3aa35d574732d8acdc65162966783568161b777ddad1d710c7382d18bf54",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "docs/wolf/THIRD_PARTY_NOTICES.md",
+      "bytes": 13773,
+      "sha256": "85bfb24fb62227d08c0b9682e83c8feda78dcf58548101c4307bf3c783df945d",
+      "validated_source_sha256": "85bfb24fb62227d08c0b9682e83c8feda78dcf58548101c4307bf3c783df945d",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "docs/wolf/TRAINING_SYSTEM_AUDIT_20261109.md",
+      "bytes": 15377,
+      "sha256": "464b509d2ec6f546ccefe7b7401d8fa771f80c32bdcad2e83a91e2fa0169000a",
+      "validated_source_sha256": "0860c0ca1e0f1894a3939f225c5bed40b3924def7fda12bfa912ead9bb53bf26",
+      "documentation_paths_sanitized": true
+    },
+    {
+      "path": "docs/wolf/UPSTREAM_STATE.md",
+      "bytes": 41472,
+      "sha256": "90c903aa4404396a025b3fbe85606b2c1ff68998df2e1f33a7e90a49b93f2355",
+      "validated_source_sha256": "90c903aa4404396a025b3fbe85606b2c1ff68998df2e1f33a7e90a49b93f2355",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "docs/wolf/source_contract.json",
+      "bytes": 12630,
+      "sha256": "83ca25943524ade76267feb0c40b067abdb38f27287777eefdd398bc518795fe",
+      "validated_source_sha256": "83ca25943524ade76267feb0c40b067abdb38f27287777eefdd398bc518795fe",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "scripts/check_wolf_methods.py",
+      "bytes": 4351,
+      "sha256": "0252a44a1733d3f89b41b0bb7cf5bdc2c2acb864c1c67609821922c88f8c28ab",
+      "validated_source_sha256": "0252a44a1733d3f89b41b0bb7cf5bdc2c2acb864c1c67609821922c88f8c28ab",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "scripts/check_wolf_release.py",
+      "bytes": 6795,
+      "sha256": "3c39316cc6652fb35e906e5de99e9e95876e0cc6e5b2a97f02f3d9449b9d3b68",
+      "validated_source_sha256": "3c39316cc6652fb35e906e5de99e9e95876e0cc6e5b2a97f02f3d9449b9d3b68",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "scripts/train_wolf_methods.py",
+      "bytes": 3078,
+      "sha256": "379b02b55a67e795380ca26e3dd91ab8e2fb9ed68f62244a84186a5d5c20180e",
+      "validated_source_sha256": "379b02b55a67e795380ca26e3dd91ab8e2fb9ed68f62244a84186a5d5c20180e",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/wolf/__init__.py",
+      "bytes": 86,
+      "sha256": "c1b6b021104cc8dca241a4465c5219f276b19f86910ff6672da3045be3715e6a",
+      "validated_source_sha256": "c1b6b021104cc8dca241a4465c5219f276b19f86910ff6672da3045be3715e6a",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/wolf/speed_guard.py",
+      "bytes": 3141,
+      "sha256": "c012662dd601a86377aa4c49579eb66745038c2b00706cafb517c72155d3e66a",
+      "validated_source_sha256": "c012662dd601a86377aa4c49579eb66745038c2b00706cafb517c72155d3e66a",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/wolf/urdf/wolf_description.urdf",
+      "bytes": 19112,
+      "sha256": "7fba83027167d5642aeb42883a6556412f832d9052355e7f4d14c184e83ddb87",
+      "validated_source_sha256": "7fba83027167d5642aeb42883a6556412f832d9052355e7f4d14c184e83ddb87",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/wolf/wolf_constants.py",
+      "bytes": 4727,
+      "sha256": "2199686c27cf047ca1c294b45206c1692b06f2577dd0c4fd337e74c8c92088d7",
+      "validated_source_sha256": "2199686c27cf047ca1c294b45206c1692b06f2577dd0c4fd337e74c8c92088d7",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/wolf/xmls/wolf.xml",
+      "bytes": 19029,
+      "sha256": "2e30e5422b1503c286d77d1a31b6f88fb79a3b5ab7654e71a9b6c8c886043d7e",
+      "validated_source_sha256": "2e30e5422b1503c286d77d1a31b6f88fb79a3b5ab7654e71a9b6c8c886043d7e",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_distillation/__init__.py",
+      "bytes": 301,
+      "sha256": "ef7e35474a6b116208f1ad40fd2ae3d6e541e88fd84cf030790238a6e704375b",
+      "validated_source_sha256": "ef7e35474a6b116208f1ad40fd2ae3d6e541e88fd84cf030790238a6e704375b",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_distillation/bridge.py",
+      "bytes": 9780,
+      "sha256": "66ca9de71a0305c3d7f2492dcef6dec78a5de1bd4f27c92ce7767196cc1fc766",
+      "validated_source_sha256": "66ca9de71a0305c3d7f2492dcef6dec78a5de1bd4f27c92ce7767196cc1fc766",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_distillation/contracts.py",
+      "bytes": 9210,
+      "sha256": "80c35da10fee91825db302b31bc4cd71f72445b433e216029e7305f9ecf33077",
+      "validated_source_sha256": "80c35da10fee91825db302b31bc4cd71f72445b433e216029e7305f9ecf33077",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_distillation/core.py",
+      "bytes": 12492,
+      "sha256": "f63ca226fa5cbf0869c8a8c66de1d5c928f86bac28648efab608a2e94d8fe998",
+      "validated_source_sha256": "f63ca226fa5cbf0869c8a8c66de1d5c928f86bac28648efab608a2e94d8fe998",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_distillation/run.py",
+      "bytes": 13779,
+      "sha256": "224659d95584de0a97e29ae798b3c738d2dd305750854db918a568db5fa883d6",
+      "validated_source_sha256": "224659d95584de0a97e29ae798b3c738d2dd305750854db918a568db5fa883d6",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/__init__.py",
+      "bytes": 735,
+      "sha256": "c9770092913cba6101ad68b6ead2a8ac2ea6df19796d57656409057bae2da9ba",
+      "validated_source_sha256": "c9770092913cba6101ad68b6ead2a8ac2ea6df19796d57656409057bae2da9ba",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/dual_critic.py",
+      "bytes": 7784,
+      "sha256": "92fd5a1e722f7a547b77d7131741d5be3b3f755c08ecea77d31b257a8ff9dc2e",
+      "validated_source_sha256": "92fd5a1e722f7a547b77d7131741d5be3b3f755c08ecea77d31b257a8ff9dc2e",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/estimator.py",
+      "bytes": 4725,
+      "sha256": "b431a827de2a655f615443ed3437817d1bd65a6cf2d28c76fdbf7d289a3ff79b",
+      "validated_source_sha256": "b431a827de2a655f615443ed3437817d1bd65a6cf2d28c76fdbf7d289a3ff79b",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/methods_ppo.py",
+      "bytes": 6687,
+      "sha256": "cf66398ec358a7df0e98ddfe1f9ce4e888450df36c87925968d4f1816f60a7f3",
+      "validated_source_sha256": "cf66398ec358a7df0e98ddfe1f9ce4e888450df36c87925968d4f1816f60a7f3",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/methods_targets.py",
+      "bytes": 1539,
+      "sha256": "f302262eb5f6d11a139485906d9b970cf4193d9347eec4353b80d9865d6cf453",
+      "validated_source_sha256": "f302262eb5f6d11a139485906d9b970cf4193d9347eec4353b80d9865d6cf453",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/perception_models.py",
+      "bytes": 11540,
+      "sha256": "8236f4ac34dcc22a4646d3159b2d65f8cebbc6fa05d7821c054abc1fb246ad41",
+      "validated_source_sha256": "8236f4ac34dcc22a4646d3159b2d65f8cebbc6fa05d7821c054abc1fb246ad41",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/policy.py",
+      "bytes": 6651,
+      "sha256": "d220ec078a73c77991a34a53f7210b7ba0920a13922eeca2a98120e1a84949ec",
+      "validated_source_sha256": "d220ec078a73c77991a34a53f7210b7ba0920a13922eeca2a98120e1a84949ec",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/ppo.py",
+      "bytes": 12854,
+      "sha256": "dff11a22a00fff356f2964f39cc1283b92c586827ee1952e7dc8294789b66c65",
+      "validated_source_sha256": "dff11a22a00fff356f2964f39cc1283b92c586827ee1952e7dc8294789b66c65",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/spec.py",
+      "bytes": 2719,
+      "sha256": "4c8188623a7981f3940ac08c52c5610b5313b6ac07455fb851dc344fc112ac26",
+      "validated_source_sha256": "4c8188623a7981f3940ac08c52c5610b5313b6ac07455fb851dc344fc112ac26",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/storage.py",
+      "bytes": 3795,
+      "sha256": "d5784e248feac75adcaef08da32fc492686b5a96ff4b955c5ff7a6077af7fe3e",
+      "validated_source_sha256": "d5784e248feac75adcaef08da32fc492686b5a96ff4b955c5ff7a6077af7fe3e",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/warm_start.py",
+      "bytes": 4993,
+      "sha256": "8feb4bf30846622ff2db7e713b13a82ee561c0a08de8c92890279b6c951a50ad",
+      "validated_source_sha256": "8feb4bf30846622ff2db7e713b13a82ee561c0a08de8c92890279b6c951a50ad",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/__init__.py",
+      "bytes": 1376,
+      "sha256": "0e26d8d4ccbce6125bf1c6df749bc47948a8cb02c3ec01e28dcca5d322225d0c",
+      "validated_source_sha256": "0e26d8d4ccbce6125bf1c6df749bc47948a8cb02c3ec01e28dcca5d322225d0c",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/env_cfg.py",
+      "bytes": 32155,
+      "sha256": "c22080efc1a8c861e6b2887f9bba0b84f145e383a8c8939f5cdac3f12eb61784",
+      "validated_source_sha256": "c22080efc1a8c861e6b2887f9bba0b84f145e383a8c8939f5cdac3f12eb61784",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/__init__.py",
+      "bytes": 33,
+      "sha256": "80118e4c96524e699e2673857add270c6e87a5e67d23ae9175cc85efcd7a4367",
+      "validated_source_sha256": "80118e4c96524e699e2673857add270c6e87a5e67d23ae9175cc85efcd7a4367",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/commands.py",
+      "bytes": 1192,
+      "sha256": "9e12c87aec54bd1ad2291485f65762e0acef1c68a536ad38b7774a4c6c099089",
+      "validated_source_sha256": "9e12c87aec54bd1ad2291485f65762e0acef1c68a536ad38b7774a4c6c099089",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/common.py",
+      "bytes": 4195,
+      "sha256": "6bb0f9c5b14fa5574b3016a55d467af0db796af418bd88e1d1a085323bc8cd3b",
+      "validated_source_sha256": "6bb0f9c5b14fa5574b3016a55d467af0db796af418bd88e1d1a085323bc8cd3b",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/curriculums.py",
+      "bytes": 11909,
+      "sha256": "51a83246b6aef7ba7a1b3e443f0085852bebb60f80aee3b2bfb3140d2351642e",
+      "validated_source_sha256": "51a83246b6aef7ba7a1b3e443f0085852bebb60f80aee3b2bfb3140d2351642e",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/events.py",
+      "bytes": 21848,
+      "sha256": "986765fe88952d08c97eb4de4a751ab3d8fe456b17e7380e7a9adfdcf12825f5",
+      "validated_source_sha256": "986765fe88952d08c97eb4de4a751ab3d8fe456b17e7380e7a9adfdcf12825f5",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/him.py",
+      "bytes": 4761,
+      "sha256": "d8eba8c161c134a579cd53e1aa65a8a082e1fdf2fd2e7c4392994793890a33fa",
+      "validated_source_sha256": "d8eba8c161c134a579cd53e1aa65a8a082e1fdf2fd2e7c4392994793890a33fa",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/methods_observations.py",
+      "bytes": 3547,
+      "sha256": "ee17d4919cabfa36c2b8de8bfc8639638700c3d45fbad8bebf992dac84ad6955",
+      "validated_source_sha256": "ee17d4919cabfa36c2b8de8bfc8639638700c3d45fbad8bebf992dac84ad6955",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/methods_terrain.py",
+      "bytes": 12223,
+      "sha256": "63c7dc59bf226db7207d54fed9978ec9c03e22b9ca3de57179a23ea1b0a0312f",
+      "validated_source_sha256": "63c7dc59bf226db7207d54fed9978ec9c03e22b9ca3de57179a23ea1b0a0312f",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/metrics.py",
+      "bytes": 1103,
+      "sha256": "a39dfa5f92c4bf3ed569c6a1262f5472672e1ab5fa4bbd1eaa2bcfaabb6d09fc",
+      "validated_source_sha256": "a39dfa5f92c4bf3ed569c6a1262f5472672e1ab5fa4bbd1eaa2bcfaabb6d09fc",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/observations.py",
+      "bytes": 903,
+      "sha256": "c1b9830c933c43d20fa542e3a3f38202c2e0830a9145022bef4aaca21b6da3d5",
+      "validated_source_sha256": "c1b9830c933c43d20fa542e3a3f38202c2e0830a9145022bef4aaca21b6da3d5",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/rewards.py",
+      "bytes": 18683,
+      "sha256": "f1b16f0c8e4df7d5eb8411455a7054a1311ea5ce8c0cd7670fbc818f1b595781",
+      "validated_source_sha256": "f1b16f0c8e4df7d5eb8411455a7054a1311ea5ce8c0cd7670fbc818f1b595781",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/symmetry.py",
+      "bytes": 3342,
+      "sha256": "5fb9444bf361b810eff6c3248a04726e1fef7baeb8e2e259cd84b4ad90f0e74c",
+      "validated_source_sha256": "5fb9444bf361b810eff6c3248a04726e1fef7baeb8e2e259cd84b4ad90f0e74c",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/mdp/terrain.py",
+      "bytes": 5157,
+      "sha256": "5826682ad57130318c8c8bb34c438f0529ed892f51c9ec8e22c89f328b2c55ee",
+      "validated_source_sha256": "5826682ad57130318c8c8bb34c438f0529ed892f51c9ec8e22c89f328b2c55ee",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/methods_cfg.py",
+      "bytes": 4574,
+      "sha256": "27c578982dc90197489d67e2fa6b556ebab1105e7ae2111f34ed82b026ef929c",
+      "validated_source_sha256": "27c578982dc90197489d67e2fa6b556ebab1105e7ae2111f34ed82b026ef929c",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/methods_registry.py",
+      "bytes": 1455,
+      "sha256": "3c010981092745ec6c913ee2c0109293dcf622bf04493622e07b8323f9534850",
+      "validated_source_sha256": "3c010981092745ec6c913ee2c0109293dcf622bf04493622e07b8323f9534850",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/methods_runner.py",
+      "bytes": 1540,
+      "sha256": "c2ea65b2ce66ecb4f9874a9e43c71674ae3db8e375dfdd38f7b6e4a18e5c000f",
+      "validated_source_sha256": "c2ea65b2ce66ecb4f9874a9e43c71674ae3db8e375dfdd38f7b6e4a18e5c000f",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/methods_terrain_cfg.py",
+      "bytes": 3191,
+      "sha256": "bd9b45ecbec6bb7e05bf5529fd241cf07c31efc3cfdc224a190baa01156499ce",
+      "validated_source_sha256": "bd9b45ecbec6bb7e05bf5529fd241cf07c31efc3cfdc224a190baa01156499ce",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/rl_cfg.py",
+      "bytes": 3910,
+      "sha256": "a45637c49d43ebe3e7b80f3110f96d4d7207f16735942cbd914706076afbaa08",
+      "validated_source_sha256": "a45637c49d43ebe3e7b80f3110f96d4d7207f16735942cbd914706076afbaa08",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/runner.py",
+      "bytes": 10872,
+      "sha256": "2f50481f5b8e4c8cbe32f55ec9dda1b85cbea8e2b3099aee4b94a4f3b319892e",
+      "validated_source_sha256": "2f50481f5b8e4c8cbe32f55ec9dda1b85cbea8e2b3099aee4b94a4f3b319892e",
+      "documentation_paths_sanitized": false
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/wolf/speed_guard.py",
+      "bytes": 2724,
+      "sha256": "4b4b8d36a38afb02632af635cc6213952e8c70ed137176fbb7351de724ac8f92",
+      "validated_source_sha256": "4b4b8d36a38afb02632af635cc6213952e8c70ed137176fbb7351de724ac8f92",
+      "documentation_paths_sanitized": false
+    }
+  ],
+  "framework_patch_sha256": "36d10a2272ab27a23c466e9aa4c9aeca91d8a20bc6a1d824b82602d45286c93f",
+  "excluded": [
+    "tests source",
+    "STL meshes",
+    "model checkpoints",
+    "training data",
+    "machine launchers",
+    "virtual environments",
+    "private logs"
+  ],
+  "local_verification_files": [
+    {
+      "path": "tests/test_wolf_distillation.py",
+      "sha256": "27160cb48e1b13629ac1dbb018321daaf91977cf9b52c18c0406075b6034b46f"
+    },
+    {
+      "path": "tests/test_wolf_distillation_bridge.py",
+      "sha256": "6d0deea2428c594172cb8832a20f8d526a408a40199766f8c527f94e05c4b25a"
+    },
+    {
+      "path": "tests/test_wolf_him_numeric.py",
+      "sha256": "7cc6930be1d8f0d558e434cf0b638afeae30d83dad7e955d79c44320a2036ce7"
+    },
+    {
+      "path": "tests/test_wolf_him_ppo.py",
+      "sha256": "4df426d536fe345d32d3514a9d8af0fe13d60677fafb0ef6fa63d8992c5d2b61"
+    },
+    {
+      "path": "tests/test_wolf_integration.py",
+      "sha256": "0c91f702aa169308bfe32e10dbdbb5561c9cbe486821e244aab1f16b8be1b9fa"
+    },
+    {
+      "path": "tests/test_wolf_methods_integration.py",
+      "sha256": "3651f1addd0a8c58c4fd99e650a9158b0b038d6fb57f6051467f21a0fcc54dd1"
+    },
+    {
+      "path": "tests/test_wolf_perception_models.py",
+      "sha256": "97aa617385d298c9895f6ed5a1dd12c8879f62dbe3215f3345642ffc19e5dec6"
+    },
+    {
+      "path": "tests/test_wolf_source_contract.py",
+      "sha256": "3443a9ebdc680e0b625a29ff8f76844e98e89a6a91694be4c4757419e89a2308"
+    },
+    {
+      "path": "tests/test_wolf_speed_guard.py",
+      "sha256": "4eb80d68c7e59857987e8b544f338ea8ce709e84e3e5400cdb362c1d0ebb8e27"
+    },
+    {
+      "path": "tests/test_wolf_terrain_teacher.py",
+      "sha256": "8f58ae6b8af924bf5e7640c437e6a0d7e431b7344abfbc14a4649ce3940d5080"
+    }
+  ],
+  "validated_full_snapshot_sha256": "11e2df1a3bf5784c81e99149459ccbffed4ea695ae39b05525908e89405e45c7",
+  "validated_full_snapshot_file_count": 608
+}

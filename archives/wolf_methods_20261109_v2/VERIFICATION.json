@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "release": "wolf_methods_20261109_v2",
+  "make_check": {
+    "exit_code": 0,
+    "ruff": "passed",
+    "ty": "passed",
+    "pyright_errors": 0,
+    "pyright_warnings": 0,
+    "node_version": "24.21.0",
+    "pyright_version": "1.1.408"
+  },
+  "wolf_regressions": {
+    "passed": 127,
+    "warnings": 20,
+    "test_sources": "local only under repository policy; hashes in SOURCE_MANIFEST.json"
+  },
+  "gpu_release": {
+    "linux": "passed",
+    "windows_wsl": "passed",
+    "source_manifest": {
+      "sha256": "11e2df1a3bf5784c81e99149459ccbffed4ea695ae39b05525908e89405e45c7",
+      "files_verified": 608
+    },
+    "versions": {
+      "torch": "2.14.1+cu126",
+      "rsl-rl-lib": "5.5.1",
+      "mujoco": "3.11.0",
+      "mujoco-warp": "3.11.0",
+      "tensordict": "0.14.2"
+    },
+    "training_started": false,
+    "optimizer_steps": 0,
+    "backward_calls": 0,
+    "original_tasks_preserved": true,
+    "profiles": [
+      {
+        "stage": "soft",
+        "mode": "full",
+        "num_envs": 2,
+        "control_steps": 2,
+        "forced_timeout_seen": true,
+        "actor_and_critic_unchanged": true,
+        "jit_roundtrip": true,
+        "checkpoint_roundtrip": "untrained optimizer fixture only"
+      },
+      {
+        "stage": "hard",
+        "mode": "full",
+        "num_envs": 2,
+        "control_steps": 2,
+        "forced_timeout_seen": true,
+        "actor_and_critic_unchanged": true,
+        "jit_roundtrip": true,
+        "checkpoint_roundtrip": "untrained optimizer fixture only"
+      },
+      {
+        "stage": "soft",
+        "mode": "no_him",
+        "num_envs": 2,
+        "control_steps": 2,
+        "forced_timeout_seen": true,
+        "actor_and_critic_unchanged": true,
+        "jit_roundtrip": true,
+        "checkpoint_roundtrip": "untrained optimizer fixture only"
+      },
+      {
+        "stage": "soft",
+        "mode": "aux_off",
+        "num_envs": 2,
+        "control_steps": 2,
+        "forced_timeout_seen": true,
+        "actor_and_critic_unchanged": true,
+        "jit_roundtrip": true,
+        "checkpoint_roundtrip": "untrained optimizer fixture only"
+      },
+      {
+        "stage": "hard",
+        "mode": "aux_off",
+        "num_envs": 2,
+        "control_steps": 2,
+        "forced_timeout_seen": true,
+        "actor_and_critic_unchanged": true,
+        "jit_roundtrip": true,
+        "checkpoint_roundtrip": "untrained optimizer fixture only"
+      }
+    ]
+  },
+  "report_sha256": {
+    "make_check_final.log": "307afaa6067f6cb0aac1fa033d620e79520623564432236adab1eea15a0aa876",
+    "pytest_all_wolf_final.log": "bd73a43594829d509d78ed437bb32ab21e520f2b506daa726ea191d200118cb4",
+    "jc_release_check_v2.json": "de0588623f2c6eea928d79ce5e86317031e709cc3332a91cab066c05037e993d",
+    "windows_release_check_v2.json": "de0588623f2c6eea928d79ce5e86317031e709cc3332a91cab066c05037e993d"
+  },
+  "scope": "Bounded release checks only. No claim of training convergence, qualified action teacher, long-episode DAgger validation, or robot safety."
+}

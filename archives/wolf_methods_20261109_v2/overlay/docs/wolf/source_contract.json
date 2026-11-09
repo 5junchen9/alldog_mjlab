@@ -1,0 +1,634 @@
+{
+  "schema_version": 1,
+  "asset_commit": "886015aef351f1e5517cd50e47628be35ec315ed",
+  "control_commit": "2913d3f449f8eb5b0505156c460ad2f61e4c49fd",
+  "files": {
+    "xmls/wolf.xml": "2e30e5422b1503c286d77d1a31b6f88fb79a3b5ab7654e71a9b6c8c886043d7e",
+    "urdf/wolf_description.urdf": "7fba83027167d5642aeb42883a6556412f832d9052355e7f4d14c184e83ddb87",
+    "xmls/assets/FL_Link1.STL": "ea461987e5dbb0d62ecd0419c98cc531c10a3365b9a61ac4232de458f57d8c0a",
+    "xmls/assets/FL_Link2.STL": "e911b8e5d902c4b3f75192c3591433691e0c1306d1bf68ba45ea60d941d4e538",
+    "xmls/assets/FL_Link3.STL": "040544535d4955fcdb51e8355520305178aa1ab6ae64fcb91867f9ad5e9fc47d",
+    "xmls/assets/FL_Link4.STL": "a68e537e403d10a58f059f689bebf61342a6b79f67f72f273df898ce73d5c71d",
+    "xmls/assets/FR_Link1.STL": "3beafabdf3ff6a3b040f23ec769e751cd2113c348f349c6c6d247f2b5e066a05",
+    "xmls/assets/FR_Link2.STL": "4d577c2b6fdc68aa3fa2b2e0cd55e1ab9df750629549d46a114a73f364a6e68d",
+    "xmls/assets/FR_Link3.STL": "5a1b6bc0577f6afd413a048b94e0604e0b240373b62701fbac95799b54972f16",
+    "xmls/assets/FR_Link4.STL": "a68e537e403d10a58f059f689bebf61342a6b79f67f72f273df898ce73d5c71d",
+    "xmls/assets/RL_Link1.STL": "26571749adefd1514a6f8a2b64ad7c0832dd7d44f68f1fece7ce9eda77844042",
+    "xmls/assets/RL_Link2.STL": "bbd9567d727199fa2afaf92e012b00b744905e3629951f52220ebd4d81b6f190",
+    "xmls/assets/RL_Link3.STL": "42faa8ead912a60e9dfccfaef053829d9c2d57cbad969f5e0bfc06d740f282df",
+    "xmls/assets/RL_Link4.STL": "a68e537e403d10a58f059f689bebf61342a6b79f67f72f273df898ce73d5c71d",
+    "xmls/assets/RR_Link1.STL": "892a0eefeef4d1a3ed7ddd7476bbd622d3b68d96fa6079c6d3bd6947941ea003",
+    "xmls/assets/RR_Link2.STL": "db9ab3a4bb936ca73642058da7b0bade8f58c4b3b6d05ff2b2c531046b7f601d",
+    "xmls/assets/RR_Link3.STL": "796bf95ebb0eb3282c70551a7c4062d7103890787dfb99b1d307e5bb204b5f34",
+    "xmls/assets/RR_Link4.STL": "a68e537e403d10a58f059f689bebf61342a6b79f67f72f273df898ce73d5c71d",
+    "xmls/assets/base_link.STL": "cc997c541ccc15ed12fd77c534e98c3cf14c4021176a708d39bdefb8bf933373"
+  },
+  "joints": {
+    "FL_hip": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -0.6,
+      "upper": 0.8,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "FL_thigh": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -3.14159,
+      "upper": 3.14159,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "FL_calf": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -2.72,
+      "upper": 2.72,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "FL_foot": {
+      "type": "continuous",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "effort": 17.0,
+      "velocity": 32.98672
+    },
+    "FR_hip": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -0.8,
+      "upper": 0.6,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "FR_thigh": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -3.14159,
+      "upper": 3.14159,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "FR_calf": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -2.72,
+      "upper": 2.72,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "FR_foot": {
+      "type": "continuous",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "effort": 17.0,
+      "velocity": 32.98672
+    },
+    "RL_hip": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -0.8,
+      "upper": 0.6,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "RL_thigh": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -3.14159,
+      "upper": 3.14159,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "RL_calf": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -2.72,
+      "upper": 2.72,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "RL_foot": {
+      "type": "continuous",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "effort": 17.0,
+      "velocity": 32.98672
+    },
+    "RR_hip": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -0.6,
+      "upper": 0.8,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "RR_thigh": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -3.14159,
+      "upper": 3.14159,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "RR_calf": {
+      "type": "revolute",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower": -2.72,
+      "upper": 2.72,
+      "effort": 60.0,
+      "velocity": 20.42035
+    },
+    "RR_foot": {
+      "type": "continuous",
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "effort": 17.0,
+      "velocity": 32.98672
+    }
+  },
+  "links": {
+    "base_link": {
+      "mass": 9.9614,
+      "pos": [
+        -0.025143,
+        -5.7679e-08,
+        -0.0042488
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.025591,
+        "ixy": 4.8159e-07,
+        "ixz": -3.4836e-21,
+        "iyy": 0.03108,
+        "iyz": -3.987e-19,
+        "izz": 0.043798
+      }
+    },
+    "FL_Link1": {
+      "mass": 1.4729,
+      "pos": [
+        -0.025322,
+        1.2207e-05,
+        0.068696
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0020636,
+        "ixy": -9.4769e-07,
+        "ixz": 2.4326e-06,
+        "iyy": 0.0011648,
+        "iyz": 1.9093e-06,
+        "izz": 0.0010522
+      }
+    },
+    "FL_Link2": {
+      "mass": 1.7698,
+      "pos": [
+        -0.18046,
+        -2.3231e-05,
+        0.016521
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0011502,
+        "ixy": -5.7767e-07,
+        "ixz": 1.204e-07,
+        "iyy": 0.0026128,
+        "iyz": -7.4721e-07,
+        "izz": 0.0036337
+      }
+    },
+    "FL_Link3": {
+      "mass": 1.1536,
+      "pos": [
+        0.17933,
+        5.3626e-06,
+        -0.0024049
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.00046468,
+        "ixy": -5.8902e-08,
+        "ixz": 1.494e-06,
+        "iyy": 0.0031314,
+        "iyz": 4.172e-08,
+        "izz": 0.0035559
+      }
+    },
+    "FL_Link4": {
+      "mass": 1.5305,
+      "pos": [
+        2.7756e-16,
+        0.0,
+        0.030708
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0036061,
+        "ixy": 3.3386e-19,
+        "ixz": 1.6978e-19,
+        "iyy": 0.0036061,
+        "iyz": 2.2333e-19,
+        "izz": 0.0069124
+      }
+    },
+    "FR_Link1": {
+      "mass": 1.4729,
+      "pos": [
+        0.025322,
+        -1.2207e-05,
+        0.068696
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0020636,
+        "ixy": -9.4769e-07,
+        "ixz": -2.4326e-06,
+        "iyy": 0.0011648,
+        "iyz": -1.9093e-06,
+        "izz": 0.0010522
+      }
+    },
+    "FR_Link2": {
+      "mass": 1.7698,
+      "pos": [
+        0.18046,
+        2.3231e-05,
+        0.016521
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0011502,
+        "ixy": -5.7767e-07,
+        "ixz": -1.204e-07,
+        "iyy": 0.0026128,
+        "iyz": 7.4721e-07,
+        "izz": 0.0036337
+      }
+    },
+    "FR_Link3": {
+      "mass": 1.1536,
+      "pos": [
+        -0.17933,
+        -5.3626e-06,
+        -0.0024049
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.00046468,
+        "ixy": -5.8902e-08,
+        "ixz": -1.494e-06,
+        "iyy": 0.0031314,
+        "iyz": -4.172e-08,
+        "izz": 0.0035559
+      }
+    },
+    "FR_Link4": {
+      "mass": 1.5305,
+      "pos": [
+        -2.2204e-16,
+        0.0,
+        0.030708
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0036061,
+        "ixy": 5.2092e-20,
+        "ixz": 1.2726e-19,
+        "iyy": 0.0036061,
+        "iyz": 1.2864e-20,
+        "izz": 0.0069124
+      }
+    },
+    "RL_Link1": {
+      "mass": 1.4729,
+      "pos": [
+        -0.025322,
+        1.2207e-05,
+        0.068696
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0020636,
+        "ixy": -9.4769e-07,
+        "ixz": 2.4326e-06,
+        "iyy": 0.0011648,
+        "iyz": 1.9093e-06,
+        "izz": 0.0010522
+      }
+    },
+    "RL_Link2": {
+      "mass": 1.7698,
+      "pos": [
+        -0.18046,
+        -2.3231e-05,
+        0.016521
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0011502,
+        "ixy": -5.7767e-07,
+        "ixz": 1.204e-07,
+        "iyy": 0.0026128,
+        "iyz": -7.4721e-07,
+        "izz": 0.0036337
+      }
+    },
+    "RL_Link3": {
+      "mass": 1.1536,
+      "pos": [
+        0.17933,
+        5.3626e-06,
+        -0.0024049
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.00046468,
+        "ixy": -5.8902e-08,
+        "ixz": 1.494e-06,
+        "iyy": 0.0031314,
+        "iyz": 4.172e-08,
+        "izz": 0.0035559
+      }
+    },
+    "RL_Link4": {
+      "mass": 1.5305,
+      "pos": [
+        1.1102e-16,
+        -1.1102e-16,
+        0.030708
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0036061,
+        "ixy": -3.0749e-19,
+        "ixz": -2.5461e-19,
+        "iyy": 0.0036061,
+        "iyz": 1.3246e-19,
+        "izz": 0.0069124
+      }
+    },
+    "RR_Link1": {
+      "mass": 1.4729,
+      "pos": [
+        0.025322,
+        -1.2207e-05,
+        0.068696
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0020636,
+        "ixy": -9.4769e-07,
+        "ixz": -2.4326e-06,
+        "iyy": 0.0011648,
+        "iyz": -1.9093e-06,
+        "izz": 0.0010522
+      }
+    },
+    "RR_Link2": {
+      "mass": 1.7698,
+      "pos": [
+        0.18046,
+        2.3231e-05,
+        0.016521
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0011502,
+        "ixy": -5.7767e-07,
+        "ixz": -1.204e-07,
+        "iyy": 0.0026128,
+        "iyz": 7.4721e-07,
+        "izz": 0.0036337
+      }
+    },
+    "RR_Link3": {
+      "mass": 1.1536,
+      "pos": [
+        -0.17933,
+        -5.3688e-06,
+        -0.0024049
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.00046468,
+        "ixy": -5.8886e-08,
+        "ixz": -1.494e-06,
+        "iyy": 0.0031314,
+        "iyz": -4.172e-08,
+        "izz": 0.0035559
+      }
+    },
+    "RR_Link4": {
+      "mass": 1.5305,
+      "pos": [
+        -7.2164e-16,
+        -1.3323e-15,
+        0.030708
+      ],
+      "rpy": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0036061,
+        "ixy": 5.1632e-20,
+        "ixz": 1.2842e-19,
+        "iyy": 0.0036061,
+        "iyz": 2.7795e-20,
+        "izz": 0.0069124
+      }
+    }
+  },
+  "control": {
+    "policy_joint_order": [
+      "FL_hip",
+      "FL_thigh",
+      "FL_calf",
+      "FL_foot",
+      "FR_hip",
+      "FR_thigh",
+      "FR_calf",
+      "FR_foot",
+      "RL_hip",
+      "RL_thigh",
+      "RL_calf",
+      "RL_foot",
+      "RR_hip",
+      "RR_thigh",
+      "RR_calf",
+      "RR_foot"
+    ],
+    "leg_kp": 80.0,
+    "leg_kd": 2.0,
+    "wheel_kp": 0.0,
+    "wheel_kd": 0.6,
+    "hip_action_scale": 0.125,
+    "other_leg_action_scale": 0.25,
+    "wheel_action_scale": 5.0,
+    "wheel_signs": {
+      "FL": 1,
+      "FR": -1,
+      "RL": 1,
+      "RR": -1
+    },
+    "physics_dt": 0.005,
+    "decimation": 4,
+    "soft_joint_pos_limit_factor": 0.9,
+    "default_root_z": 0.4432,
+    "default_angles": {
+      "FL": [
+        0,
+        0.82,
+        1.43,
+        0
+      ],
+      "FR": [
+        0,
+        -0.82,
+        -1.43,
+        0
+      ],
+      "RL": [
+        0,
+        -0.82,
+        -1.43,
+        0
+      ],
+      "RR": [
+        0,
+        0.82,
+        1.43,
+        0
+      ]
+    }
+  }
+}
