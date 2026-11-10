@@ -1,0 +1,99 @@
+{
+  "title": "Black 平地全向教师：前进、后退、转向与侧移",
+  "framework_repository": "https://github.com/mujocolab/mjlab",
+  "framework_commit": "45b1e263ec1c3c0d2c3211b458135d80bb7030df",
+  "fork_base_commit": "2913d3f449f8eb5b0505156c460ad2f61e4c49fd",
+  "scope": "source-only independent overlay; not integrated into alldog_mjlab",
+  "files": [
+    {
+      "path": "overlay/src/mjlab/asset_zoo/robots/black_stock/__init__.py",
+      "sha256": "1d662b6ca514ecea5c43c88f10be223b9f4f8c54435a7cbf3625fae83a2fda53",
+      "source_sha256": "1d662b6ca514ecea5c43c88f10be223b9f4f8c54435a7cbf3625fae83a2fda53",
+      "bytes": 69,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/asset_zoo/robots/black_stock/black_constants.py",
+      "sha256": "3310b52ddde7e2aabf3bbf8c4d31d2d6e912d857536b1107f615fe8fd93c649f",
+      "source_sha256": "3310b52ddde7e2aabf3bbf8c4d31d2d6e912d857536b1107f615fe8fd93c649f",
+      "bytes": 4394,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_actuation/__init__.py",
+      "sha256": "48f7e12ca7bca039b74b20802d12b30f94f751b993b33baca6fe7f2270b31d20",
+      "source_sha256": "48f7e12ca7bca039b74b20802d12b30f94f751b993b33baca6fe7f2270b31d20",
+      "bytes": 1023,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_actuation/actuation.py",
+      "sha256": "a32e060d96649a842e6f2a7906e7e4e504485355e847810a49069949ce3cb599",
+      "source_sha256": "8bad541f6cb0915174a130d0664686c80535a951dd6218a77c8f4788bf40138d",
+      "bytes": 4838,
+      "change": "formatting and type-only cast; normalized AST identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_actuation/env_cfgs.py",
+      "sha256": "8a31e6b12ac2116747819023b3729b7adbe196f2f489cc90a3eb4e54d1ad645d",
+      "source_sha256": "8a31e6b12ac2116747819023b3729b7adbe196f2f489cc90a3eb4e54d1ad645d",
+      "bytes": 2193,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_stock/__init__.py",
+      "sha256": "94e39201ff67d1b59d14f86c240007f4b519584f25bf4b45f938e6fb542a8d8b",
+      "source_sha256": "94e39201ff67d1b59d14f86c240007f4b519584f25bf4b45f938e6fb542a8d8b",
+      "bytes": 754,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_stock/env_cfgs.py",
+      "sha256": "44ef0b9ceb3aeb8a9ef23ae53a7d494306aa59aeac08b3f62100e9df308f59f5",
+      "source_sha256": "44ef0b9ceb3aeb8a9ef23ae53a7d494306aa59aeac08b3f62100e9df308f59f5",
+      "bytes": 6896,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_teacher/__init__.py",
+      "sha256": "fbacd1aeba94f2011388d1d172cc23f921ad09a5d9e19ecffdafbe8740cc452c",
+      "source_sha256": "fbacd1aeba94f2011388d1d172cc23f921ad09a5d9e19ecffdafbe8740cc452c",
+      "bytes": 1343,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_teacher/env_cfgs.py",
+      "sha256": "27db1f68d1d4fec26a38cb94907ba63f0ac94fd46a99b2ef259bfca16914a018",
+      "source_sha256": "27db1f68d1d4fec26a38cb94907ba63f0ac94fd46a99b2ef259bfca16914a018",
+      "bytes": 1549,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_teacher/omni_command.py",
+      "sha256": "ae639196a09e4c6ff3252f8d7b4b97023ce6a079c706d577df9cc8623e56c898",
+      "source_sha256": "ae639196a09e4c6ff3252f8d7b4b97023ce6a079c706d577df9cc8623e56c898",
+      "bytes": 2445,
+      "change": "byte-identical"
+    },
+    {
+      "path": "overlay/src/mjlab/tasks/velocity/config/black_teacher/rl_cfg.py",
+      "sha256": "3cdb0bfe76fcf64e1e1250e4ca0abbc1d558306b883dd8c984d75f8dfafeca50",
+      "source_sha256": "3cdb0bfe76fcf64e1e1250e4ca0abbc1d558306b883dd8c984d75f8dfafeca50",
+      "bytes": 417,
+      "change": "byte-identical"
+    }
+  ],
+  "framework_files_checked": 515,
+  "framework_files_modified": [],
+  "local_verification_files": [
+    {
+      "name": "tests/test_black_actuation.py",
+      "sha256": "9e291631877bd11d110dd6a11563931ea92af54eefe1799a1a3559fa07861046"
+    },
+    {
+      "name": "tests/test_black_teacher_omni.py",
+      "sha256": "d46652e6a56e5c8d7bf4fdf0e297c9683d70c4920c744913e2127e7e0f528079"
+    }
+  ],
+  "training_source_untouched": true
+}

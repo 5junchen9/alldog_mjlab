@@ -1,0 +1,150 @@
+{
+  "repository": "https://github.com/N-W-wolf/super-dog",
+  "commit": "1b9f15de46eb75f6f253582b66fd51536548b4d9",
+  "assets_included": false,
+  "rights_notice": "Obtain authorized local copies. Asset redistribution rights were not confirmed; no asset bytes are included.",
+  "files": [
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/black_description.urdf",
+      "upstream_path": "legged_gym/resources/robots/black/black_description.urdf",
+      "git_blob": "4c59ee3f6e8127147c4376615728d297686a6a6d",
+      "sha256": "e5879c46d9324227b85b4b99e656e34546811be9cadca27cebddb08666476fff",
+      "bytes": 19090
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FL_calf.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FL_calf.STL",
+      "git_blob": "ade7c69840bf8928fa86e2c310334d9c91a5618b",
+      "sha256": "fb037c3717bd48d32c3c418b2596f60de8d1bff9c35b13a92e78cb8cea931e72",
+      "bytes": 859584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FL_foot.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FL_foot.STL",
+      "git_blob": "e87c1b957521820c4fb648ddab492e0922a9b2f5",
+      "sha256": "e98aad89f81a790e3060abfba2bd95b5e5efd14c739a1a7910591df42fe6d85a",
+      "bytes": 117684
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FL_hip.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FL_hip.STL",
+      "git_blob": "6e9536ad680c29e54b85cbe19f9165e6daaac6dd",
+      "sha256": "d47ff5f6a2c780b72d3bc240e1a8bb97e292c33c4770f1b6c20fa6f7cc3bc480",
+      "bytes": 3019584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FL_thigh.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FL_thigh.STL",
+      "git_blob": "3c61f3595a7327c286ae2c4a8f842f232d85ff41",
+      "sha256": "41b0ac7d9547f14494bf025af79403476ffdd7275ea6bc6de0a05a873614ce7f",
+      "bytes": 3936184
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FR_calf.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FR_calf.STL",
+      "git_blob": "e358a5418ff09eb6999adee9b584acc37a64c326",
+      "sha256": "d2c94be56389590a3e1a14aa0551c7a0425421c915ba333efd37e13a4a3f15ef",
+      "bytes": 859584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FR_foot.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FR_foot.STL",
+      "git_blob": "a62891bf8da5b3b422e40b12b471ead4d5546582",
+      "sha256": "067c04dd084a3175bf9ed7c4bed6590cced12464ff9a28e2bec7db6702b68f2b",
+      "bytes": 117684
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FR_hip.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FR_hip.STL",
+      "git_blob": "27d8eb43e1fc653fca3c39dbc82ffc72086ba103",
+      "sha256": "3e7a2004d4fca373a2afaf5dbc4e3eb8a8af90883b3647ba79e67104bf1c9217",
+      "bytes": 3019584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/FR_thigh.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/FR_thigh.STL",
+      "git_blob": "31abce797eb0893d40abfed27becbf5dac9a356a",
+      "sha256": "7909f9bf57e4fb1b4f972ab7cc2d2148f555794752cce584ec756b60c13b16a0",
+      "bytes": 3948184
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RL_calf.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RL_calf.STL",
+      "git_blob": "72daf9112c9ca1a807b79ba06310eae940f3dd2d",
+      "sha256": "7560e1f3a37d257f6be98fa837b45c4b2818e1a474c9955d7b5d6c334a91a77f",
+      "bytes": 859584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RL_foot.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RL_foot.STL",
+      "git_blob": "120e4c506f2e6e477e0e7bf47fb9e24152892c38",
+      "sha256": "10ac85c4c5122ce2c75afd51d77b60726a9a38a2529f365ac178bcdb234713ef",
+      "bytes": 117684
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RL_hip.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RL_hip.STL",
+      "git_blob": "251a37a3c7a18e1bf71a06b7c21a42661ff6ba8f",
+      "sha256": "aee046318855ddc513dff40f8096ce910097272d6ce5c4e7f408df1b1208d82f",
+      "bytes": 3019584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RL_thigh.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RL_thigh.STL",
+      "git_blob": "a6345d77c09f760421f46680636d2390b5c54718",
+      "sha256": "f064055dd374be27c0fecf34c54eb782c12783e1ec19cbeeffc9c2fdb774aece",
+      "bytes": 3935384
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RR_calf.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RR_calf.STL",
+      "git_blob": "e6e7ba330ca428180986a17656055dd4b7d4ddc0",
+      "sha256": "b6b7b20c646d6323c44de7a4fd59d6b085a1acfb9f23c418e9ea2132cd0cb996",
+      "bytes": 859584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RR_foot.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RR_foot.STL",
+      "git_blob": "cc43150563f63442130170ce4be2325439762484",
+      "sha256": "f403824296a656a465e4675d3a29ad7f97f48b450d5a48a2938e6ae377b818fe",
+      "bytes": 117684
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RR_hip.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RR_hip.STL",
+      "git_blob": "1f6bd4ebdcffa2277d71f4f72021889fcb902eb5",
+      "sha256": "594e27ec8678ac90f847a5085d3e9a5c0493e1ea707b1e1eb0242cfd8abeef0d",
+      "bytes": 3019584
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/RR_thigh.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/RR_thigh.STL",
+      "git_blob": "313f6974000375a285bb70db709fcd796f629702",
+      "sha256": "f1a02a1101e1d402add98b3963c639784bc5c1fc5c8282423f81e4b57909371e",
+      "bytes": 3948184
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/d435.stl",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/d435.stl",
+      "git_blob": "ba21c20591659ab9c9b02ed8a425b3b2f0e292ea",
+      "sha256": "a373adb4a2142f36c1b12a5ca4cd227a94aab263ad164239347c96874a2bb18f",
+      "bytes": 517134
+    },
+    {
+      "path": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/trunk.STL",
+      "upstream_path": "legged_gym/resources/robots/black/meshes/trunk.STL",
+      "git_blob": "9b048bb4acc676641d3022a18849c68d01132541",
+      "sha256": "df3a5caa8ae7f549fa4632a1098427a09ee0677170e2d6a05e8bf79f0927070a",
+      "bytes": 21252234
+    }
+  ],
+  "derived_trunk": {
+    "source": "src/mjlab/asset_zoo/robots/black_stock/source/meshes/trunk.STL",
+    "derived": "src/mjlab/asset_zoo/robots/black_stock/derived/trunk.obj",
+    "faces": 425043,
+    "vertices": 1275129,
+    "triangles_identical": true,
+    "source_sha256": "df3a5caa8ae7f549fa4632a1098427a09ee0677170e2d6a05e8bf79f0927070a",
+    "derived_sha256": "a1077cef5a7a7f0b6909c33ab0165d3a3330734a8c73d26e61649d4ddeba4f39"
+  }
+}
