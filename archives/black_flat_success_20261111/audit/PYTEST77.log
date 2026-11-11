@@ -1,0 +1,10 @@
+WARN `--no-project` was provided, but no project was found
+........................................................................ [ 93%]
+.....                                                                    [100%]
+=============================== warnings summary ===============================
+../../../../rl_train/black_mjlab_stock_20261110/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491
+  /home/wujuncheng/rl_train/black_mjlab_stock_20261110/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+77 passed, 1 warning in 2.63s

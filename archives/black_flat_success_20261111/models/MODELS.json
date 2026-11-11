@@ -1,0 +1,20 @@
+{
+  "model_33999.pt": {
+    "restore_path": "logs/black_teacherfree/mixed_30000_20261111/updates_30000/model_33999.pt",
+    "bytes": 4885263,
+    "sha256": "55be4aff5a54232a45f27e6df567d0de49d53e4aeb9096c1e96c307b343749f7",
+    "purpose": "Selected flat success model; only deployment candidate in this archive"
+  },
+  "model_3999.pt": {
+    "restore_path": "logs/black_continuation/omni_chain_20261110/stage1/updates_01000/model_3999.pt",
+    "bytes": 39291725,
+    "sha256": "ea4a072fe6a11eb1fb29cfc4e2c56babfb2fad5a5f2ebe1778868389e792a1fb",
+    "purpose": "Exact starting state for teacher-free 30000-update reproduction"
+  },
+  "model_2999.pt": {
+    "restore_path": "logs/rsl_rl/black_teacher_omni_flat/2026-11-10_19-06-42_omni_4096_3000/model_2999.pt",
+    "bytes": 4883573,
+    "sha256": "a5e5a066f9f5cb809cc7e338c2db03270c1daf3826c9f92794a875af57959629",
+    "purpose": "Frozen original Omni evaluation control"
+  }
+}

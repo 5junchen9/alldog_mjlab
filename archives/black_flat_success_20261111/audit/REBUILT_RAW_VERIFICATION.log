@@ -1,0 +1,13 @@
+{
+  "complete": true,
+  "raw_runs_verified": 40,
+  "trials_verified": 8960,
+  "gpu": {
+    "max_concurrent_non_desktop_compute_jobs": 1,
+    "samples": 165,
+    "peak_used_mib": 2429,
+    "minimum_free_mib": 5353,
+    "maximum_temperature_c": 58
+  },
+  "summary_arithmetic_verified": true
+}

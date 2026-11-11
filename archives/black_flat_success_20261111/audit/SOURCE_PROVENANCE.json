@@ -1,0 +1,18 @@
+{
+  "source": "/home/wujuncheng/rl_train/black_mjlab_stock_20261110",
+  "source_has_git": false,
+  "checks": [
+    {
+      "label": "training",
+      "checked": 320,
+      "mismatches": []
+    },
+    {
+      "label": "extra",
+      "checked": 320,
+      "mismatches": []
+    }
+  ],
+  "training_fingerprint": "3c842f7a3b843b62a6a3728811818d38a595fbcab717001c7007ef09028ac58f",
+  "source_manifest_scope": "Every one of the 320 original source/asset/dependency files, byte-exact; archive supplements do not change mature source."
+}

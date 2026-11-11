@@ -1,0 +1,1 @@
+{"sha256": "55be4aff5a54232a45f27e6df567d0de49d53e4aeb9096c1e96c307b343749f7", "scope": "CPU inference only", "results": {"actor": {"output_shape": [3, 12], "finite": true, "strict_load": true, "state_unchanged": true}, "critic": {"output_shape": [3, 1], "finite": true, "strict_load": true, "state_unchanged": true}}}

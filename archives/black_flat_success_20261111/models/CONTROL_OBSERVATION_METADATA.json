@@ -1,0 +1,75 @@
+{
+  "scope": "CPU MuJoCo asset compilation and RSL-RL strict actor/critic load/inference only; no environment rollout or training",
+  "joint_order_compiled": [
+    "FL_hip_joint",
+    "FL_thigh_joint",
+    "FL_calf_joint",
+    "FR_hip_joint",
+    "FR_thigh_joint",
+    "FR_calf_joint",
+    "RR_hip_joint",
+    "RR_thigh_joint",
+    "RR_calf_joint",
+    "RL_hip_joint",
+    "RL_thigh_joint",
+    "RL_calf_joint"
+  ],
+  "observation_order_actor": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_height",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces"
+  ],
+  "observation_order_critic": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_height",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces"
+  ],
+  "action_scale": 0.25,
+  "use_default_offset": true,
+  "rl_clip_actions": null,
+  "action_clip": null,
+  "decimation": 4,
+  "physics_dt": 0.005,
+  "control_dt": 0.02,
+  "normalizer_unchanged": true,
+  "actor_zero_input_output": [
+    0.10782270133495331,
+    2.3243091106414795,
+    -0.4374464452266693,
+    -1.1639539003372192,
+    -1.022996187210083,
+    2.4345574378967285,
+    0.8625946044921875,
+    1.6056030988693237,
+    0.6188602447509766,
+    2.0771265029907227,
+    0.41046464443206787,
+    -4.031362056732178
+  ],
+  "critic_zero_input_value": [
+    0.2345399111509323
+  ],
+  "compiled": {
+    "nq": 19,
+    "nv": 18,
+    "ngeom": 50,
+    "nmesh": 14
+  },
+  "finite": true
+}

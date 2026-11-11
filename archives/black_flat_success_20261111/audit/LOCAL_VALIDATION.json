@@ -1,0 +1,34 @@
+{
+  "time": "2026-11-11T11:57:54.564626+08:00",
+  "mature_sources_unchanged_at_end": {
+    "checked": 320,
+    "changed": []
+  },
+  "checkpoint_sha256": "55be4aff5a54232a45f27e6df567d0de49d53e4aeb9096c1e96c307b343749f7",
+  "actor_critic_finite": true,
+  "adam_states_finite": true,
+  "reconstructed_original_files": 1564,
+  "rebuild_all_hashes_verified": true,
+  "rebuilt_cpu_actor_critic_strict_load_inference": true,
+  "rebuilt_raw_runs_verified": 40,
+  "rebuilt_trials_verified": 8960,
+  "pytest": {
+    "passed": 77,
+    "scope": "5 existing teacherfree CPU test files; project existing .venv",
+    "log": "audit/PYTEST77.log",
+    "first_attempt": "wolf environment missing pytest; not executed; no install"
+  },
+  "make_check": "not run",
+  "make_test": "not run",
+  "gpu_rollout_this_window": false,
+  "rough_training_started": false,
+  "real_hardware_validation": false,
+  "source_modifications": false,
+  "deleted_source_data": false,
+  "commit_or_push": false,
+  "accepted_validation_blocks": 30,
+  "warnings": [
+    "snap launcher blocked in sandbox; installed uv binary used",
+    "wolf runtime lacks pytest; existing project venv used only for 77 tests"
+  ]
+}

@@ -1,0 +1,10 @@
+make: 进入目录“/tmp/black_release_check”
+uv run ruff format
+344 files left unchanged
+uv run ruff check --fix
+All checks passed!
+uv run ty check
+All checks passed!
+uv run pyright
+0 errors, 0 warnings, 0 informations
+make: 离开目录“/tmp/black_release_check”

@@ -1,0 +1,18 @@
+{
+  "files": [
+    "src/mjlab/tasks/velocity/config/black_actuation/actuation.py",
+    "tests/test_black_candidate_commands.py",
+    "tests/test_black_candidate_rewards.py",
+    "tests/test_black_continuation_commands.py",
+    "tests/test_black_continuation_eval.py",
+    "tests/test_black_continuation_ppo.py",
+    "tests/test_black_dagger.py",
+    "tests/test_black_him_student.py",
+    "tests/test_black_teacher_omni.py",
+    "tests/test_black_teacherfree_rewards.py",
+    "tests/test_black_teacherfree_train.py",
+    "pyproject.toml"
+  ],
+  "production_python_ast_unchanged": true,
+  "scope": "type-only validation repairs; frozen source and all models unchanged"
+}

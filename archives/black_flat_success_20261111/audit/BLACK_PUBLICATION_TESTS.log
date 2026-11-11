@@ -1,0 +1,13 @@
+...................................................................      [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491
+tests/test_black_him_student.py::test_policy_export_needs_only_history
+  /home/wujuncheng/rl_train/black_mjlab_stock_20261110/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/test_black_him_student.py::test_policy_export_needs_only_history
+  /home/wujuncheng/rl_train/black_mjlab_stock_20261110/.venv/lib/python3.13/site-packages/torch/jit/_serialization.py:176: FutureWarning: `torch.jit.load` is deprecated. Please switch to `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+67 passed, 3 warnings in 2.04s
