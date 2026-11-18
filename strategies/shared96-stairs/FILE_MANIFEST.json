@@ -1,0 +1,18 @@
+{
+  "PROVENANCE.md": {
+    "bytes": 562,
+    "sha256": "6d179db9bb2dabf9c2a6e0d53c68b2e4cd92fd60a762f88db116ca1dd8284de9"
+  },
+  "README.md": {
+    "bytes": 1517,
+    "sha256": "2bfa7149531670e931e4a57353220e07f013710a6337d67cc782ce1430120d62"
+  },
+  "strategy.json": {
+    "bytes": 769,
+    "sha256": "8b1a51c5e7ebf8a391292e973c77d3daab4517b17e9a9e86e8410260817dfe8c"
+  },
+  "strategy.py": {
+    "bytes": 2200,
+    "sha256": "5fdc7117ffe8164443ea9fdf4921180adf04c0fc773b66b065b520aec8b3a9f5"
+  }
+}

@@ -1,0 +1,2 @@
+# Provenance and license
+New integration/strategy source supplied for this project; no copied third-party implementation, data, logs, credentials, host paths, model weights, or generated policy is included. License: Apache License 2.0 for the source in this package, subject to publication authorization and the destination repository's notice requirements. Runtime dependencies and the independent native course/model implementations are not redistributed. The package includes source wiring contracts, not empirical endorsement of any warm actor or stair run.

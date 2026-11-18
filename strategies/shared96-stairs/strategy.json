@@ -1,0 +1,44 @@
+{
+  "schema": "shared96_native_stairs_strategy_v1",
+  "actor": {
+    "raw_width": 446,
+    "measured_width": 45,
+    "producer_widths": [
+      3,
+      16,
+      32
+    ],
+    "head_widths": [
+      96,
+      512,
+      256,
+      128,
+      12
+    ],
+    "observation_normalizer": false
+  },
+  "critic": {
+    "privileged_width": 446,
+    "normalizer_streams": [
+      72,
+      374
+    ]
+  },
+  "rehearsal_transfer": false,
+  "native_state_transfer": false,
+  "optimizer": "new_for_stairs",
+  "promotion": {
+    "start_cm": 4,
+    "front_angle_deg": 0,
+    "headon_fraction": 0.9,
+    "aux_angles_deg": [
+      -15,
+      15
+    ],
+    "current_fraction": 0.8,
+    "minimum_each_direction": 32,
+    "window": 64,
+    "pass_fraction": 0.9,
+    "maximum_cm": 30
+  }
+}
