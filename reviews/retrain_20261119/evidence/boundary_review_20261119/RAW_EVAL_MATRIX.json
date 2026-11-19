@@ -1,0 +1,122 @@
+[
+  {
+    "robot": "black",
+    "course": "general",
+    "exit_code": 0,
+    "directory": "black_raw_general",
+    "assigned": 48,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/black_raw_general"
+  },
+  {
+    "robot": "black",
+    "course": "platform",
+    "exit_code": 0,
+    "directory": "black_raw_platform",
+    "assigned": 6,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/black_raw_platform"
+  },
+  {
+    "robot": "black",
+    "course": "broken_bridge",
+    "exit_code": 0,
+    "directory": "black_raw_broken_bridge",
+    "assigned": 6,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/black_raw_broken_bridge"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_axes",
+    "exit_code": 0,
+    "directory": "wolf_raw_flat_axes",
+    "assigned": 66,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/wolf_raw_flat_axes"
+  },
+  {
+    "robot": "wolf",
+    "course": "general",
+    "exit_code": 0,
+    "directory": "wolf_raw_general",
+    "assigned": 36,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/wolf_raw_general"
+  },
+  {
+    "robot": "wolf",
+    "course": "broken_bridge",
+    "exit_code": 0,
+    "directory": "wolf_raw_broken_bridge",
+    "assigned": 6,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/wolf_raw_broken_bridge"
+  },
+  {
+    "robot": "wolf",
+    "course": "plum_stakes",
+    "exit_code": 0,
+    "directory": "wolf_raw_plum_stakes",
+    "assigned": 6,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/wolf_raw_plum_stakes"
+  },
+  {
+    "robot": "black",
+    "course": "flat8",
+    "exit_code": 0,
+    "directory": "black_raw_flat8",
+    "assigned": 32,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/black_raw_flat8"
+  },
+  {
+    "robot": "black",
+    "course": "axes",
+    "exit_code": 0,
+    "directory": "black_raw_axes",
+    "assigned": 24,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/black_raw_axes"
+  },
+  {
+    "robot": "black",
+    "course": "stairs",
+    "exit_code": 0,
+    "directory": "black_raw_stairs",
+    "assigned": 2,
+    "success": 0,
+    "administratively_truncated": true,
+    "recomputed_from_raw": true,
+    "qualified": false,
+    "evidence": "raw/black_raw_stairs"
+  }
+]

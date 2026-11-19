@@ -1,0 +1,88 @@
+{
+  "scope": "exact_agent_generated_unqualified_Windows_GPU_test_weights",
+  "files": [
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_student/student.pt",
+      "bytes": 1998387,
+      "sha256": "08972c613138a8b6a34579457d265eff049ac22f06efd820cd7290d3d64c69ed"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_student/student_update_000001.pt",
+      "bytes": 1998387,
+      "sha256": "08972c613138a8b6a34579457d265eff049ac22f06efd820cd7290d3d64c69ed"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_student_resume/student.pt",
+      "bytes": 1998579,
+      "sha256": "8b8622d9ccda1f903154adcc7347332952295c87c31cc9de594ea8670a9239e1"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 1998579,
+      "sha256": "8b8622d9ccda1f903154adcc7347332952295c87c31cc9de594ea8670a9239e1"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_teacher/teacher.pt",
+      "bytes": 9414527,
+      "sha256": "1a4395a0ed103f14cdde4b9a818ddeb19b39b977116921d31a8dacaa0a95aab0"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9414527,
+      "sha256": "1a4395a0ed103f14cdde4b9a818ddeb19b39b977116921d31a8dacaa0a95aab0"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9414911,
+      "sha256": "f7b8538c90e45d514f82a2d1910092a0e42652a3438882922aa9f702039b35eb"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/black/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9414911,
+      "sha256": "f7b8538c90e45d514f82a2d1910092a0e42652a3438882922aa9f702039b35eb"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_student/student.pt",
+      "bytes": 2067251,
+      "sha256": "a943e30cf1fb2139abef5b98d8e52237f162c0bc24774fa39ed69296b51c46f0"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_student/student_update_000001.pt",
+      "bytes": 2067251,
+      "sha256": "a943e30cf1fb2139abef5b98d8e52237f162c0bc24774fa39ed69296b51c46f0"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_student_resume/student.pt",
+      "bytes": 2067443,
+      "sha256": "eff1ec885b224c41c17487c4befa24602cb73bbeabf7b30dd92111c08f3dcef7"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 2067443,
+      "sha256": "eff1ec885b224c41c17487c4befa24602cb73bbeabf7b30dd92111c08f3dcef7"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "d0f3e3e786bfeb6b2a46eab286ac17b1a1142513b043ef3e6e090eaf1999ec61"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "d0f3e3e786bfeb6b2a46eab286ac17b1a1142513b043ef3e6e090eaf1999ec61"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "f49bd4316efb3952f13f3b3903bf7ca81c9ce20a72aabdbab9ab3359ec52e814"
+    },
+    {
+      "path": "runs/boundary_windows_v3_001/wolf/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "f49bd4316efb3952f13f3b3903bf7ca81c9ce20a72aabdbab9ab3359ec52e814"
+    }
+  ],
+  "file_count": 16,
+  "bytes": 92000176,
+  "status": "deleted_and_verified"
+}

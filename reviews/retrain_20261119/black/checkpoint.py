@@ -1,0 +1,143 @@
+"""v3随机初始化与自包含学习器；不接入旧版权重身份。"""
+
+import copy
+import hashlib
+import json
+import os
+import tempfile
+from pathlib import Path
+
+import torch
+
+from black.model import Teacher, make_modules
+
+CONTRACT = {
+  "schema": "black_retrain_shared_actor_v3",
+  "input_order": ["current_p45", "HIM_next_velocity3", "HIM_unit16", "terrain32"],
+  "history_shape": [5, 45],
+  "him_input": "5x42_command_stripped_proprio",
+  "critic": "raw446_plus_course_time_hold_entry3_only_for_value",
+  "geometry": "nearest_surface_pool_original_pixel_optical_xyz_div4_range0p2to4m_valid_12x16_v2",
+  "depth": "planar_z_metres_nearest_valid_surface_bins160x90_to64x48_range0p2to4m_v2",
+  "foot_clearance": "sparse_gap_allmiss_saturated_range_and_real_contact_support",
+  "visual_memory": "50_healthy_fresh_frames_25_frame_overlap_crossfade_handoff",
+  "frame_validity": "finite_raw_capture_in_current_episode; in_range_hit_separate",
+  "camera_hz": 10,
+  "control_hz": 50,
+  "action_order": [
+    f"{leg}_{joint}"
+    for leg in ("FL", "FR", "RR", "RL")
+    for joint in ("hip", "thigh", "calf")
+  ],
+  "action_scale": 0.25,
+  "action_space": "policy_mean_before_native_delay_clear_on_reset_and_PD",
+}
+
+
+def tensor_digest(values):
+  result = hashlib.sha256()
+  for name, value in sorted(values.items()):
+    value = value.detach().cpu().contiguous()
+    result.update(str((name, tuple(value.shape), str(value.dtype))).encode())
+    result.update(value.reshape(-1).view(torch.uint8).numpy().tobytes())
+  return result.hexdigest()
+
+
+def teacher_identity(teacher):
+  weights = tensor_digest(teacher.state_dict())
+  return hashlib.sha256(
+    (weights + json.dumps(CONTRACT, sort_keys=True)).encode()
+  ).hexdigest()
+
+
+def source_identity():
+  """代码/资产身份可跨安装路径；运行库另存，供优化器恢复严格比较。"""
+  from black.eval_collect import runtime_identity, source_files
+  from black.eval_protocol import digest
+
+  files = {
+    name: value
+    for name, value in source_files().items()
+    if not name.startswith("@runtime/")
+  }
+  return {"sha256": digest(files), "runtime": runtime_identity()}
+
+
+def initial_models(device="cpu"):
+  """调用前设置随机种子；不打开任何历史模型文件。"""
+  him, actor, cnn, gru = make_modules()
+  teacher = Teacher(him, actor).to(device)
+  return teacher, cnn.to(device), gru.to(device)
+
+
+def save_bundle(path, teacher, cnn, gru, *, phase, updates, learning_state=None):
+  """保存新候选身份；没有能力验收结果就不标成合格教师。"""
+  packet = {
+    "contract": CONTRACT,
+    "teacher_id": teacher_identity(teacher),
+    "teacher": teacher.state_dict(),
+    "cnn": cnn.state_dict(),
+    "gru": gru.state_dict(),
+    "initialization": copy.deepcopy(teacher.initialization),
+    "phase": phase,
+    "completed_updates": updates,
+    "qualification": "not_evaluated",
+    "learning_state": learning_state,
+    "source_identity": source_identity(),
+    "exact_physical_resume": False,
+  }
+  path = Path(path)
+  descriptor, name = tempfile.mkstemp(
+    dir=path.parent, prefix=f".{path.name}.", suffix=".pending"
+  )
+  temporary = Path(name)
+  try:
+    with os.fdopen(descriptor, "wb") as stream:
+      torch.save(packet, stream)
+      stream.flush()
+      os.fsync(stream.fileno())
+    # 同目录硬链接一次性发布完整文件；目标已存在时原子拒绝，绝不覆盖。
+    os.link(temporary, path)
+  finally:
+    temporary.unlink(missing_ok=True)
+  directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+  try:
+    os.fsync(directory)
+  finally:
+    os.close(directory)
+  return packet["teacher_id"]
+
+
+def load_bundle(path, device="cpu"):
+  packet = torch.load(path, map_location=device, weights_only=True)
+  if packet["contract"] != CONTRACT:
+    raise ValueError("共享actor的输入约定不一致")
+  saved_source = packet.get("source_identity")
+  if (
+    not isinstance(saved_source, dict)
+    or saved_source.get("sha256") != source_identity()["sha256"]
+  ):
+    raise ValueError("源码或资产改变，需要重新建立模型身份")
+  him, actor, cnn, gru = make_modules()
+  teacher = Teacher(him, actor).to(device)
+  cnn, gru = cnn.to(device), gru.to(device)
+  teacher.initialization = copy.deepcopy(packet["initialization"])
+  teacher.load_state_dict(packet["teacher"], strict=True)
+  cnn.load_state_dict(packet["cnn"], strict=True)
+  gru.load_state_dict(packet["gru"], strict=True)
+  if teacher_identity(teacher) != packet["teacher_id"]:
+    raise ValueError("共享actor/HIM/地形编码器权重身份不一致")
+  return teacher, cnn, gru, packet
+
+
+def require_teacher_evaluation(path, teacher_id, stage="student"):
+  """从原始采集包重新评分；四个手填布尔不能授予资格。"""
+  if path is None:
+    raise ValueError("需要独立能力评估的原始证据索引")
+  from black.eval_collect import source_files
+  from black.eval_protocol import digest
+  from black.qualification import require_qualification
+
+  return require_qualification(
+    path, teacher_id, stage, source_sha256=digest(source_files())
+  )

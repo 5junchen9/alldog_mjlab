@@ -1,0 +1,72 @@
+[
+  {
+    "robot": "black",
+    "case": "teacher",
+    "exit_code": 0,
+    "evidence": "gpu/windows/black_teacher.json",
+    "original_sha256": "f120baafedd8db9c7eac6e320df39521ac1476e8617d7a30e05a3032a98e27cc"
+  },
+  {
+    "robot": "black",
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "evidence": "gpu/windows/black_teacher_resume.json",
+    "original_sha256": "c36c6140953ae8ee6e0e2cbde9e479251e9e41d585e2f47b65ab72934efcbf2c"
+  },
+  {
+    "robot": "black",
+    "case": "student",
+    "exit_code": 0,
+    "evidence": "gpu/windows/black_student.json",
+    "original_sha256": "ea3f555c6ff7f14d07a368218f6a1a3f90022f2f8a62fa23d368e1c9d957b67b"
+  },
+  {
+    "robot": "black",
+    "case": "student_resume",
+    "exit_code": 0,
+    "evidence": "gpu/windows/black_student_resume.json",
+    "original_sha256": "aab961f53946bcefdad60d56a4c6ec369bba89d152b9ca741f4b2cd35227ac43"
+  },
+  {
+    "robot": "black",
+    "case": "boundary_gpu",
+    "exit_code": 0,
+    "evidence": "gpu/windows/black_boundary_gpu.json",
+    "original_sha256": "47b51982d494178d6afaaba85c73b128d435cc897fed8d5f69006c92e74ce67c"
+  },
+  {
+    "robot": "wolf",
+    "case": "teacher",
+    "exit_code": 0,
+    "evidence": "gpu/windows/wolf_teacher.json",
+    "original_sha256": "6f7061c7eac8407dd48294eef259bcbac7ccc888be7a1fd65ad57facaf645922"
+  },
+  {
+    "robot": "wolf",
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "evidence": "gpu/windows/wolf_teacher_resume.json",
+    "original_sha256": "70072dea5759cfb5b6b233f2241be13f147a112a429304d1d124faa6a47cbf92"
+  },
+  {
+    "robot": "wolf",
+    "case": "student",
+    "exit_code": 0,
+    "evidence": "gpu/windows/wolf_student.json",
+    "original_sha256": "5a79b41482d977dc669bdb8acd764c265f5dc3959d7dffe3aab82dd3d06828b8"
+  },
+  {
+    "robot": "wolf",
+    "case": "student_resume",
+    "exit_code": 0,
+    "evidence": "gpu/windows/wolf_student_resume.json",
+    "original_sha256": "31ad5c6d85a61dcf36de1738cbbfdd794a6fa6cd68528841646532c3afa0b275"
+  },
+  {
+    "robot": "wolf",
+    "case": "boundary_gpu",
+    "exit_code": 0,
+    "evidence": "gpu/windows/wolf_boundary_gpu.json",
+    "original_sha256": "e4f346451a8e1e939656ff0cff9699745a842344f80a4e77d81051fcbfc2b0c3"
+  }
+]

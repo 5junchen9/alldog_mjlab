@@ -1,0 +1,42 @@
+{
+  "head": "31c219ae2bb2bb85bbd2d0bf165de6b8d09c2582",
+  "working_tree_clean": true,
+  "cpu_tests": 277,
+  "source_identity": {
+    "black": {
+      "sha256": "0b2a81fa8203e6ffbba1fc9779772181931d629ffa73d33eeee347ac653d631d",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.1+cu126",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "12.6"
+      }
+    },
+    "wolf": {
+      "sha256": "621a3805547a2af005f69eb55f577539cd7ad01a5b857dbca873b88f898f846f",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.1+cu126",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "12.6"
+      }
+    }
+  },
+  "gpu_optimizer_validated": true,
+  "gpu_optimizer_scope": "32_env_teacher_student_one_round_and_independent_process_resume; synthetic_memory_boundaries",
+  "gpu_checks_passed": 10
+}

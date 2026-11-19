@@ -1,0 +1,63 @@
+{
+  "reviewed_against_commit": "47c6f78393143a4e54c52306b9be5f885b9832ac",
+  "runtime_source_frozen_during_gpu_checks": true,
+  "checks": [
+    {
+      "item": "raw_capture_health_before_augmentation",
+      "result": "pass",
+      "evidence": "black/test_boundary_review.py"
+    },
+    {
+      "item": "unhealthy_teacher_geometry_and_student_depth_mask_together",
+      "result": "pass",
+      "evidence": "black/test_boundary_review.py"
+    },
+    {
+      "item": "camera_health_and_hit_evaluation_rules",
+      "result": "pass",
+      "evidence": "black/test_boundary_review.py; wolf/tests/test_boundary_review.py"
+    },
+    {
+      "item": "Wolf_first_course_entry_and_PPO_save_restore",
+      "result": "pass",
+      "evidence": "wolf/tests/test_boundary_review.py"
+    },
+    {
+      "item": "range_boundary_dropout_and_no_false_clamped_background",
+      "result": "pass",
+      "evidence": "black/test_boundary_review.py"
+    },
+    {
+      "item": "shared_overlap_rules_in_sampling_burnin_gradient_and_JIT",
+      "result": "pass",
+      "evidence": "black/test_review_fixes.py; black/test_export.py; gpu/*/boundary_gpu.json"
+    },
+    {
+      "item": "real_Adam_across_handoff",
+      "result": "pass",
+      "evidence": "black/test_student_training.py::test_real_student_optimizer_crosses_memory_handoff"
+    },
+    {
+      "item": "previous_Black_overall_camera_gate",
+      "result": "already_present_in_v2; made_per_trial_score_consistent",
+      "evidence": "black/qualification.py"
+    },
+    {
+      "item": "correct_review_assumptions",
+      "result": "Wolf_critic_433; bounded_memory_not_zero_distribution_shift; JC30.96GiB_WSL15.33GiB",
+      "evidence": "docs/boundary_review_20261119.md"
+    },
+    {
+      "item": "Windows_GPU_teacher_student_and_resume",
+      "result": "pass_10_checks_32_envs_and_synthetic_memory",
+      "evidence": "WINDOWS_GPU_MATRIX.json"
+    }
+  ],
+  "unverified": [
+    "natural_NaN_root_cause",
+    "4096_student_optimizer_and_long_stability",
+    "task_learning_convergence_and_independent_learning_seeds",
+    "real_camera_mount_and_hardware",
+    "Black_student_ONNX_and_Wolf_deployment_exports"
+  ]
+}

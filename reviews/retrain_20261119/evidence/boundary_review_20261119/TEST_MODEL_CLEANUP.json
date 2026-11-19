@@ -1,0 +1,170 @@
+{
+  "scope": "exact_agent_generated_v3_unqualified_test_weights_only",
+  "base": "/home/wujuncheng/rl_train/retrain/runs/boundary_review_20261119_001",
+  "files": [
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_student/student.pt",
+      "bytes": 1998387,
+      "sha256": "eb5b07383e909678ba61105dd2cf7eb45ce394cc76a37a64dc5e57e0d6028be9"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_student/student_update_000001.pt",
+      "bytes": 1998387,
+      "sha256": "eb5b07383e909678ba61105dd2cf7eb45ce394cc76a37a64dc5e57e0d6028be9"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_student_resume/student.pt",
+      "bytes": 1998515,
+      "sha256": "c1ac29e6a8362e368a552e6e20ba695975d43e975bcfa2cd3d399a2e8bec79c8"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 1998515,
+      "sha256": "c1ac29e6a8362e368a552e6e20ba695975d43e975bcfa2cd3d399a2e8bec79c8"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_teacher/teacher.pt",
+      "bytes": 9414527,
+      "sha256": "ba0f08f9f264e0c6fe429be53b56a982e80dec95f4b116722ab88970651413e6"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9414527,
+      "sha256": "ba0f08f9f264e0c6fe429be53b56a982e80dec95f4b116722ab88970651413e6"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9414911,
+      "sha256": "ebe679a5b24b8404ac38c6f91e6824d1677eff2d004f1d2b5ccb49e8cafca3dd"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9414911,
+      "sha256": "ebe679a5b24b8404ac38c6f91e6824d1677eff2d004f1d2b5ccb49e8cafca3dd"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/general_teacher/teacher.pt",
+      "bytes": 9415165,
+      "sha256": "53d2a06ce49a98c83b791208f555c0bb1c2de5570ec18e5fa6c5c306608b1516"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/general_teacher/teacher_update_000001.pt",
+      "bytes": 9415165,
+      "sha256": "53d2a06ce49a98c83b791208f555c0bb1c2de5570ec18e5fa6c5c306608b1516"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/general_teacher_resume/teacher.pt",
+      "bytes": 9415549,
+      "sha256": "c81ebbc81c8d11bde22bfe7bad83154290eb81a121f48af37023138667c854aa"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/general_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9415549,
+      "sha256": "c81ebbc81c8d11bde22bfe7bad83154290eb81a121f48af37023138667c854aa"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/specialty_stairs_teacher/teacher.pt",
+      "bytes": 9424319,
+      "sha256": "e2c269fb2be6fa81e54ed59b8667003ac32cb492e1cc203a9792655918404743"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/specialty_stairs_teacher/teacher_update_000001.pt",
+      "bytes": 9424319,
+      "sha256": "e2c269fb2be6fa81e54ed59b8667003ac32cb492e1cc203a9792655918404743"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/specialty_stairs_teacher_resume/teacher.pt",
+      "bytes": 9424831,
+      "sha256": "c0c4911cdac7be9412c6c0bd916d1754ed32f45390871727d55a072be8f92252"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/black/specialty_stairs_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9424831,
+      "sha256": "c0c4911cdac7be9412c6c0bd916d1754ed32f45390871727d55a072be8f92252"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_student/student.pt",
+      "bytes": 2067251,
+      "sha256": "aedab54ca5b95cf3c1e02287bcd57b66779f88a1c073f353364a82ece2115d8a"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_student/student_update_000001.pt",
+      "bytes": 2067251,
+      "sha256": "aedab54ca5b95cf3c1e02287bcd57b66779f88a1c073f353364a82ece2115d8a"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_student_resume/student.pt",
+      "bytes": 2067443,
+      "sha256": "976f2132636194c26858887826554406a63b1552665cff12666b0e85a9b463e4"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 2067443,
+      "sha256": "976f2132636194c26858887826554406a63b1552665cff12666b0e85a9b463e4"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "dde52858bec256b7b5603651ffb9e197b8334fdec3960e9a27f9d3cb75ab6fe0"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "dde52858bec256b7b5603651ffb9e197b8334fdec3960e9a27f9d3cb75ab6fe0"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "ecbe57639524c2421c7432fd41306098988192f652f72e126c534089d414d18c"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "ecbe57639524c2421c7432fd41306098988192f652f72e126c534089d414d18c"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/general_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "346bbb1e9ffa5c656d892c942bdecaffac74a10067ea94ad1f38567680de42f0"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/general_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "346bbb1e9ffa5c656d892c942bdecaffac74a10067ea94ad1f38567680de42f0"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/general_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "aaac674ca55c840e5d74358f8077db53ba69f0dd89227b803ddea3dd684a43aa"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/general_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "aaac674ca55c840e5d74358f8077db53ba69f0dd89227b803ddea3dd684a43aa"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/stairs_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "b99dff76572411216c84740620f164a34b0d08e8fef4a83ca3e716ced816a8ab"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/stairs_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "b99dff76572411216c84740620f164a34b0d08e8fef4a83ca3e716ced816a8ab"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/stairs_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "c19698b0e6e704663f4b3d7241666b6181ae873c62c21c842df2ba839112523c"
+    },
+    {
+      "path": "runs/boundary_review_20261119_001/wolf/stairs_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "c19698b0e6e704663f4b3d7241666b6181ae873c62c21c842df2ba839112523c"
+    }
+  ],
+  "file_count": 32,
+  "bytes": 243515736,
+  "status": "deleted_and_verified",
+  "raw_rescoring_needs_model_weights": false
+}
