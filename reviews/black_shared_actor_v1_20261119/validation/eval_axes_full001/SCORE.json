@@ -1,0 +1,1821 @@
+{
+  "automatic_promotion": false,
+  "bundle_sha256": "fcf3f66f61ad999dfeb79c1e20fd55592cfef080128baf37f390549465bfd842",
+  "collection_complete": true,
+  "counts": {
+    "administrative_incomplete": 0,
+    "assigned": 24,
+    "complete": 24,
+    "independent_episodes": 24,
+    "invalid_evidence": 0,
+    "native_timeout": 0,
+    "physical_failure": 2,
+    "started": 24,
+    "success": 10
+  },
+  "coverage": {
+    "cells": {
+      "axis/0/+0.10/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/0/+0.10/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/0/+0.25/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/0/+0.25/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/0/-0.10/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/0/-0.10/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/0/-0.25/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/0/-0.25/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/1/+0.10/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/1/+0.10/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/1/+0.25/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/1/+0.25/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/1/-0.10/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/1/-0.10/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/1/-0.25/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/1/-0.25/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/2/+0.10/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/2/+0.10/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/2/+0.25/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/2/+0.25/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/2/-0.10/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/2/-0.10/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "axis/2/-0.25/0.0": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      },
+      "axis/2/-0.25/3.141592653589793": {
+        "assigned": 1,
+        "complete": 1,
+        "qualification": "not_registered",
+        "success": 1
+      }
+    },
+    "missing_axis_cells": [],
+    "missing_flat8_cells": [
+      "flat8/forward",
+      "flat8/lateral_left",
+      "flat8/lateral_right",
+      "flat8/reverse",
+      "flat8/reversal",
+      "flat8/stop",
+      "flat8/yaw_left",
+      "flat8/yaw_right"
+    ],
+    "stairs_qualification_scope": "not_registered"
+  },
+  "manifest_sha256": "56c549f2cc3d0bec6a0f0e1455a202e4a1460117ca3f0cb2c7a1ee83db5a6abb",
+  "protocol_id": "shared_actor_absolute_diagnostics_v1",
+  "qualification": "not_registered",
+  "result_sha256": "cc1ecb36bb6f45d3a541f55870c32358718e619e48b078ad800b3271585a4cd9",
+  "schema": "shared_actor_evaluation_v1",
+  "source_sha256": "56bf36c53b7e55832cdaa0c02425408a76ccc83b0593416db172499ca2656837",
+  "status_counts": {
+    "fail": 14,
+    "pass": 10
+  },
+  "teacher_id": "37e671b908236b43921373af11505550f85614800cc8c54ebbcc9c58fd2dd48e",
+  "trials": [
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        0,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.09833690979929088,
+            "nonresponder": false,
+            "overshoot_count": 0,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "start",
+            "response_s": 0.06,
+            "steady_directed": 0.0017155745491254492,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.06789630685001612,
+            "nonresponder": false,
+            "overshoot_count": 60,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.04,
+            "steady_directed": 0.14378328431397677,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.058746362006030305,
+          "settled_at": 2.2,
+          "ticks": 250,
+          "yaw": 0.0446218977777753
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0000"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        1,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.10674591069109737,
+            "nonresponder": false,
+            "overshoot_count": 6,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "start",
+            "response_s": 0.1,
+            "steady_directed": 0.0005476112198084592,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.04920514439640101,
+            "nonresponder": false,
+            "overshoot_count": 53,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.08,
+            "steady_directed": 0.10868156368436757,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.08160164041658959,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.11728684420511126
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0001"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        2,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.06499446351954248,
+            "nonresponder": false,
+            "overshoot_count": 88,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.42,
+            "steady_directed": 0.12470206598809455,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.09601768551750865,
+            "nonresponder": false,
+            "overshoot_count": 0,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "reverse",
+            "response_s": 0.04,
+            "steady_directed": 0.0048113785089662995,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.09418467010294806,
+          "settled_at": 1.32,
+          "ticks": 250,
+          "yaw": 0.09770428755320609
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0002"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        3,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.05976767987944186,
+            "nonresponder": false,
+            "overshoot_count": 60,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.04,
+            "steady_directed": 0.10835104971192777,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.10103923500413657,
+            "nonresponder": false,
+            "overshoot_count": 9,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "reverse",
+            "response_s": 3.38,
+            "steady_directed": 0.01330536640351056,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.06277459398209904,
+          "settled_at": 2.5,
+          "ticks": 250,
+          "yaw": 0.08879546549834777
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0003"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        4,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.11875015326077118,
+            "nonresponder": false,
+            "overshoot_count": 29,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.14,
+            "steady_directed": 0.17663909516995774,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.047243637293577195,
+            "nonresponder": false,
+            "overshoot_count": 73,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.1,
+            "steady_directed": 0.29003613248467447,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.07852552072009361,
+          "settled_at": 1.18,
+          "ticks": 250,
+          "yaw": 0.08463665394287091
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0004"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        5,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.0997706109052524,
+            "nonresponder": false,
+            "overshoot_count": 17,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.08,
+            "steady_directed": 0.19310997965279966,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.034353667264804245,
+            "nonresponder": false,
+            "overshoot_count": 13,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.08,
+            "steady_directed": 0.24247096770443022,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.07174270674016676,
+          "settled_at": 5.44,
+          "ticks": 250,
+          "yaw": 0.07569375907967332
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0005"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        6,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.04072287578834221,
+            "nonresponder": false,
+            "overshoot_count": 20,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.1,
+            "steady_directed": 0.23838919441448525,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.14622839103016305,
+            "nonresponder": false,
+            "overshoot_count": 26,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.24,
+            "steady_directed": 0.1551272105189855,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.05355798739099236,
+          "settled_at": 4.78,
+          "ticks": 250,
+          "yaw": 0.07404634243575856
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0006"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        7,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.04702999424189329,
+            "nonresponder": false,
+            "overshoot_count": 49,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.06,
+            "steady_directed": 0.2755596895888448,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 0,
+            "complete": true,
+            "mae": 0.1038336288370192,
+            "nonresponder": false,
+            "overshoot_count": 13,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.22,
+            "steady_directed": 0.18140564000234008,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.07135938222235132,
+          "settled_at": 2.42,
+          "ticks": 250,
+          "yaw": 0.05589302720996784
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0007"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        8,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.052248191421385856,
+            "nonresponder": false,
+            "overshoot_count": 0,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "start",
+            "response_s": 1.68,
+            "steady_directed": 0.04818188850069419,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.05551412612199783,
+            "nonresponder": false,
+            "overshoot_count": 23,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.14,
+            "steady_directed": 0.07372740805149078,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.06883676777910941,
+          "settled_at": 3.0,
+          "ticks": 250,
+          "yaw": 0.062055809792247604
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0008"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        9,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.05389787673666433,
+            "nonresponder": false,
+            "overshoot_count": 5,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 1.08,
+            "steady_directed": 0.054299623000479184,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.06788090209505754,
+            "nonresponder": false,
+            "overshoot_count": 33,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 1.54,
+            "steady_directed": 0.08913326744892401,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.0987876989565933,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.11289559722295962
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0009"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        10,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.040285874335095284,
+            "nonresponder": false,
+            "overshoot_count": 53,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.1,
+            "steady_directed": 0.1163836692739278,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.05196340250084177,
+            "nonresponder": false,
+            "overshoot_count": 5,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.52,
+            "steady_directed": 0.0546383855282329,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.05566841282910943,
+          "settled_at": 2.36,
+          "ticks": 250,
+          "yaw": 0.0751926957978867
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0010"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "physical_failure",
+      "episode_identity": [
+        0,
+        119041,
+        11,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.05530803061497863,
+            "nonresponder": false,
+            "overshoot_count": 35,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.06,
+            "steady_directed": 0.08931674905645196,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": false,
+            "mae": 0.17003265588845343,
+            "nonresponder": false,
+            "overshoot_count": 93,
+            "overshoot_denominator": 198,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "reverse",
+            "response_s": 0.16,
+            "steady_directed": 0.21697947125872502,
+            "steady_ticks": 198,
+            "target": -0.10000000149011612,
+            "ticks": 248
+          }
+        ],
+        "park": {
+          "complete": false,
+          "passed": false,
+          "planar": null,
+          "settled_at": null,
+          "ticks": 0,
+          "yaw": null
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 598,
+      "physical_failure": true,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0011"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "physical_failure",
+      "episode_identity": [
+        0,
+        119041,
+        12,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": false,
+            "mae": 0.3273915917509132,
+            "nonresponder": false,
+            "overshoot_count": 36,
+            "overshoot_denominator": 54,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "start",
+            "response_s": 0.26,
+            "steady_directed": 0.5412549703485436,
+            "steady_ticks": 54,
+            "target": -0.25,
+            "ticks": 104
+          },
+          {
+            "axis": 1,
+            "complete": false,
+            "mae": null,
+            "nonresponder": true,
+            "overshoot_count": 0,
+            "overshoot_denominator": 0,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "reverse",
+            "response_s": null,
+            "steady_directed": null,
+            "steady_ticks": 0,
+            "target": 0.25,
+            "ticks": 0
+          }
+        ],
+        "park": {
+          "complete": false,
+          "passed": false,
+          "planar": null,
+          "settled_at": null,
+          "ticks": 0,
+          "yaw": null
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 204,
+      "physical_failure": true,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0012"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        13,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.08501595611101948,
+            "nonresponder": false,
+            "overshoot_count": 42,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.12,
+            "steady_directed": 0.22889726942055857,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.08335782375186682,
+            "nonresponder": false,
+            "overshoot_count": 62,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.24,
+            "steady_directed": 0.2814153212681413,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.06479525059856703,
+          "settled_at": 2.2800000000000002,
+          "ticks": 250,
+          "yaw": 0.060289253223105334
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0013"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        14,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.09745182311162352,
+            "nonresponder": false,
+            "overshoot_count": 67,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.1,
+            "steady_directed": 0.25188461953774094,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.07283329073805361,
+            "nonresponder": false,
+            "overshoot_count": 19,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.46,
+            "steady_directed": 0.20451663758140057,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.0687387638040527,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.10093643399892607
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0014"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        15,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.0981064523383975,
+            "nonresponder": false,
+            "overshoot_count": 89,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.68,
+            "steady_directed": 0.31798576105386017,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 1,
+            "complete": true,
+            "mae": 0.1332463071923121,
+            "nonresponder": false,
+            "overshoot_count": 15,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.38,
+            "steady_directed": 0.13294488388492026,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.07580747882148064,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.08318894636072219
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0015"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        16,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.11322606218163855,
+            "nonresponder": false,
+            "overshoot_count": 35,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "start",
+            "response_s": 0.06,
+            "steady_directed": 0.03224913555081002,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.11067452202765708,
+            "nonresponder": false,
+            "overshoot_count": 80,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.06,
+            "steady_directed": 0.12745308977337116,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.07211219291302555,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.10168060569185763
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0016"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        17,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.0900873052875977,
+            "nonresponder": false,
+            "overshoot_count": 12,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "start",
+            "response_s": 0.06,
+            "steady_directed": 0.027773703282000496,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.12274723712587729,
+            "nonresponder": false,
+            "overshoot_count": 41,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "reverse",
+            "response_s": 0.0,
+            "steady_directed": 0.033374009688850494,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.09616272837285093,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.08407802664046175
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0017"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        18,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.11784134829096729,
+            "nonresponder": false,
+            "overshoot_count": 55,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.04,
+            "steady_directed": 0.09943579225189751,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.0945672534359619,
+            "nonresponder": true,
+            "overshoot_count": 16,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": false,
+            "phase": "reverse",
+            "response_s": null,
+            "steady_directed": 0.023412251849658786,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.0447088200749777,
+          "settled_at": 2.48,
+          "ticks": 250,
+          "yaw": 0.07014926770376041
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0018"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        19,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.09425741122162436,
+            "nonresponder": false,
+            "overshoot_count": 49,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.04,
+            "steady_directed": 0.09469355164968875,
+            "steady_ticks": 200,
+            "target": 0.10000000149011612,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.09089902759820688,
+            "nonresponder": false,
+            "overshoot_count": 47,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.04,
+            "steady_directed": 0.07364970220893156,
+            "steady_ticks": 200,
+            "target": -0.10000000149011612,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.0800176465614523,
+          "settled_at": 3.68,
+          "ticks": 250,
+          "yaw": 0.08498895733026439
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0019"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        20,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.14984641748247668,
+            "nonresponder": false,
+            "overshoot_count": 26,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.02,
+            "steady_directed": 0.1378766165417619,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.11081157391425223,
+            "nonresponder": false,
+            "overshoot_count": 53,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.16,
+            "steady_directed": 0.23566048736218362,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.06396001042807256,
+          "settled_at": 3.8000000000000003,
+          "ticks": 250,
+          "yaw": 0.07278626954288847
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0020"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        21,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.16803888717317023,
+            "nonresponder": false,
+            "overshoot_count": 53,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.8200000000000001,
+            "steady_directed": 0.19764412245131097,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.17392183668212965,
+            "nonresponder": false,
+            "overshoot_count": 92,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.24,
+            "steady_directed": 0.2867638643900864,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.05462786542202795,
+          "settled_at": 1.54,
+          "ticks": 250,
+          "yaw": 0.07181398800387978
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0021"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        22,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.12768242149613798,
+            "nonresponder": false,
+            "overshoot_count": 76,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.9400000000000001,
+            "steady_directed": 0.2602107817027718,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.14988402650982607,
+            "nonresponder": false,
+            "overshoot_count": 74,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.06,
+            "steady_directed": 0.27073622061579955,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": false,
+          "planar": 0.06342944657005224,
+          "settled_at": null,
+          "ticks": 250,
+          "yaw": 0.10883133487473241
+        },
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "fail",
+      "success": false,
+      "trial_id": "trial_0022"
+    },
+    {
+      "administrative_incomplete": false,
+      "complete": true,
+      "end_reason": "horizon",
+      "episode_identity": [
+        0,
+        119041,
+        23,
+        0,
+        0
+      ],
+      "full_horizon": true,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "motion": [
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.10655963023658842,
+            "nonresponder": false,
+            "overshoot_count": 48,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "start",
+            "response_s": 0.02,
+            "steady_directed": 0.22350855479482562,
+            "steady_ticks": 200,
+            "target": 0.25,
+            "ticks": 250
+          },
+          {
+            "axis": 2,
+            "complete": true,
+            "mae": 0.11218732760287821,
+            "nonresponder": false,
+            "overshoot_count": 75,
+            "overshoot_denominator": 200,
+            "overshoot_qualification": "not_registered",
+            "passed": true,
+            "phase": "reverse",
+            "response_s": 0.02,
+            "steady_directed": 0.25519881858490406,
+            "steady_ticks": 200,
+            "target": -0.25,
+            "ticks": 250
+          }
+        ],
+        "park": {
+          "complete": true,
+          "passed": true,
+          "planar": 0.061625580138328744,
+          "settled_at": 5.46,
+          "ticks": 250,
+          "yaw": 0.08226144359912724
+        },
+        "passed": true
+      },
+      "native_timeout": false,
+      "observed_ticks": 900,
+      "physical_failure": false,
+      "program": "axis",
+      "started": true,
+      "status": "pass",
+      "success": true,
+      "trial_id": "trial_0023"
+    }
+  ]
+}

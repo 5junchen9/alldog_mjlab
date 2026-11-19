@@ -1,0 +1,189 @@
+{
+  "schema": "shared_actor_gpu_learner_resume_review_v1",
+  "runs": [
+    {
+      "run": "resume_teacher_seed001",
+      "teacher_id": "dd4897745d515cc8dae8ba62ad9e13a9e7d2630b4a31ff6e835c8bca6e32719a",
+      "rounds": 1,
+      "adam_steps": [
+        20
+      ],
+      "normalizer_counts": [
+        768,
+        768
+      ],
+      "all_tensors_finite": true,
+      "periodic_matches_final_teacher": true,
+      "checkpoint_sha256": "599ede5a7982f67b3c9be600ec0286ada0c6916edf8a8ba37220d6fb91cde14d",
+      "result": {
+        "starting_updates": 0,
+        "added_updates": 1,
+        "completed_updates": 1,
+        "optimizer_calls": 20,
+        "teacher_id": "dd4897745d515cc8dae8ba62ad9e13a9e7d2630b4a31ff6e835c8bca6e32719a",
+        "qualification": "not_evaluated",
+        "recipe": {
+          "algorithm": "shared_actor_teacher_ppo_v1",
+          "num_envs": 32,
+          "controls_per_round": 24,
+          "ppo_options": {
+            "num_learning_epochs": 5,
+            "num_mini_batches": 4,
+            "learning_rate": 5e-05,
+            "schedule": "fixed",
+            "gamma": 0.99,
+            "lam": 0.95,
+            "entropy_coef": 0.01,
+            "desired_kl": 0.01,
+            "max_grad_norm": 1.0,
+            "value_loss_coef": 1.0,
+            "use_clipped_value_loss": true,
+            "clip_param": 0.2,
+            "normalize_advantage_per_mini_batch": false,
+            "optimizer": "adam"
+          }
+        },
+        "learner_resumed": false,
+        "exact_physical_resume": false,
+        "restart_boundary": "new_physics_curriculum_camera_episode",
+        "camera": {
+          "parent": "robot/d435_link",
+          "position_relative_trunk_m": [
+            0.325,
+            0.0,
+            -0.038000000000000006
+          ],
+          "optical_axis_relative_trunk": [
+            0.8544588301328074,
+            0.0,
+            -0.5195191118795095
+          ],
+          "fov_degrees": [
+            86.99999237060547,
+            57.999996185302734
+          ],
+          "resolution": [
+            424,
+            240
+          ],
+          "convention": "MuJoCo camera local -Z; static compiled nominal data relative trunk",
+          "distinct_from_Codex_aligned88_8": true
+        },
+        "render": {
+          "reference_wh": [
+            424,
+            240
+          ],
+          "render_wh": [
+            160,
+            90
+          ],
+          "camera_id": 0,
+          "chunk": 32,
+          "frustum_retargeted": true,
+          "model_mutated": false
+        },
+        "initialization": "r800_weights_only",
+        "exact_failure_replay": false,
+        "capability_evaluated": false
+      }
+    },
+    {
+      "run": "resume_teacher_continue001",
+      "teacher_id": "37e671b908236b43921373af11505550f85614800cc8c54ebbcc9c58fd2dd48e",
+      "rounds": 2,
+      "adam_steps": [
+        40
+      ],
+      "normalizer_counts": [
+        1536,
+        1536
+      ],
+      "all_tensors_finite": true,
+      "periodic_matches_final_teacher": true,
+      "checkpoint_sha256": "fcf3f66f61ad999dfeb79c1e20fd55592cfef080128baf37f390549465bfd842",
+      "result": {
+        "starting_updates": 1,
+        "added_updates": 1,
+        "completed_updates": 2,
+        "optimizer_calls": 40,
+        "teacher_id": "37e671b908236b43921373af11505550f85614800cc8c54ebbcc9c58fd2dd48e",
+        "qualification": "not_evaluated",
+        "recipe": {
+          "algorithm": "shared_actor_teacher_ppo_v1",
+          "num_envs": 32,
+          "controls_per_round": 24,
+          "ppo_options": {
+            "num_learning_epochs": 5,
+            "num_mini_batches": 4,
+            "learning_rate": 5e-05,
+            "schedule": "fixed",
+            "gamma": 0.99,
+            "lam": 0.95,
+            "entropy_coef": 0.01,
+            "desired_kl": 0.01,
+            "max_grad_norm": 1.0,
+            "value_loss_coef": 1.0,
+            "use_clipped_value_loss": true,
+            "clip_param": 0.2,
+            "normalize_advantage_per_mini_batch": false,
+            "optimizer": "adam"
+          }
+        },
+        "learner_resumed": true,
+        "exact_physical_resume": false,
+        "restart_boundary": "new_physics_curriculum_camera_episode",
+        "camera": {
+          "parent": "robot/d435_link",
+          "position_relative_trunk_m": [
+            0.325,
+            0.0,
+            -0.038000000000000006
+          ],
+          "optical_axis_relative_trunk": [
+            0.8544588301328074,
+            0.0,
+            -0.5195191118795095
+          ],
+          "fov_degrees": [
+            86.99999237060547,
+            57.999996185302734
+          ],
+          "resolution": [
+            424,
+            240
+          ],
+          "convention": "MuJoCo camera local -Z; static compiled nominal data relative trunk",
+          "distinct_from_Codex_aligned88_8": true
+        },
+        "render": {
+          "reference_wh": [
+            424,
+            240
+          ],
+          "render_wh": [
+            160,
+            90
+          ],
+          "camera_id": 0,
+          "chunk": 32,
+          "frustum_retargeted": true,
+          "model_mutated": false
+        },
+        "initialization": "learner_resume_cold_environment",
+        "exact_failure_replay": false,
+        "capability_evaluated": false
+      }
+    }
+  ],
+  "unchanged_between_rounds": {
+    "him.": true,
+    "actor.": false,
+    "terrain_encoder.": false,
+    "cnn": true,
+    "gru": true
+  },
+  "physics": "new_episode_per_process",
+  "capability_evaluated": false,
+  "formal_training_started": false
+}

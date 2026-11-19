@@ -1,0 +1,263 @@
+"""学生实际控制采样；冻结教师在相同访问状态上提供监督。"""
+
+from pathlib import Path
+
+import torch
+from checkpoint import save_bundle, teacher_identity
+from learner_state import capture_rng, parameter_signature, restore_rng, validate_resume
+from student import SharedStudent, distillation_loss
+
+# isort: split
+# checkpoint/model先注册旧学生模块路径。
+from causal_visual_gru import State
+
+CONTROL_STEPS = 24
+LANES_PER_BATCH = 128
+LEARNING_RATE = 1e-4
+
+
+def _state_slice(state, start, stop, device):
+  if state is None:
+    return None
+  return State(
+    episode=state.episode[start:stop].detach().to(device),
+    frame=state.frame[start:stop].detach().to(device),
+    capture_tick=state.capture_tick[start:stop].detach().to(device),
+    tick=state.tick,
+    hidden=state.hidden[start:stop].detach().to(device),
+  )
+
+
+def _metadata_slice(metadata, start, stop, device):
+  return {
+    name: value[start:stop].to(device) if torch.is_tensor(value) else value
+    for name, value in metadata.items()
+  }
+
+
+def _collect(env, student, state):
+  history, geometry, depth, metadata = [], [], [], []
+  student.eval()
+  with torch.no_grad():
+    for _ in range(CONTROL_STEPS):
+      current = env.obs["history"].reshape(env.count, 5, 45)
+      row = env.frames.metadata()
+      # 在step之前复制，防止环境复用观测/帧缓冲区改变旧样本。
+      history.append(current.detach().cpu().clone())
+      geometry.append(env.obs["geometry"].detach().cpu().clone())
+      depth.append(env.frames.depth.detach().cpu().clone())
+      metadata.append(
+        {
+          name: value.detach().cpu().clone() if torch.is_tensor(value) else value
+          for name, value in row.items()
+        }
+      )
+      action, _, state = student(current, env.frames.depth, row, state)
+      env.step(action)
+  return {
+    "history": torch.stack(history),
+    "geometry": torch.stack(geometry),
+    "depth": torch.stack(depth),
+    "metadata": metadata,
+  }, state
+
+
+def _sequence(student, sample, prefix, start, stop, device):
+  history = sample["history"][:, start:stop].to(device)
+  depth = sample["depth"][:, start:stop].to(device)
+  metadata = [_metadata_slice(row, start, stop, device) for row in sample["metadata"]]
+  state = _state_slice(prefix, start, stop, device)
+  actions, visual, state = student.forward_sequence(history, depth, metadata, state)
+  del actions  # 监督使用相同visual重新过冻结actor，保留这条梯度路径。
+  return history, visual, state
+
+
+def _refresh_state(student, sample, prefix, count, device):
+  """更新后用该轮输入重算hidden；更早episode前缀仍属于上一模型版本。"""
+  student.eval()
+  parts = []
+  with torch.no_grad():
+    for start in range(0, count, LANES_PER_BATCH):
+      stop = min(start + LANES_PER_BATCH, count)
+      _, _, state = _sequence(student, sample, prefix, start, stop, device)
+      parts.append(_state_slice(state, 0, stop - start, "cpu"))
+  return State(
+    episode=torch.cat([state.episode for state in parts]).to(device),
+    frame=torch.cat([state.frame for state in parts]).to(device),
+    capture_tick=torch.cat([state.capture_tick for state in parts]).to(device),
+    tick=parts[0].tick,
+    hidden=torch.cat([state.hidden for state in parts]).to(device),
+  )
+
+
+def train_student(
+  env,
+  teacher,
+  cnn,
+  gru,
+  rounds,
+  output,
+  feature_weight=1.0,
+  *,
+  resume: dict | None = None,
+  save_every: int = 100,
+):
+  """外部检查教师资格后调用；不在这里创建或推断能力验收结果。
+
+  每轮24步、每128lane做一次有限序列BPTT，累积后仅执行一次Adam。
+  跨轮保留截断hidden；更新后重算本轮，未实现整个长episode的精确重放。
+  rounds是本次新增轮数。resume仅恢复学习器；调用方先加载该包的模型，
+  物理、课程、相机和GRU记忆均重新初始化，不续接上次物理轨迹。
+  """
+  if rounds < 1:
+    raise ValueError("at least one student round required")
+  if save_every < 1:
+    raise ValueError("save_every must be >=1")
+  output = Path(output)
+  output.mkdir(parents=True, exist_ok=True)
+  student = SharedStudent(teacher, cnn, gru)
+  # Adam状态按参数位置绑定，因此记录名称并保持与实际optimizer完全相同的顺序。
+  named_parameters = [
+    (f"depth_encoder.{name}", parameter)
+    for name, parameter in student.depth_encoder.named_parameters()
+  ] + [(f"gru.{name}", parameter) for name, parameter in student.gru.named_parameters()]
+  parameters = [parameter for _, parameter in named_parameters]
+  signature = parameter_signature(named_parameters)
+  gru_cell_parameters = set(student.gru.gru.parameters())
+  optimizer = torch.optim.Adam(parameters, lr=LEARNING_RATE)
+  recipe = {
+    "controls_per_round": CONTROL_STEPS,
+    "lanes_per_microbatch": LANES_PER_BATCH,
+    "num_envs": env.count,
+    "optimizer": "Adam",
+    "learning_rate": LEARNING_RATE,
+    "gradient_clip_norm": 1.0,
+    "optimizer_updates_per_round": 1,
+    "feature_weight": float(feature_weight),
+    "loss": "Huber(action_mean)+feature_weight*Huber(terrain32)",
+    "recipe_status": "initial_experiment_not_tuned",
+    "controller": "student",
+    "teacher_queries": "same_student_visited_state",
+    "trainable": ["CNN", "GRU"],
+    "recurrent_context": "detached_prefix_then_replay_current_24_controls_after_update",
+    "prefix_limitation": "prefix_hidden_from_previous_model_version_truncated_approximation",
+    "exact_long_episode_replay": False,
+  }
+  completed_updates, optimizer_calls = 0, 0
+  if resume is not None:
+    if teacher_identity(teacher) != resume.get("teacher_id"):
+      raise ValueError("student resume teacher identity mismatch")
+    learning_state = validate_resume(resume, "student", recipe)
+    if learning_state.get("parameter_signature") != signature:
+      raise ValueError("student optimizer parameter signature mismatch")
+    completed_updates = resume["completed_updates"]
+    optimizer_calls = learning_state["optimizer_calls"]
+    if optimizer_calls != completed_updates:
+      raise ValueError("student requires one optimizer call per completed update")
+    optimizer.load_state_dict(learning_state["optimizer"])
+    restore_rng(learning_state["rng"], env.device)
+
+  def save(path):
+    return save_bundle(
+      path,
+      teacher,
+      cnn,
+      gru,
+      phase="student",
+      updates=completed_updates,
+      learning_state={
+        "schema": "shared_actor_learner_v1",
+        "recipe": recipe,
+        "optimizer": optimizer.state_dict(),
+        "optimizer_calls": optimizer_calls,
+        "rng": capture_rng(env.device),
+        "parameter_signature": signature,
+        "restart_boundary": "new_physics_curriculum_camera_gru_episode",
+      },
+    )
+
+  # 不加载上一进程的hidden；旧帧身份和新物理episode不能拼接。
+  state = None
+  starting_updates = completed_updates
+  metrics = []
+  periodic_checkpoints = []
+  for _ in range(rounds):
+    env.metrics.policy_update = completed_updates
+    prefix = _state_slice(state, 0, env.count, "cpu")
+    sample, state = _collect(env, student, state)
+    student.train()
+    optimizer.zero_grad(set_to_none=True)
+    summary = {
+      "round": completed_updates + 1,
+      "loss": 0.0,
+      "action_huber": 0.0,
+      "feature_huber": 0.0,
+    }
+    gru_cell_used = False
+
+    def mark_gru_cell_used(_module, _inputs):
+      nonlocal gru_cell_used
+      gru_cell_used = True
+
+    # 没有fresh valid帧时，原GRU按设计不调用GRUCell。
+    # 只记录本轮反向重放是否实际调用它，异常退出也会移除hook。
+    with student.gru.gru.register_forward_pre_hook(mark_gru_cell_used):
+      for start in range(0, env.count, LANES_PER_BATCH):
+        stop = min(start + LANES_PER_BATCH, env.count)
+        history, visual, _ = _sequence(student, sample, prefix, start, stop, env.device)
+        geometry = sample["geometry"][:, start:stop].to(env.device)
+        loss, values = distillation_loss(
+          history.flatten(0, 1),
+          geometry.flatten(0, 1),
+          visual.flatten(0, 1),
+          student,
+          teacher,
+          feature_weight,
+        )
+        if not bool(torch.isfinite(loss)):
+          raise FloatingPointError("nonfinite student loss")
+        # 每项loss已对24步和该微批取均值，最后不足128lane也按实际数量加权。
+        weight = (stop - start) / env.count
+        (loss * weight).backward()
+        summary["loss"] += float(loss.detach()) * weight
+        for name in ("action_huber", "feature_huber"):
+          summary[name] += float(values[name]) * weight
+    if any(
+      parameter.grad is None and (gru_cell_used or parameter not in gru_cell_parameters)
+      for parameter in parameters
+    ):
+      raise RuntimeError("missing student gradient")
+    # 保留未使用GRUCell的None梯度，Adam会跳过这些参数及其旧动量。
+    summary["gru_cell_used"] = gru_cell_used
+    torch.nn.utils.clip_grad_norm_(parameters, 1.0, error_if_nonfinite=True)
+    optimizer.step()
+    optimizer_calls += 1
+    completed_updates += 1
+    metrics.append(summary)
+    state = _refresh_state(student, sample, prefix, env.count, env.device)
+    if completed_updates % save_every == 0:
+      periodic_path = output / f"student_update_{completed_updates:06d}.pt"
+      save(periodic_path)
+      periodic_checkpoints.append(str(periodic_path))
+
+  path = output / "student.pt"
+  assert state is not None  # rounds>=1，每轮采样后都产生对应的GRU状态。
+  teacher_id = save(path)
+  return {
+    "checkpoint": str(path),
+    "teacher_id": teacher_id,
+    "completed_updates": completed_updates,
+    "starting_updates": starting_updates,
+    "added_updates": rounds,
+    "optimizer_calls": optimizer_calls,
+    "periodic_checkpoints": periodic_checkpoints,
+    "control_steps": rounds * CONTROL_STEPS,
+    "environment_transitions": rounds * CONTROL_STEPS * env.count,
+    "final_state_tick": state.tick,
+    "recipe": recipe,
+    "round_metrics": metrics,
+    "qualification": "not_assessed_here",
+    "learner_resumed": resume is not None,
+    "cold_start": ["physics", "curriculum", "camera", "GRU"],
+    "exact_physical_resume": False,
+  }

@@ -1,0 +1,163 @@
+共享actor新教师独立诊断采集与评分：已实现的执行规范
+记录日期：2026-11-19
+
+状态与范围
+
+本文件先记录只读核查的旧协议来源，再补入当前已实现的独立诊断链。eval_protocol.py、eval_adapter.py、eval_collect.py和eval_score.py已经接通；新教师完整资格尚未注册，资格门保持关闭。本文件不登记任何教师为合格，也不开放学生正式训练。
+checkpoint.py:110–122仍保持资格门closed。当前四个passed布尔值和teacher_id即使全部匹配，也不足以开放训练。周期存档、学习器恢复、有限PPO续算只验证工程链路，不计入能力试验。
+旧coverage10954对stock8954的配对结果不属于新shared_actor_v1教师。旧评估中的pass、fail、incomplete及缺测均原样保留。
+
+本文所有源码路径以如下工程根目录为起点：
+${PROJECT_ROOT}
+S = preparation/rough_v2/shared_actor_v1_20261119
+C = preparation/rough_v2/teacher96_coverage_only_eval_20261118
+N = preparation/rough_v2/teacher96_native_supervised_dev_runtime_20261118
+F = preparation/rough_v2/teacher96_flat8_pair_20261117
+E = preparation/rough_v2/black_reliability_20261119/evaluation
+P = preparation/rough_v2/stairs_passage_course_candidate_20261117
+V = preparation/rough_v2/structural_stoprepair_v7_fix1_candidate_20261115/candidate_source/preparation/rough_v2/specialty446_nativecontexts_v34_20261114
+行号为本次核查位置，后续代码修改时以同名函数和实际源码为准。
+
+一、可沿用的平地运动测量
+
+1.八项基础动作：前进vx=0.30、后退vx=-0.30、左右横移vy=±0.30、左右转向wz=±0.50、3秒后前进转后退、3秒后前进转停车。线速度单位m/s，角速度单位rad/s。
+  来源：F/commands.py:1–13、F/gate.py:7–28。
+  原协议32条lane=8动作×4重复，400控制步=8秒；每条必须400帧完整有效且无原生失败。
+  单方向：最后100帧的有符号平均实际速度至少为目标的50%。
+  前进后反转：第75–149帧平均vx≥0.15，最后100帧平均-vx≥0.15。
+  前进后停车：相同前进条件；最后100帧平均平面速度≤0.10、平均|wz|≤0.15。
+  C/score_flat8.py:29–32另要求候选32条全部完成，无原生失败或超时，并比较旧对照是否丢失通过lane。新教师只可复用单条绝对动作指标；旧对照比较不能移作独立资格。
+  C既定flat8种子为298483291、298483313。F/evaluate.py的906839属于更早CPU诊断，修改过扰动、事件和reset设置，不能直接作为新原生环境的评估入口。
+
+2.低速、反向和停车长窗口：C/protocol.py:3–30、C/native_score.py:23–56。
+  固定种子298483211、298483223、298483241、298483269。
+  前两种子：纯wz=±0.15/±0.25/±0.30/±0.50；纯vx=±0.30；纯vy=±0.15/±0.30；组合(0.20,-0.15,0.30)、(0.20,0.15,-0.30)。
+  后两种子：前6项先vx=-0.15再wz=±0.10/±0.15/±0.25；其余纯vx=±0.15/±0.30和源码列出的6项组合命令。
+  每项覆盖初始朝向0和pi，保留原生随机yaw扰动。原两臂各每种子每格2条，跨对应两种子每格4条；不能直接删除arm字段后声称沿用了原评分协议。
+  900控制步=18秒：0–99停车，100–349目标动作，350–599相反动作，600–899停车。后两种子前6项的第二动作是上述转向，不是简单取反。
+  每动作250帧，前50帧为响应过程，后200帧计算稳态。有符号稳态平均实际速度≥目标幅值50%；首次连续10帧达到50%目标的时刻是响应延迟，无响应保持null并计入nonresponders。
+  停车需完整650–899共250帧，期间无原生终止/超时，平均平面速度≤0.10、平均|wz|≤0.15，并在600之后出现连续26帧：平面速度≤0.08、|wz|≤0.12、倾角≤0.35rad、至少2脚原生接触代理成立。
+  后退后转向须核验转向前真实vx<-0.05，未达到后退条件的试验另列，不能计作已验证后退转向；原配对resolved要求每臂4条中至少3条满足。
+
+3.必须补齐的指定纯轴覆盖：E/README.md:20–26明确记录旧证据缺口。
+  新采集清单需逐格列出vx、vy、wz各自±0.10、±0.25，初始朝向0/pi，起动与反转阶段。
+  组合指令不能补纯轴缺格，正方向不能补负方向，已有历史数据不能补新教师缺格。
+  当前axes实现为12个有符号纯轴目标×2朝向=24条；每条按900步起动/反转/停车时序采集。若另行运行4个预先固定的种子，每个目标/朝向可得到4条独立试验，共96条；这仍是待执行的多seed方案，不是本次已经完成的分母或已批准的统计充分性门槛。
+  原flat8和旧长窗口仍单独报告，不把新增低速清单写成原协议未变。若采用其他种子或重复数，必须在采集前固定并写入新协议身份，不能看结果后选择。
+
+4.原生随机命令面板可补充分布诊断，不能替代指定命令覆盖。
+  N/native_panel.py、N/score_native.py:4–10、31–85：64环境×3000控制步，seed=932683171，原生自动reset，不注入命令。
+  pure/mixed×3轴×正负×低/高幅值共24格；活动轴阈值0.05，低/高分界0.30；稳定阶段age≥1秒且command等于target。
+  每个独立(seed,lane,episode)在某格至少25个稳定帧；至少4个此类episode才将该格标为resolved。统计逐episode平均值，再取episode宏平均，防止长回合支配。
+  此处低速区间不能证明精确±0.10或±0.25能力。随机采样漏格仍为incomplete；采集中的真实终止帧保留，reset后的速度不接到上一回合。
+
+二、旧差值门槛的适用边界
+
+C/native_score.py:98–130、N/score_native.py:69–85都是两臂比较。
+每轴MAE劣化容许值(0.035m/s,0.025m/s,0.08rad/s)、候选响应/通过数不少于旧对照、候选终止/超时数不多于旧对照等，均依赖指定的两臂身份和试验分配，不能作为新教师独立能力门。
+C另有转向稳态≤目标幅值+0.05、过冲比例较对照增加≤2个百分点，以及负向转向过冲比例≤10%；这些属于旧低速对照门的组成部分。新教师应输出对应指标，是否将这些阈值注册为新独立门尚未决定。
+已有绝对50%速度和停车阈值可直接作为同口径动作指标；不能由这些局部门槛自动推导整体合格。失败数容许值、每格通过比例、置信度要求、所有分项的合并规则仍需在新评分协议中明确注册。
+
+三、阶梯完整通过与课程升级必须分开
+
+实际路线高度为4、6、8、10、12、15、20、25、30、35cm；当前passage课程最大30cm。
+来源：P/passage_course.py:6–11。路线配置还包含25%平地，课程从最低高度开始；S/runtime.py:101–111、P/specialty_env.py:839–896。
+直接运行当前32环境训练分布不会固定覆盖所有高度，平地lane不能充当楼梯试验。必须在原生reset前分配确切高度、路线方向、入场角，并记录编译后几何身份与实际出生位置。
+
+可复用的物理通过证据：
+  P/passage_tracks.py:17–48核对真实编译踏面和碰撞掩码。每条路线有12个升降踏面和1个landing。
+  P/passage_tracks.py:50–139按真实接触力、接触法向/位置和运动方向，依次记录12级；每级需前脚和后脚接触，允许相邻帧完成；第6级后要有landing接触，再继续下梯。
+  P/passage_native.py:18–30要求原安全条件、原入口/出口顺序和原上梯阶段已完成；跳帧位移>0.25m、回合/高度/方向变化或原失败使证据无效。
+  P/passage_course.py:71–78要求实际birth<first_verified_pass_tick≤closed_tick。不能用位置到达、奖励累计或重置后的状态伪造通过。
+
+可复用的原严格结束条件：
+  P/specialty_env.py:303–348要求四脚全部在出口平台范围和通道内，脚高度相对地面绝对值≤0.08m，四脚接触，机器人世界线速度范数≤0.12m/s、角速度范数≤0.7rad/s、倾角≤0.35rad，原顺序ledger.closed且连续稳定至少6个20ms控制步，且无原失败。
+  数值来源V/parameters.py:3–13。6步即0.12秒，是原严格规则，不是长期站稳证据。
+  当前评分器的“完整过梯并稳停”单条指标同时要求真实12踏面+landing+安全出口证据和原strict finish；两项原状态都采集，不另造位置捷径。
+
+不能沿用为新合格门的课程成功：
+  P/passage_course.py:10、19–24把pass_strict_stop和pass_timeout_no_stop均计作课程成功；后者只说明已穿过，超时时未达原稳停条件。
+  strict_stop_without_pass也不能充当完整过梯。
+  原课程每方向至少32次、最近最多64次、通过率≥90%才升级(P/passage_course.py:8、85–105)。这是动态课程的升级规则，且成功类别含pass_timeout_no_stop，不是新教师固定高度独立验收门。
+  课程90%正面、10%±15度辅助角、20%低高度复习(P/passage_course.py:8–9、51–68)不能证明每个角度均达到独立最低样本数。
+
+待预先固定的阶梯范围与门槛：
+  需要声明合格高度上限、两个方向、正面及±15度哪些属于必过格，以及每格独立试验数、成功率、允许失败/超时数。当前新方案没有这些已注册的独立资格阈值，不可自行认定。
+  当前采集器支持显式height×direction×angle清单，不以课程晋级决定哪些格被测试。默认诊断范围为4–30cm的9个高度×2方向×3角(-15/0/15度)=54条，每格每次面板1条；这是明确的诊断分母，未注册为资格要求。小样本冒烟结果单独保存，不替换完整清单或真实失败。
+  保留原120秒episode时限(P/specialty_env.py:896)。每条trial运行到原生失败、strict finish或真实timeout；行政墙钟中止记incomplete，不能记成功。若另定更短评估时限，需注册新协议，不能冒称原生timeout。
+
+四、权重、输入、动作和时间身份
+
+1.只从S/checkpoint.py:95–107加载选定的新bundle，记录文件SHA256、teacher_id、CONTRACT、phase和completed_updates。
+  teacher_id覆盖teacher完整state_dict和CONTRACT(S/checkpoint.py:33–46)，包含actor/HIM/地形编码器。bundle文件SHA和运行源码SHA另记，避免权重相同但环境/相机实现不同。
+  采集前后计算teacher_id一致；teacher.freeze()及torch.inference_mode()，optimizer_calls=0。只评估指定bundle，不能重读旧8954/10954充当教师。
+
+2.动作必须用S/model.py:62–83的teacher(history[B,5,45],geometry[B,768])直接输出均值，不调用PPO随机sample，不加动作噪声，不以价值网络选动作。
+  输入顺序为current_p45+冻结HIM预测next_velocity3+单位化latent16+可见terrain32。geometry与学生来自同一次64×48深度，10Hz相机/50Hz控制，原生5帧history按reset更新。
+  记录frame、capture_tick、episode、depth有效标记及相机K/frustum身份；不额外调用观测更新来获取评分数据，避免推进history或噪声状态。
+  动作空间为执行器延迟/PD之前的policy mean，顺序FL/FR/RR/RL×hip/thigh/calf，scale=0.25；保留原0–2步延迟、reset保留执行器历史和原生扰动。记录实际动作、延迟选择和处理后目标，不把目标冒充实际ctrl。
+
+3.指定命令必须在原command.compute/reset中发布、在history生成前生效，当前history末帧[30:33]、command_manager及实际tracking reward消费的命令必须一致。
+  C/adapters.py:5–32、71–104可参考其私有适配方式，但它要求旧TeacherFreeVelocityCommandCfg，不能直接套到当前SpecialtyCommandCfg。
+  当前S/eval_adapter.py在构造前配置本次SpecialtyCommandCfg私有子类，固定平地或路线身份；NativeEnv(...,evaluation=adapter)已接入，默认evaluation=None的训练路径保持原样。指令在compute/reset中发布；当前history末帧和真实tracking reward读取均核验，不在obs生成后补写command，不复用旧P45Native绕开新相机/HIM接口。
+
+4.平地速度使用同一pre-action时刻的真实body IMU vx/vy/wz；记录动作时刻k、积分后/终止前k+1及reset标志，不能将reset后的速度作为上一回合动作的物理响应。
+  E/README.md:28–32记录旧trace的这些时间边界。自动reset保留，正式trial以初次分配的episode身份为准；若继续采集后续episode，给新trial身份，不补长原trial。
+  阶梯终止证据要在原终止/奖励消费者或reset前原record路径克隆保存，step返回后已可能清空passage_seen/strict状态。P/passage_native.py:32–45可参考其闭合证据读取时机。
+
+五、完整分母和故障处理
+
+每个正式trial至少绑定protocol_id、bundle_sha、teacher_id、seed、lane、episode/birth、命令程序或height/direction/angle、预分配时序与实际结束原因。
+评分同时列assigned、started、complete、success、physical_failure、native_timeout、administrative_incomplete、invalid_evidence及独立episode数，所有预分配trial都在最终报告中。
+真实跌倒/碰撞/越界是行为失败，不删行、不用后续reset重试替换；早终止后缺失阶段保持未完成，不用存活样本均值补成通过。停车不能把terminal前无运动的少量帧当完整停车。
+NaN/Inf、仿真overflow、身份或时序错误触发现有fault证据保存并停止本次采集。保留原异常和FAILED；记录已完成/失败/未开始的分母，不把故障后的输出当完整RESULT。
+同一正式attempt目录不覆盖；重新采集需新attempt身份并保留原失败。发生真实行为失败仍完成其余预定trial，不能为了得到漂亮结果提前停止或挑seed。
+
+六、当前已实现的诊断链
+
+1.eval_collect.py只加载选定bundle、冻结teacher，调用新NativeEnv的真实相机与history链。flat8清单为32条×400步；axes为24条×900步；stairs默认54条、每条最多6000步。每批实际创建32环境，短批复制占位lane并标padding，独立trial_id明确区分；axes补8条，stairs第二批补10条，均不登记到评分分母。
+2.--seed默认119041；每批实际seed=base_seed+batch_id，清单在执行前固定。当前单次面板不等同于旧协议4个种子，也不代表已完成多seed资格验收。
+3.采集前写MANIFEST，绑定bundle/teacher/source/CONTRACT、roster、seed、时限、mean动作模式及阈值版本；每批保存相机和渲染回执。逐控制步保存紧凑证据；验证policy action等于原action_manager及joint_pos收到的raw_action，另存实际延迟、延迟选择动作和PD位置目标。每条只登记初次episode，原生结束后不补入reset帧。
+4.原reward.compute结束后、events/auto_reset前克隆阶梯与动作证据，保留真实closed_tick、原始terminated/truncated、safe_exit和strict状态。RESULT在资源正常关闭、教师身份及源码hash复核后发布，表示采集流程正常结束；行政截短也会发布RESULT，但collection_complete=false，SCORE仍为incomplete。行为失败仍计入完整分母，collection_complete=true不代表动作全部通过。异常故障保存PARTIAL/FAILED，不能独立评分；构造期故障也保留原异常及可保存的首次坏状态。
+5.eval_score.py纯CPU读取manifest及证据hash，核验身份、时间和独立episode，按原绝对动作指标与完整过梯/strict双证据分项评分。缺格/缺帧保持incomplete，无效证据单列。qualification始终not_registered，automatic_promotion=False。
+6.CPU反例已覆盖：真实终止不能补帧、reset后速度不能接上回合、错teacher_id拒绝、只穿过未停稳不能算完整稳停、重复trial不能扩大分母、缺纯轴格不能由mixed补齐、padding不计分，以及故障记录或close再次失败保留首个异常。
+7.完整独立资格协议及证据验证接入前，S/checkpoint.py资格门继续closed。以后开放该门需要已注册的完整能力门及可核验报告，不能接受四个手填passed布尔。当前采集/评分器可执行不意味着教师已合格。
+
+七、可复制命令与当前证据
+
+以下命令为使用说明，不会自动执行；每次采集创建新out目录。示例bundle是已有新教师包，未取得完整资格。
+
+cd ${PROJECT_ROOT}
+CAND=preparation/rough_v2/shared_actor_v1_20261119
+BUNDLE="$CAND/evidence/resume_teacher_continue001/teacher.pt"
+
+默认plan不读取权重或创建环境：
+uv run --no-sync --offline python "$CAND/eval_collect.py" --suite flat8
+uv run --no-sync --offline python "$CAND/eval_collect.py" --suite axes
+uv run --no-sync --offline python "$CAND/eval_collect.py" --suite stairs
+
+显式执行flat8并自动评分：
+RUN_TAG=$(date +%Y%m%d_%H%M%S_%N)
+EVAL_OUT="$CAND/evidence/eval_flat8_manual_$RUN_TAG"
+uv run --no-sync --offline python "$CAND/eval_collect.py" --suite flat8 --seed 119041 --bundle "$BUNDLE" --execute --out "$EVAL_OUT"
+
+axes或stairs分别执行，始终新建out；stairs可加--heights-cm 4 6和--angles-deg 0明确缩小诊断清单：
+RUN_TAG=$(date +%Y%m%d_%H%M%S_%N)
+uv run --no-sync --offline python "$CAND/eval_collect.py" --suite axes --seed 119041 --bundle "$BUNDLE" --execute --out "$CAND/evidence/eval_axes_manual_$RUN_TAG"
+RUN_TAG=$(date +%Y%m%d_%H%M%S_%N)
+uv run --no-sync --offline python "$CAND/eval_collect.py" --suite stairs --seed 119041 --bundle "$BUNDLE" --execute --out "$CAND/evidence/eval_stairs_manual_$RUN_TAG"
+
+短检查可加--max-controls 12。没有完成既定时限的trial保持incomplete；真实失败照常保留失败，不用截短或padding补成通过。采集器使用原GPU互斥锁，未自动排队或重试。
+
+对上述EVAL_OUT作CPU复评分；--out为新文件，不覆盖原SCORE.json：
+SCORE_TAG=$(date +%Y%m%d_%H%M%S_%N)
+CUDA_VISIBLE_DEVICES='' uv run --no-sync --offline python "$CAND/eval_score.py" --manifest "$EVAL_OUT/MANIFEST.json" --result "$EVAL_OUT/RESULT.json" --out "$EVAL_OUT/SCORE_RECHECK_$SCORE_TAG.json"
+
+评估接入轮CPU101项通过，Ruff、格式检查、ty和Pyright均通过。历史28/39/59项分别属于先前轮次，保留在README中。
+已完成GPU短检查evidence/eval_flat_smoke001：32环境×12控制步，optimizer_calls=0，32条started/32条incomplete，complete=0、success=0、invalid_evidence=0。短检查未形成动作通过结论。
+完整flat8的evidence/eval_flat_full001：32条完整计分，29pass/3fail，其中2条原生失败、1条停车未达标；0invalid、0更新。
+完整axes的evidence/eval_axes_full001：24个纯轴命令/朝向格均分配并完整计分，10pass/14fail，其中2条原生失败、12条动作或停车未达标；0invalid、0更新。这些单seed诊断不构成完整资格。
+阶梯evidence/eval_stairs_smoke001：4cm双向正面共2条真实trial和30条不计分padding，各120步，2incomplete、0failure、0invalid、0更新，ordered_treads=0，未形成踏面或完整过梯证据。
+阶梯evidence/eval_stairs_full001：同一4cm双向正面2条路线分别在343步和481步原生失败，终止前有序踏面分别为0和3；0通过、0invalid_evidence、0更新，教师权重不变。当前候选未通过最低4cm这两条诊断；采集器正常保存失败和终止前证据，无采集器报错。没有完整过梯成功GPU样本，默认54格仍未完成覆盖。
+
+本次文档更新只修改README.txt和EVALUATION_PROTOCOL.txt，不修改正在按源码hash运行的任何.py文件或checkpoint资格门。

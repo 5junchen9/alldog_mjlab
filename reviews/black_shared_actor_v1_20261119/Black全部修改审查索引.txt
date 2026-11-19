@@ -1,0 +1,133 @@
+Black全部修改审查索引｜2026-11-19
+
+阅读顺序：先看本轮《Black重训判断与剩余隐患.txt》，再看最新《Black新训练架构审查说明.txt》与11:25评估报告，随后按以下阶段逆序追查代码和证据。
+旧报告中的“当前”“尚未实现”均属于写成时的阶段，原文保留。当前实现以shared_actor_v1_20261119源码和11:25包为准。
+
+一、五个阶段的主报告、代码与证据
+
+01可靠性修复（09:59）
+报告：Black修改报告.txt
+代码及证据：Black修改与证据.zip
+摘要：Black验证摘要.json
+修改：首次坏子步探针、8954标签采样、96维接口核查、方向明细。JC与Win隔离候选有4096环境零更新证据。
+验证：31项分组CPU检查；历史NaN未复现。2个.pt为合成故障快照，不是模型。
+包大小：988,563字节；114个文件；55个Python文件；CRC完整。
+本轮只读对照：0个包内文件与当前项目相同，114个不同。包SHA256：37c557f1cc593c514d18aa0b0956ab1794c82c0b0979b26a5e0bf71374b48ff0
+
+02共享actor首版（10:41）
+报告：Black共享actor修改报告.txt
+代码及证据：Black共享actor代码与验证.zip
+摘要：Black共享actor验证摘要.json
+修改：共享actor/HIM、可见几何编码器、特权critic、学生CNN+GRU、初版入口。
+验证：28项CPU；教师和学生各32环境×24步零更新。旧资格摘要门、周期恢复等已被后续修订。
+包大小：95,536字节；30个文件；15个Python文件；CRC完整。
+本轮只读对照：17个包内文件与当前项目相同，13个不同。包SHA256：85c552e38102d577089217bb9d67d9f39d8619b50eeea43ca5a614d606a60546
+
+03自动复核修复（10:53）
+报告：Black复核修复报告.txt
+代码及证据：Black复核代码与证据.zip
+摘要：Black复核验证摘要.json
+修改：未调用GRU梯度处理、原子存档、原异常保留、真实终止优先、关闭摘要误放。
+验证：39项CPU；1round/20次Adam；原生reset隔离检查。
+包大小：121,478字节；43个文件；17个Python文件；CRC完整。
+本轮只读对照：33个包内文件与当前项目相同，10个不同。包SHA256：dc55c773696131aac3e0ee10086761b3128b589682f4011a4fac456b179b29a3
+
+04周期存档与续算（11:08）
+报告：Black续算修改报告.txt
+代码及证据：Black续算代码与证据.zip
+摘要：Black续算验证摘要.json
+修改：周期checkpoint、显式学习器恢复、随机状态/参数绑定/计数校验；独立评估待接入规范。
+验证：59项CPU；两个GPU进程由1round续到累计2round/40次Adam，物理冷启动。
+包大小：119,709字节；36个文件；19个Python文件；CRC完整。
+本轮只读对照：29个包内文件与当前项目相同，7个不同。包SHA256：4505cc3dc122bf6f4015e2bb77e67591d4d93510c8889523671091d6f2f65492
+
+05独立诊断与复审（11:25）
+报告：Black评估完善与自动审查报告.txt
+代码及证据：Black评估代码与证据.zip
+摘要：Black评估验证摘要.json
+修改：固定试验清单、原生命令与终止前证据、独立评分、完整分母及失败保留。当前代码快照。
+验证：101项CPU；5次GPU全部0更新。flat29/32、axes10/24、4cm双向0/2；正式资格未注册。
+包大小：11,446,918字节；150个文件；26个Python文件；CRC完整。
+本轮只读对照：150个包内文件与当前项目相同，0个不同。包SHA256：71746ff47219f7a9dd26283f1ccdc94fafd979896e5dad5570e94883f5d05a5e
+
+二、指导和综述的版本关系
+
+Black当前指导.txt、Black当前综述.txt：10:41共享actor首版快照，名称“当前”不再代表最新。
+Black复核后指导.txt、Black复核后综述.txt：10:53复核快照。
+Black续算后指导.txt、Black续算后综述.txt：11:08学习器续算快照。
+Black评估后指导.txt、Black评估后综述.txt：11:25最新工程指导和综述。
+Black教师能力评估待接入规范.txt：11:08规范草案，保留历史。
+Black教师独立评估执行规范.txt：11:25已接入的独立诊断协议，完整教师资格仍未注册。
+Black评估交付索引.json：仅11:25单包的简要文件数、字节和hash，不能代替本总索引。
+
+三、当前代码导航（相对候选目录）
+
+checkpoint.py：权重来源、输入约定、模型身份、原子保存、关闭的学生资格门。
+入口/定义：tensor_digest:33, teacher_identity:42, initial_models:49, save_bundle:58, load_bundle:95, require_teacher_evaluation:110
+eval_adapter.py：命令在history前生效、奖励见证、reset前证据。
+入口/定义：EvaluationAdapter:11
+eval_collect.py：冻结教师均值动作采集、首次episode、源码和权重hash。
+入口/定义：sha256:28, write_json:32, source_files:55, new_trial:72, collect_batch:80, close_environment:186, execute:198, main:313
+eval_protocol.py：预登记清单、绝对阈值、命令程序和padding身份。
+入口/定义：digest:40, command:45, roster:64, padded_batch:137
+eval_score.py：CPU独立评分、完整分母、反伪通过；不授予正式资格。
+入口/定义：require:30, file_sha256:35, mean:39, finite_vector:43, validate_spec:51, validate_rows:84, flat8_metrics:256, response_latency:289, axis_metrics:295, stairs_metrics:366, score_trial:386, absent_trial:423, coverage:439, score_attempt:477, main:602
+learner_state.py：学习器配方、参数顺序、随机状态及恢复身份。
+入口/定义：capture_rng:11, restore_rng:36, _same_recipe:61, validate_resume:76, parameter_signature:96
+model.py：模型结构、冻结HIM及r800加载；从头训练必须先改此处和checkpoint.py。
+入口/定义：FrozenHIM:27, Teacher:48, make_modules:86, make_initial_modules:94
+ppo.py：教师PPO；actor/几何32可训练，HIM冻结，完整446维仅供critic。
+入口/定义：PPOActor:19, build_ppo:54
+run.py：plan/probe/teacher/student入口；默认r800，不是全随机初始化。
+入口/定义：cpu_copy:35, collect_probe:43, train_teacher:95, main:227
+runtime.py：原生环境、相机与episode时序、首次坏状态探针及评估适配。
+入口/定义：AlignedFrames:15, native_imports:64, NativeEnv:78
+student.py：学生引用教师actor/HIM；动作/特征Huber损失及输入梯度。
+入口/定义：SharedStudent:11, distillation_loss:85
+student_training.py：学生闭环采集、微批BPTT、Adam及窗口hidden刷新。
+入口/定义：_state_slice:19, _metadata_slice:31, _collect:38, _sequence:65, _refresh_state:75, train_student:93
+terrain.py：160×90→64×48固定采样；12×16真实像素回投768维可见几何。
+入口/定义：_nearest_pixels:19, reduce_depth:25, camera_frustum:39, renderer_frustum:56, geometry:74
+test_checkpoint.py：对应模块的CPU回归测试。
+入口/定义：modules:10, test_interrupted_write_does_not_publish_or_damage_previous_bundle:18, test_existing_target_is_not_overwritten:43
+test_entrypoint.py：对应模块的CPU回归测试。
+入口/定义：test_student_gate_rejects_before_creating_environment:18, Options:66, SyntheticEnv:73, test_teacher_entrypoint_updates_and_saves_fresh_learning_state:99, _fake_main:124, test_original_exception_survives_diagnostic_and_close_errors:157, test_close_failure_after_success_is_still_raised:202
+test_eval_adapter.py：对应模块的CPU回归测试。
+入口/定义：Scene:22, configured:26, test_real_config_changes_are_private_and_command_publishes_before_history:35, test_flat_orientation_keeps_original_yaw_range:90, route_state:114, test_fixed_routes_keep_original_passage_and_grid_episode_identity:140, observed_env:163, test_terminal_evidence_is_cloned_before_reset_and_not_next_episode:213, test_stale_history_and_changed_reward_command_are_rejected:252, test_constructor_keeps_first_fault_when_diagnostic_or_close_fails:271
+test_eval_collect.py：对应模块的CPU回归测试。
+入口/定义：test_fixed_roster_and_command_boundaries:13, FakeEnv:31, trials_for:81, test_first_terminal_is_retained_without_reset_rows_or_padding:92, test_nonfinite_action_preserves_unstarted_physics_and_partial_trial:105, test_cleanup_failure_keeps_original_error:115, test_nonfinite_measurement_stops_before_physics:130, test_json_publication_never_leaves_half_result:146, test_publication_failure_retains_trials_and_failed_record:160
+test_eval_score.py：对应模块的CPU回归测试。
+入口/定义：make_trial:19, terminate:80, save_attempt:89, test_flat8_preserves_absolute_case_thresholds:127, test_failure_remains_failure_and_cannot_be_padded_by_reset_rows:140, test_administrative_short_trace_is_incomplete:156, test_pure_axis_start_reverse_and_full_park:163, test_axis_park_needs_26_consecutive_supported_frames_and_all_250_rows:183, test_mixed_target_cannot_fill_a_pure_axis_cell:201, test_stairs_requires_physical_passage_and_strict_finish:208, test_stairs_rejects_skipped_contact_landing_and_wrong_terminal_time:233, test_stair_strict_flag_requires_actual_native_terminal_and_reset:249, test_attempt_keeps_full_denominator_and_never_registers_qualification:257, test_attempt_reports_unassigned_pure_axis_gaps_and_invalid_trace:270, test_wrong_teacher_identity_is_rejected_even_with_updated_file_hash:282, test_duplicate_trial_cannot_expand_denominator:291, test_trial_hash_change_is_rejected:299, test_false_complete_summary_is_rejected:308, test_failed_attempt_cannot_use_an_already_published_result:315, test_attempt_requires_frozen_mean_policy_without_optimizer:329
+test_learner_state.py：对应模块的CPU回归测试。
+入口/定义：preserve_global_rng:19, test_cpu_rng_round_trip_is_weights_only_and_repeats_next_draws:25, test_cuda_rng_uses_requested_device_without_gpu:51, test_unavailable_cuda_has_no_state_or_device_calls:76, test_cpu_rng_packet_cannot_claim_complete_cuda_restore:90, test_resume_requires_phase_schema_recipe_and_integer_counters:102, test_parameter_signature_preserves_binding_order_shapes_and_dtypes:152
+test_model.py：对应模块的CPU回归测试。
+入口/定义：sample:17, test_r800_weights_and_him_meaning_are_preserved:21, test_teacher_gradient_updates_head_and_terrain_but_not_him:39, test_frozen_shared_actor_still_backpropagates_to_student_visual:67
+test_pipeline.py：对应模块的CPU回归测试。
+入口/定义：test_new_bundle_is_independent_of_r800_file:17, test_frames_hold_once_and_reset_only_finished_lanes:34, test_unqualified_teacher_cannot_start_student_training:56, test_true_terminal_wins_over_simultaneous_timeout:65, test_manual_pass_summary_cannot_open_student_training:90
+test_ppo.py：对应模块的CPU回归测试。
+入口/定义：setup_ppo:17, test_native_ppo_reencodes_geometry_and_updates_only_allowed_parameters:44, test_actor_cannot_read_critic_and_wrapper_preserves_initial_head:109, test_native_timeout_approximation_never_bootstraps_true_terminal:121
+test_student.py：对应模块的CPU回归测试。
+入口/定义：example:11, metadata:27, test_shared_modules_frozen_even_when_student_enters_train:48, test_targets_are_teacher_means_and_detached_features:63, test_action_gradient_crosses_frozen_actor_then_reaches_gru:86, test_held_frame_does_not_advance_gru_and_reset_starts_new_episode:132, test_real_frame_age_and_old_episode_mask_the_cnn_input:160, test_future_frame_and_noncontiguous_control_are_rejected:172, test_frame_age_boundary_survives_a_long_control_clock:181
+test_student_training.py：对应模块的CPU回归测试。
+入口/定义：FakeFrames:15, FakeEnv:58, modules:92, test_student_controls_and_teacher_labels_its_states_across_rounds:101, test_partial_microbatch_has_lane_weight_and_one_optimizer_step:169, test_nonfinite_gradient_stops_before_adam_and_preserves_weights:198, test_all_invalid_window_trains_cnn_without_initializing_gru_cell_adam:231, test_invalid_window_preserves_existing_gru_cell_weights_and_adam_moments:259, RoundResetFrames:303, RoundResetEnv:327, test_resume_matches_continuous_learner_at_aligned_cold_episode_boundary:349, test_resume_rejects_parameter_order_before_loading_optimizer_or_sampling:414, test_resume_rejects_changed_frozen_teacher_before_sampling:434, test_resume_rejects_changed_student_recipe:450, test_periodic_checkpoints_retain_each_saved_update:464
+test_teacher_resume.py：对应模块的CPU回归测试。
+入口/定义：modules:14, assert_same:23, test_teacher_resume_matches_uninterrupted_learning_on_same_synthetic_states:38, test_teacher_resume_rejects_incompatible_learning_state_before_collecting:72, test_teacher_failure_keeps_last_complete_periodic_bundle:93
+test_terrain.py：对应模块的CPU回归测试。
+入口/定义：test_reduce_keeps_exact_pixels_and_owns_renderer_buffer:10, test_projection_uses_original_pixel_centres_and_planar_z:25, test_invalid_points_zero_and_depth_scale_does_not_clip:39, test_camera_frustum_matches_renderer_formula_with_aspect_correction:50, test_renderer_parameters_follow_actual_global_world_ids:63, test_reduce_and_geometry_preserve_first_hit_without_filling_holes:86
+
+四、验证证据怎么读
+
+CPU：模型与梯度测试使用真实Torch及合成状态；不代表机器人能力。当前101项来自候选测试目录，不等于整个工程所有测试。
+GPU零更新：证明对应规模、窗口和控制链运行；本轮五次没有执行Adam。
+GPU更新/续算：复核轮1round/20次Adam，续算轮累计2round/40次Adam；不代表从随机权重学会任务。
+能力诊断：flat8、axes、4cm stairs有逐条JSON；真实失败保留。SCORE通过分项不能自动开放正式学生入口。
+NaN故障注入：FIRST_BAD.pt中的两份JC合成故障只验证探针，不能冒称历史NaN重放。
+完整原模型、训练checkpoint、未打包张量及全部依赖仍在原项目和Win目录；任何ZIP都不能直接描述成完整远程备份。
+
+五、审查包的限制
+
+11:25包包含当前26个Python文件和该轮原始逐步JSON，但缺少只读旧环境依赖、完整mjlab/资产、r800初始化文件、GPU诊断teacher模型。README中的命令只在原工程依赖已齐备时适用。
+GitHub将新增独立reviews快照与架构说明，代码按原字节上传，不能在该归档目录直接启动训练。不会覆盖主分支的Black/Wolf配置。
+本轮只整理、核查和上传审查资料，没有删除旧动作头，没有改为从零初始化，也没有启动训练。
+
+完整文件级SHA256、ZIP逐成员清单、当前对比结果和代码定义行号见Black全部修改审查索引.json。

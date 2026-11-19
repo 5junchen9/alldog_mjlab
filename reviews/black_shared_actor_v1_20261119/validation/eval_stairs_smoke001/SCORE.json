@@ -1,0 +1,169 @@
+{
+  "automatic_promotion": false,
+  "bundle_sha256": "fcf3f66f61ad999dfeb79c1e20fd55592cfef080128baf37f390549465bfd842",
+  "collection_complete": false,
+  "counts": {
+    "administrative_incomplete": 2,
+    "assigned": 2,
+    "complete": 0,
+    "independent_episodes": 2,
+    "invalid_evidence": 0,
+    "native_timeout": 0,
+    "physical_failure": 0,
+    "started": 2,
+    "success": 0
+  },
+  "coverage": {
+    "cells": {
+      "stairs/4/-1/0": {
+        "assigned": 1,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "stairs/4/1/0": {
+        "assigned": 1,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      }
+    },
+    "missing_axis_cells": [
+      "axis/0/-0.10/0.0",
+      "axis/0/-0.10/3.141592653589793",
+      "axis/0/+0.10/0.0",
+      "axis/0/+0.10/3.141592653589793",
+      "axis/0/-0.25/0.0",
+      "axis/0/-0.25/3.141592653589793",
+      "axis/0/+0.25/0.0",
+      "axis/0/+0.25/3.141592653589793",
+      "axis/1/-0.10/0.0",
+      "axis/1/-0.10/3.141592653589793",
+      "axis/1/+0.10/0.0",
+      "axis/1/+0.10/3.141592653589793",
+      "axis/1/-0.25/0.0",
+      "axis/1/-0.25/3.141592653589793",
+      "axis/1/+0.25/0.0",
+      "axis/1/+0.25/3.141592653589793",
+      "axis/2/-0.10/0.0",
+      "axis/2/-0.10/3.141592653589793",
+      "axis/2/+0.10/0.0",
+      "axis/2/+0.10/3.141592653589793",
+      "axis/2/-0.25/0.0",
+      "axis/2/-0.25/3.141592653589793",
+      "axis/2/+0.25/0.0",
+      "axis/2/+0.25/3.141592653589793"
+    ],
+    "missing_flat8_cells": [
+      "flat8/forward",
+      "flat8/lateral_left",
+      "flat8/lateral_right",
+      "flat8/reverse",
+      "flat8/reversal",
+      "flat8/stop",
+      "flat8/yaw_left",
+      "flat8/yaw_right"
+    ],
+    "stairs_qualification_scope": "not_registered"
+  },
+  "manifest_sha256": "10d21516375aa16562ee25dc803f9ef80d2b6924866b7890f7dd142c75d2f9a9",
+  "protocol_id": "shared_actor_absolute_diagnostics_v1",
+  "qualification": "not_registered",
+  "result_sha256": "cfd233b380c0b853bfee73edd1e8db939034cc60102a630764fe0c59f637230a",
+  "schema": "shared_actor_evaluation_v1",
+  "source_sha256": "56bf36c53b7e55832cdaa0c02425408a76ccc83b0593416db172499ca2656837",
+  "status_counts": {
+    "incomplete": 2
+  },
+  "teacher_id": "37e671b908236b43921373af11505550f85614800cc8c54ebbcc9c58fd2dd48e",
+  "trials": [
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        0,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "course_success_is_qualification": false,
+        "passed": false,
+        "physical_passage": false,
+        "proof": {
+          "angle_deg": 0,
+          "birth": 0,
+          "closed_tick": 120,
+          "direction": -1,
+          "first_verified_pass_tick": -1,
+          "height_cm": 4,
+          "invalid": false,
+          "landing_contact": false,
+          "ordered_treads": 0,
+          "pass_once": false,
+          "safe_exit": false,
+          "settled_steps": 0,
+          "strict_finish": false
+        },
+        "strict_finish": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 120,
+      "physical_failure": false,
+      "program": "stairs",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0000"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        1,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "course_success_is_qualification": false,
+        "passed": false,
+        "physical_passage": false,
+        "proof": {
+          "angle_deg": 0,
+          "birth": 0,
+          "closed_tick": 120,
+          "direction": 1,
+          "first_verified_pass_tick": -1,
+          "height_cm": 4,
+          "invalid": false,
+          "landing_contact": false,
+          "ordered_treads": 0,
+          "pass_once": false,
+          "safe_exit": false,
+          "settled_steps": 0,
+          "strict_finish": false
+        },
+        "strict_finish": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 120,
+      "physical_failure": false,
+      "program": "stairs",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0001"
+    }
+  ]
+}

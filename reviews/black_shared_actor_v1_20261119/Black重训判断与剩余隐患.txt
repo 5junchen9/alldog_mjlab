@@ -1,0 +1,52 @@
+Black重训判断与剩余隐患｜2026-11-19
+
+一、对三个判断的结论
+
+1.NaN：目前还没查到根因，不能据现有记录判定查不出来。Win日志已把故障范围缩到一次控制步：lane2800在step前qpos、qvel、action有限，step后qpos/qvel出现NaN，随后地形观测拒绝输入。该步仍包含动作写入、多个物理子步及事件；有限动作也不保证幅值、延迟目标、PD控制或接触解算正常。地形观测报错是已发现的后续症状。
+JC从r2500冷启动4096环境×120步未触发历史故障，不能重放第2530轮的完整物理瞬间。JC缺少当时坏tensor，地形检查的具体失败分支也未确定；目前不能把JC与Win判成同一个根因。Win旧FAULT.pt和TERRAIN_FAILURE张量可能仍在原resume001目录，本地当前确认有JSON和以前的核验记录；没有把这两个历史pt当作已完整本地归档。
+较早“6项CPU、未部署”的记录已经过时：black_reliability隔离候选后来在Win完成4096环境×24步零更新验证。原正式入口未切换，共享actor_v1未部署Win。首坏探针是定位工具，合成NaN被拦住不能证明历史根因已修好。
+下一步是保留原始坏状态、精确软件/模型/动作链身份，进行有上限的原配置故障采集；一旦出现首坏子步，再按动作/PD、事件/reset、接触解算或GPU数值分支逐项定位。只重置网络不能保证清除物理NaN。
+
+2.重训：重新训练新actor和学生视觉分支是合理实验方向，直接删除历史文件没有必要。旧权重的退出训练通过禁止加载完成；原文件仍用于对照、NaN定位和审查。
+当前头宽度仍是96，变化集中在共享关系和地形特征语义。默认实际上继承r800的actor/HIM/CNN/GRU；当前几何编码器、critic和Adam才是新建。已有2round的有限更新不能用来判断新架构收敛能力，也不能证明失败都由旧头引起。
+学生没有另一套独立actor。新教师训练好后，学生必须共用该actor；若学生再随机一个头，会破坏此前确定的设计。学生“从头”应首先指CNN+GRU、优化器和循环状态从新开始。
+HIM也要明确：保留旧HIM时，不能叫所有模块从零；严格全部新建时，必须补HIM训练阶段，不能将随机HIM冻结后直接开始。另需修改默认r800加载、bundle中学生视觉加载以及固定来源字段，确保新存档真实记录逐模块初始化。
+
+3.上传与审查：合理。已确认现有仓库5junchen9/alldog_mjlab，使用独立审查分支和reviews目录。上传的是当前v1架构、原字节代码快照、验证摘要及重训待改计划；不把尚未实施的全随机初始化说成已经实现。当前候选代码及本次验证证据在本地总包；历史NaN原始张量仍需另行认证归档。上传状态和精确commit将在BlackGitHub上传回执.json记录。
+
+二、其他隐患及处理优先级
+
+训练前需处理：
+- 新初始化范围和HIM训练路径尚未落地，默认r800依赖、旧CNN/GRU加载及来源字段仍在。
+- 原NaN未定位，4096旧探针短检查不能替代新共享actor在目标规模的长时稳定性验证。
+- 教师能力仍不足：flat29/32、axes10/24、4cm双向0/2，完整资格门槛、多seed和默认54条楼梯覆盖均未完成。
+- 训练分布需重新设计冷启动顺序。当前75%楼梯，楼梯世界方向±仍主要对应身体正向0.15–0.35m/s；不能把双向路线当作身体倒走训练。平地有低速命令，但没有固定保证纯轴起动→等幅反转→完整停车链覆盖。
+
+需要独立验收：
+- 冻结HIM预测next_velocity，其误差可能随新策略访问状态改变；短窗口误差不能代表新策略全课程。
+- 固定像素及192点几何存在薄物体漏采、噪声和遮挡风险；零无效帧不代表视觉充分。
+- 纯timeout尚未使用终止前critic观测精确bootstrap；长episode GRU前缀仍用旧参数形成的截断近似。
+- 课程把过梯后超时未稳停算成功；独立评分已隔离这一点，但训练晋级仍需按最终任务目标审查。原strict的连续稳停仅0.12秒。
+- 学生GPU优化/学习器恢复、策略导出和实机部署未验收；ppo.as_jit/as_onnx当前明确未实现。
+- 当前评估器是分项诊断，缺少总体教师合格规则；正式学生入口保持关闭，不能用四个手填true开放。
+- 工程依赖多份历史目录，现有ZIP不是自包含工程；GitHub的旧主分支和本地副本布局不同，必须做独立重建验证后才能称作可运行发布。
+
+这些是已知缺口和需要验证的风险；自动审查无新增实现阻断只适用于已实现且已测的范围，不等于所有长期训练、物理或部署问题已消失。
+
+三、建议执行顺序
+
+先保留旧权重及故障证据并完成审查；确定HIM是否也从零；实现新初始化和来源记录并验证旧权重未被读取；补齐NaN首坏状态采集与目标规模稳定性检查；按平地基础→低速反转停车→楼梯课程训练新教师；完成独立资格验收后，再随机初始化学生CNN+GRU并使用固定的新教师actor/HIM蒸馏。
+当前没有删除旧文件，没有改动训练源码，没有启动训练。报告、架构和索引已准备为可审查交付。
+
+四、证据位置
+
+${PROJECT_ROOT}/preparation/rough_v2/teacher_student_rework_acceptance_20261116/20261117_FULL_RECONCILIATION.zh-CN.md
+${PROJECT_ROOT}/preparation/rough_v2/black_reliability_20261119/evidence/WINDOWS_READONLY_STATE.json
+${PROJECT_ROOT}/preparation/rough_v2/black_reliability_20261119/evidence/FINAL_SUMMARY.json
+${PROJECT_ROOT}/preparation/rough_v2/black_reliability_20261119/evidence/WINDOWS_DEPLOYMENT.json
+${PROJECT_ROOT}/preparation/rough_v2/black_reliability_20261119/fault/README.md
+${PROJECT_ROOT}/preparation/rough_v2/stairs_r2500_native_fault_probe_20261119/run001/RESULT.json
+${PROJECT_ROOT}/preparation/rough_v2/shared_actor_v1_20261119/model.py
+${PROJECT_ROOT}/preparation/rough_v2/shared_actor_v1_20261119/checkpoint.py
+${PROJECT_ROOT}/preparation/rough_v2/shared_actor_v1_20261119/student.py
+${PROJECT_ROOT}/preparation/rough_v2/shared_actor_v1_20261119/evidence/EVALUATION_VALIDATION.json

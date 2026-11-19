@@ -1,0 +1,193 @@
+{
+  "date": "2026-11-19",
+  "scope": "shared_actor_independent_evaluation",
+  "cpu": {
+    "passed": 101,
+    "warnings": 1,
+    "seconds": 6.31,
+    "warning": "upstream torch.jit.script deprecation"
+  },
+  "static": {
+    "python_files": 26,
+    "ruff": "passed",
+    "format": "passed",
+    "ty": "passed",
+    "pyright_errors": 0,
+    "pyright_warnings": 0
+  },
+  "teacher_id": "37e671b908236b43921373af11505550f85614800cc8c54ebbcc9c58fd2dd48e",
+  "bundle_sha256": "fcf3f66f61ad999dfeb79c1e20fd55592cfef080128baf37f390549465bfd842",
+  "bundle": "${PROJECT_ROOT}/preparation/rough_v2/shared_actor_v1_20261119/evidence/resume_teacher_continue001/teacher.pt",
+  "source_sha256": "56bf36c53b7e55832cdaa0c02425408a76ccc83b0593416db172499ca2656837",
+  "source_files_verified": 471,
+  "gpu": {
+    "eval_flat_smoke001": {
+      "manifest_sha256": "441e09d34ffd3e89e8d1e25fe01eeecee7d215a0f39ac3fdcda28c588b1cb999",
+      "result_sha256": "23bfebd11d262798277ec998ac538315161cc3b843e4b8bc8f24ea583b5634d2",
+      "score_sha256": "66239f044cb8285641d6c319c47f51ad2054a2d945ddd7202e0b6fc4aa8efa99",
+      "counts": {
+        "administrative_incomplete": 32,
+        "assigned": 32,
+        "complete": 0,
+        "independent_episodes": 32,
+        "invalid_evidence": 0,
+        "native_timeout": 0,
+        "physical_failure": 0,
+        "started": 32,
+        "success": 0
+      },
+      "status_counts": {
+        "incomplete": 32
+      },
+      "optimizer_calls": 0,
+      "teacher_unchanged": true,
+      "collection_complete": false,
+      "recorded_control_rows": 384,
+      "qualification": "not_registered"
+    },
+    "eval_flat_full001": {
+      "manifest_sha256": "e1b53201840638c17b8f5f13c0dc5ef3217a0dc2589ed779283c723328057917",
+      "result_sha256": "bd23bd1139fd99b5d504d9be099803fc8d651c2d0cd7340e79bbc958391b51b8",
+      "score_sha256": "7fbb7c30dcbda648c455d1bb1de1a002ce04f39c4eded1d0afff45d90f39e322",
+      "counts": {
+        "administrative_incomplete": 0,
+        "assigned": 32,
+        "complete": 32,
+        "independent_episodes": 32,
+        "invalid_evidence": 0,
+        "native_timeout": 0,
+        "physical_failure": 2,
+        "started": 32,
+        "success": 29
+      },
+      "status_counts": {
+        "fail": 3,
+        "pass": 29
+      },
+      "optimizer_calls": 0,
+      "teacher_unchanged": true,
+      "collection_complete": true,
+      "recorded_control_rows": 12386,
+      "qualification": "not_registered"
+    },
+    "eval_axes_full001": {
+      "manifest_sha256": "56c549f2cc3d0bec6a0f0e1455a202e4a1460117ca3f0cb2c7a1ee83db5a6abb",
+      "result_sha256": "cc1ecb36bb6f45d3a541f55870c32358718e619e48b078ad800b3271585a4cd9",
+      "score_sha256": "2578253c433e806bf2fd3479276cf54e1056e21737a6cc5a4a825732237b5768",
+      "counts": {
+        "administrative_incomplete": 0,
+        "assigned": 24,
+        "complete": 24,
+        "independent_episodes": 24,
+        "invalid_evidence": 0,
+        "native_timeout": 0,
+        "physical_failure": 2,
+        "started": 24,
+        "success": 10
+      },
+      "status_counts": {
+        "fail": 14,
+        "pass": 10
+      },
+      "optimizer_calls": 0,
+      "teacher_unchanged": true,
+      "collection_complete": true,
+      "recorded_control_rows": 20602,
+      "qualification": "not_registered"
+    },
+    "eval_stairs_smoke001": {
+      "manifest_sha256": "10d21516375aa16562ee25dc803f9ef80d2b6924866b7890f7dd142c75d2f9a9",
+      "result_sha256": "cfd233b380c0b853bfee73edd1e8db939034cc60102a630764fe0c59f637230a",
+      "score_sha256": "ea21f4ffd5ca2667d7aff49281462011ab58309c1396c374512d326a284bd220",
+      "counts": {
+        "administrative_incomplete": 2,
+        "assigned": 2,
+        "complete": 0,
+        "independent_episodes": 2,
+        "invalid_evidence": 0,
+        "native_timeout": 0,
+        "physical_failure": 0,
+        "started": 2,
+        "success": 0
+      },
+      "status_counts": {
+        "incomplete": 2
+      },
+      "optimizer_calls": 0,
+      "teacher_unchanged": true,
+      "collection_complete": false,
+      "recorded_control_rows": 240,
+      "qualification": "not_registered"
+    },
+    "eval_stairs_full001": {
+      "manifest_sha256": "3bf6789e9def604063078ac227fd4716d51a40dba24674bcc7eeadb666915232",
+      "result_sha256": "b37f2da6c3e89389402f7d9a8bdac1b320ccd8241753fc4ce1565b435a9d7113",
+      "score_sha256": "23c4916b7d12f688aaefd0c0b6756c33502f9d906d7bd7007d9252c72145a8dc",
+      "counts": {
+        "administrative_incomplete": 0,
+        "assigned": 2,
+        "complete": 2,
+        "independent_episodes": 2,
+        "invalid_evidence": 0,
+        "native_timeout": 0,
+        "physical_failure": 2,
+        "started": 2,
+        "success": 0
+      },
+      "status_counts": {
+        "fail": 2
+      },
+      "optimizer_calls": 0,
+      "teacher_unchanged": true,
+      "collection_complete": true,
+      "recorded_control_rows": 824,
+      "qualification": "not_registered"
+    }
+  },
+  "original_files_verified_unchanged": 51,
+  "historical_sections": {
+    "CLAUDE.md": {
+      "bytes": 2084,
+      "sha256": "fd930d35a91a68ec1bd9c2262c065618d1959c915cefc354b489f6a5f053fb3d",
+      "unchanged": true
+    },
+    "BLACK_ROUGH_IMPLEMENTATION.zh-CN.md": {
+      "bytes": 9777,
+      "sha256": "6ca3ca827010747bb1b13fb0c7c7a83db1940bbc719e45410da8dc3b00d033d8",
+      "unchanged": true
+    }
+  },
+  "automatic_review": {
+    "status": "no_new_implementation_blocker_after_fixes",
+    "reviewers": [
+      "implementation_review",
+      "independent_read_only_review"
+    ],
+    "fixed": [
+      "original constructor exception and diagnostics preserved across cleanup failure",
+      "collection final publishing covered by failure recording; atomic nonoverwriting JSON",
+      "nonfinite pre-action measurements stopped before physics",
+      "PARTIAL recording failure does not suppress FAILED",
+      "strict_finish requires native terminated and matching reset",
+      "FAILED with RESULT rejects independent score"
+    ],
+    "independent_cpu_counterexamples_passed": 3,
+    "formal_teacher_qualification": "not_registered",
+    "formal_student_gate": "closed",
+    "gpu_review": "independent_evidence_review_completed",
+    "gpu_review_details": {
+      "scores_recomputed_equal": 5,
+      "source_files_unchanged": 471,
+      "teacher_identity_verified": true,
+      "terminal_rows_preserved_without_reset_append": true,
+      "delay_0_to_2_actions_match": true,
+      "stair_failure_invalid_proof_is_not_invalid_record": true,
+      "new_implementation_blockers_found": 0
+    }
+  },
+  "formal_student_gate": "closed",
+  "qualification": "not_registered",
+  "long_training_started": false,
+  "windows_deployed": false,
+  "old_physics_nan_fixed": false
+}

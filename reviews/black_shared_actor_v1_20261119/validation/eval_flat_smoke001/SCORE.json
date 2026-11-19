@@ -1,0 +1,1236 @@
+{
+  "automatic_promotion": false,
+  "bundle_sha256": "fcf3f66f61ad999dfeb79c1e20fd55592cfef080128baf37f390549465bfd842",
+  "collection_complete": false,
+  "counts": {
+    "administrative_incomplete": 32,
+    "assigned": 32,
+    "complete": 0,
+    "independent_episodes": 32,
+    "invalid_evidence": 0,
+    "native_timeout": 0,
+    "physical_failure": 0,
+    "started": 32,
+    "success": 0
+  },
+  "coverage": {
+    "cells": {
+      "flat8/forward": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/lateral_left": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/lateral_right": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/reversal": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/reverse": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/stop": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/yaw_left": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      },
+      "flat8/yaw_right": {
+        "assigned": 4,
+        "complete": 0,
+        "qualification": "not_registered",
+        "success": 0
+      }
+    },
+    "missing_axis_cells": [
+      "axis/0/-0.10/0.0",
+      "axis/0/-0.10/3.141592653589793",
+      "axis/0/+0.10/0.0",
+      "axis/0/+0.10/3.141592653589793",
+      "axis/0/-0.25/0.0",
+      "axis/0/-0.25/3.141592653589793",
+      "axis/0/+0.25/0.0",
+      "axis/0/+0.25/3.141592653589793",
+      "axis/1/-0.10/0.0",
+      "axis/1/-0.10/3.141592653589793",
+      "axis/1/+0.10/0.0",
+      "axis/1/+0.10/3.141592653589793",
+      "axis/1/-0.25/0.0",
+      "axis/1/-0.25/3.141592653589793",
+      "axis/1/+0.25/0.0",
+      "axis/1/+0.25/3.141592653589793",
+      "axis/2/-0.10/0.0",
+      "axis/2/-0.10/3.141592653589793",
+      "axis/2/+0.10/0.0",
+      "axis/2/+0.10/3.141592653589793",
+      "axis/2/-0.25/0.0",
+      "axis/2/-0.25/3.141592653589793",
+      "axis/2/+0.25/0.0",
+      "axis/2/+0.25/3.141592653589793"
+    ],
+    "missing_flat8_cells": [],
+    "stairs_qualification_scope": "not_registered"
+  },
+  "manifest_sha256": "441e09d34ffd3e89e8d1e25fe01eeecee7d215a0f39ac3fdcda28c588b1cb999",
+  "protocol_id": "shared_actor_absolute_diagnostics_v1",
+  "qualification": "not_registered",
+  "result_sha256": "23bfebd11d262798277ec998ac538315161cc3b843e4b8bc8f24ea583b5634d2",
+  "schema": "shared_actor_evaluation_v1",
+  "source_sha256": "56bf36c53b7e55832cdaa0c02425408a76ccc83b0593416db172499ca2656837",
+  "status_counts": {
+    "incomplete": 32
+  },
+  "teacher_id": "37e671b908236b43921373af11505550f85614800cc8c54ebbcc9c58fd2dd48e",
+  "trials": [
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        0,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0000"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        1,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0001"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        2,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0002"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        3,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0003"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        4,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "reverse": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0004"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        5,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "stop": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0005"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        6,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0006"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        7,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0007"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        8,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0008"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        9,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0009"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        10,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0010"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        11,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0011"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        12,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "reverse": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0012"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        13,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "stop": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0013"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        14,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0014"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        15,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0015"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        16,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0016"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        17,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0017"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        18,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0018"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        19,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0019"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        20,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "reverse": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0020"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        21,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "stop": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0021"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        22,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0022"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        23,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0023"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        24,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0024"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        25,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0025"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        26,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0026"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        27,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0027"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        28,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "reverse": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0028"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        29,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "forward_entry": false,
+          "stop": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0029"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        30,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0030"
+    },
+    {
+      "administrative_incomplete": true,
+      "complete": false,
+      "end_reason": "administrative_incomplete",
+      "episode_identity": [
+        0,
+        119041,
+        31,
+        0,
+        0
+      ],
+      "full_horizon": false,
+      "invalid_depth_frames": 0,
+      "invalid_evidence": false,
+      "metrics": {
+        "criteria": {
+          "signed_motion": false
+        },
+        "forward_entry_vx": null,
+        "late_velocity_mean": [
+          null,
+          null,
+          null
+        ],
+        "passed": false
+      },
+      "native_timeout": false,
+      "observed_ticks": 12,
+      "physical_failure": false,
+      "program": "flat8",
+      "started": true,
+      "status": "incomplete",
+      "success": false,
+      "trial_id": "trial_0031"
+    }
+  ]
+}
