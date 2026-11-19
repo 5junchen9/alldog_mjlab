@@ -86,6 +86,8 @@ class TerminalPPO(PPO):
           {"critic": extras["terminal_critic"][pure_timeout]},
           batch_size=[int(pure_timeout.sum())],
         )
+        if "terminal_course_state" in extras:
+          terminal_obs["course_state"] = extras["terminal_course_state"][pure_timeout]
         with torch.no_grad():
           value = self.critic(terminal_obs).squeeze(-1)
         adjusted[pure_timeout] += self.gamma * value
@@ -116,7 +118,7 @@ def build_ppo(obs, teacher, *, num_steps=24, device="cpu", ppo_options=None):
     actor = PPOActor(obs, teacher).to(device)
     critic = TerrainModel(
       obs,
-      {"critic": ["critic"]},
+      {"critic": ["critic", "course_state"] if "course_state" in obs else ["critic"]},
       "critic",
       1,
       (512, 256, 128),

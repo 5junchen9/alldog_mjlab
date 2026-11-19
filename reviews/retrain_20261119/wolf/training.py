@@ -1,4 +1,4 @@
-"""Wolf薄训练循环：PPO后更新HIM；视觉学生按本episode重算GRU前缀。"""
+"""Wolf教师PPO/HIM交替更新；视觉学生复用统一的50帧记忆段训练。"""
 
 import json
 from pathlib import Path
@@ -15,8 +15,6 @@ from black.learner_state import (
   validate_resume as validate_shared_resume,
 )
 from black.run import update_him
-from black.student import SharedStudent, distillation_loss
-from black.student_training import EpisodePrefix, _sequence, _state_slice
 
 from wolf.checkpoint import save_bundle, source_identity, teacher_identity
 from wolf.ppo import build_ppo
@@ -35,14 +33,17 @@ def validate_resume(packet, phase, configuration):
 
 def recipe(env, phase):
   return {
-    "algorithm": "wolf_shared_actor_v1",
+    "algorithm": "wolf_shared_actor_v2",
     "phase": phase,
     "course": env.course,
     "max_level": env.plant.command_manager.get_term("twist").cfg.max_level,
     "num_envs": env.count,
     "controls_per_round": STEPS,
     "HIM_target": "next_velocity_scaled2_and_next_frame_before_reset",
-    "student_prefix": "full_current_episode_fresh_frames_current_parameters",
+    "HIM_microbatch": "balanced_max2048",
+    "HIM_temperature": 0.5,
+    "ppo": "lr1e-3_adaptive_KL0.01_gamma0.99",
+    "camera_noise": getattr(env, "training_sensors", False),
   }
 
 
@@ -74,11 +75,8 @@ def train_teacher(env, teacher, cnn, gru, rounds, output, resume=None, save_ever
       state["optimizer_calls"],
       state["him_optimizer_calls"],
     )
+    env.restore_curriculum(state["curriculum"])
     restore_rng(state["rng"], env.device)
-    command = env.plant.command_manager.get_term("twist")
-    command.unlocked_level = state["curriculum"]["unlocked_level"]
-    command.promotion_successes = state["curriculum"]["promotion_successes"]
-    command.promotion_results = state["curriculum"]["promotion_results"]
 
   def count(*_):
     nonlocal calls
@@ -96,7 +94,6 @@ def train_teacher(env, teacher, cnn, gru, rounds, output, resume=None, save_ever
   algorithm.optimizer.register_step_post_hook(count)
 
   def save(path):
-    command = env.plant.command_manager.get_term("twist")
     return save_bundle(
       path,
       teacher,
@@ -113,11 +110,7 @@ def train_teacher(env, teacher, cnn, gru, rounds, output, resume=None, save_ever
         "optimizer_calls": calls,
         "him_optimizer_calls": him_calls,
         "rng": capture_rng(env.device),
-        "curriculum": {
-          "unlocked_level": command.unlocked_level,
-          "promotion_successes": command.promotion_successes,
-          "promotion_results": command.promotion_results,
-        },
+        "curriculum": env.capture_curriculum(),
       },
     )
 
@@ -174,125 +167,19 @@ def train_teacher(env, teacher, cnn, gru, rounds, output, resume=None, save_ever
   }
 
 
-def collect_student(env, student, hidden):
-  histories, depths, geometries, metadata = [], [], [], []
-  with torch.no_grad():
-    for _ in range(STEPS):
-      history = env.obs["history"].reshape(-1, 6, 53)
-      row = env.frames.metadata()
-      histories.append(history.detach().cpu().clone())
-      depths.append(env.frames.depth.detach().cpu().clone())
-      geometries.append(env.obs["geometry"].detach().cpu().clone())
-      metadata.append(
-        {
-          key: value.detach().cpu().clone() if torch.is_tensor(value) else value
-          for key, value in row.items()
-        }
-      )
-      action, _, hidden = student(history, env.frames.depth, row, hidden)
-      env.step(action)
-  return {
-    "history": torch.stack(histories),
-    "depth": torch.stack(depths),
-    "geometry": torch.stack(geometries),
-    "metadata": metadata,
-  }, hidden
-
-
 def train_student(env, teacher, cnn, gru, rounds, output, resume=None, save_every=100):
-  student = SharedStudent(teacher, cnn, gru)
-  initial_teacher = teacher_identity(teacher)
-  parameters = student.student_parameters()
-  optimizer = torch.optim.Adam(parameters, lr=1e-4)
-  configuration = recipe(env, "student")
-  signature = parameter_signature(
-    [(f"cnn.{n}", p) for n, p in cnn.named_parameters()]
-    + [(f"gru.{n}", p) for n, p in gru.named_parameters()]
-  )
-  completed = 0
-  if resume is not None:
-    saved = validate_resume(resume, "student", configuration)
-    if saved["parameter_signature"] != signature:
-      raise ValueError("Wolf视觉optimizer参数顺序变化")
-    optimizer.load_state_dict(saved["optimizer"])
-    completed = resume["completed_updates"]
-    restore_rng(saved["rng"], env.device)
-  # 120秒专项需完整前缀；先估算容量，不悄悄截断旧帧。
-  max_frames = (env.max_episode_controls + 4) // 5
-  estimate = (
-    env.count * max_frames * (48 * 64 * 4 + 2048)
-    + 2 * env.count * STEPS * (318 + 768 + 3072) * 4
-  )
-  available = next(
-    int(line.split()[1]) * 1024
-    for line in Path("/proc/meminfo").read_text().splitlines()
-    if line.startswith("MemAvailable:")
-  )
-  if estimate > 0.8 * available:
-    raise MemoryError("完整episode视觉前缀超过可用内存的80%，请减少环境数")
-  prefix = EpisodePrefix(env.count, env.max_episode_controls, gru.max_age)
-  hidden = None
-  output = Path(output)
+  from black.student_training import train_student as train_visual
 
-  def save(path):
-    if teacher_identity(teacher) != initial_teacher:
-      raise RuntimeError("学生更新改变了冻结teacher")
-    return save_bundle(
-      path,
-      teacher,
-      cnn,
-      gru,
-      phase="student",
-      updates=completed,
-      learning_state={
-        "schema": SCHEMA,
-        "recipe": configuration,
-        "optimizer": optimizer.state_dict(),
-        "parameter_signature": signature,
-        "optimizer_calls": completed,
-        "rng": capture_rng(env.device),
-      },
-    )
+  from wolf import checkpoint
 
-  for _ in range(rounds):
-    env.metrics.policy_update = completed
-    env.policy_identity = initial_teacher
-    initial_hidden = _state_slice(hidden, 0, env.count, "cpu")
-    sample, hidden = collect_student(env, student.eval(), hidden)
-    prefix.extend(sample)
-    student.train()
-    optimizer.zero_grad(set_to_none=True)
-    total = 0.0
-    for start in range(0, env.count, 128):
-      stop = min(start + 128, env.count)
-      history, visual, _ = _sequence(
-        student, sample, initial_hidden, start, stop, env.device
-      )
-      geometry = sample["geometry"][:, start:stop].to(env.device)
-      loss, _ = distillation_loss(
-        history.flatten(0, 1),
-        geometry.flatten(0, 1),
-        visual.flatten(0, 1),
-        student,
-        teacher,
-        1.0,
-      )
-      if not torch.isfinite(loss):
-        raise FloatingPointError("Wolf视觉损失非有限")
-      (loss * (stop - start) / env.count).backward()
-      total += float(loss.detach()) * (stop - start) / env.count
-    torch.nn.utils.clip_grad_norm_(parameters, 1.0, error_if_nonfinite=True)
-    optimizer.step()
-    completed += 1
-    hidden = prefix.refresh(student, hidden, env.device)
-    with (output / "updates.jsonl").open("a") as stream:
-      stream.write(json.dumps({"update": completed, "student_loss": total}) + "\n")
-    if completed % save_every == 0:
-      save(output / f"student_update_{completed:06d}.pt")
-  save(output / "student.pt")
-  return {
-    "teacher_id": initial_teacher,
-    "completed_updates": completed,
-    "optimizer_calls": completed,
-    "checkpoint": str(output / "student.pt"),
-  }
+  return train_visual(
+    env,
+    teacher,
+    cnn,
+    gru,
+    rounds,
+    output,
+    resume=resume,
+    save_every=save_every,
+    checkpoint_api=checkpoint,
+  )

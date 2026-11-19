@@ -12,12 +12,15 @@ import torch
 from black.model import Teacher, make_modules
 
 CONTRACT = {
-  "schema": "black_retrain_shared_actor_v1",
+  "schema": "black_retrain_shared_actor_v2",
   "input_order": ["current_p45", "HIM_next_velocity3", "HIM_unit16", "terrain32"],
   "history_shape": [5, 45],
-  "geometry": "nearest_surface_pool_original_pixel_optical_xyz_div4_valid_12x16_v2",
-  "depth": "planar_z_metres_nearest_valid_surface_bins160x90_to64x48_v2",
+  "him_input": "5x42_command_stripped_proprio",
+  "critic": "raw446_plus_course_time_hold_entry3_only_for_value",
+  "geometry": "nearest_surface_pool_original_pixel_optical_xyz_div4_range0p2to4m_valid_12x16_v2",
+  "depth": "planar_z_metres_nearest_valid_surface_bins160x90_to64x48_range0p2to4m_v2",
   "foot_clearance": "sparse_gap_allmiss_saturated_range_and_real_contact_support",
+  "visual_memory": "50_fresh_valid_frame_segments_reset_before_51st",
   "camera_hz": 10,
   "control_hz": 50,
   "action_order": [
@@ -26,7 +29,7 @@ CONTRACT = {
     for joint in ("hip", "thigh", "calf")
   ],
   "action_scale": 0.25,
-  "action_space": "policy_mean_before_native_delay_and_PD",
+  "action_space": "policy_mean_before_native_delay_clear_on_reset_and_PD",
 }
 
 

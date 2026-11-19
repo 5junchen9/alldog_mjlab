@@ -199,7 +199,8 @@ class EpisodeMetrics:
           self.extra_reasons[ids].long(),
           state.stair_ledger.max_stage[ids, None],
           (
-            state.exit_stability.paid_milli[ids, None]
+            # 同批打包整数计数；浮点奖励换成微单位，误差最多0.5e-6。
+            (state.exit_stability.paid_total[ids, None] * 1_000_000).round().long()
             if hasattr(state, "exit_stability")
             else torch.zeros_like(self.serial[ids, None])
           ),
@@ -270,7 +271,7 @@ class EpisodeMetrics:
           original_event_units=values[29] / 4,
           ascent_event_units=values[30] / 1000,
           max_legal_ascent_stage=values[35],
-          exit_stability_event_units=values[36] / 1000,
+          exit_stability_event_units=values[36] / 1_000_000,
           completion_value_event_units=values[37] * 12.0,
           extra_failure_reason_bits=dict(
             zip(

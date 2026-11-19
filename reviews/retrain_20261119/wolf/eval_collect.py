@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from black.eval_collect import write_json
+from black.eval_collect import device_lock_path, write_json
 
 from wolf.checkpoint import CONTRACT, load_bundle, source_identity, teacher_identity
 from wolf.curriculum import COURSES
@@ -191,7 +191,7 @@ def main():
   if args.bundle is None or args.out is None:
     parser.error("执行需要bundle和新的out目录")
   torch.set_num_threads(2)
-  with Path("/tmp/mjlab_black_matrix_1000_cuda_0.lock").open("a") as lock:
+  with device_lock_path(args.device).open("a") as lock:
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     print(json.dumps(execute(args), ensure_ascii=False))
 

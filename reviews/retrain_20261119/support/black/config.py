@@ -10,10 +10,25 @@ from mjlab.tasks.velocity.config.black_teacher.rl_cfg import (
   black_teacher_ppo_runner_cfg,
 )
 from mjlab.utils.noise import UniformNoiseCfg
-from support.black.specialty_composition import CompositionCommandCfg
 from support.black.observations import append_terrain
+from support.black.specialty_composition import CompositionCommandCfg
 
 TASKS = ("stairs", "platform", "high_wall", "slope", "broken_bridge", "plum_stakes")
+
+
+def configure_ppo_schedule(rl, course="flat_foundation"):
+  """按训练阶段配置PPO学习率与自适应KL调度；从零阶段不用旧微调5e-5。"""
+  if course in ("flat_foundation", "flat_axes"):
+    rl.algorithm.learning_rate = 1.0e-3
+  elif course == "general":
+    rl.algorithm.learning_rate = 3.0e-4
+  elif course == "specialty":
+    rl.algorithm.learning_rate = 1.0e-4
+  else:
+    raise ValueError(f"Unknown Black course for PPO schedule: {course}")
+  rl.algorithm.schedule = "adaptive"
+  rl.algorithm.desired_kl = 0.01
+  return rl
 
 
 def make_general_configs(
@@ -21,6 +36,8 @@ def make_general_configs(
 ):
   """25%平地与75%六种粗糙地形，沿用原生奖励和地形升级。"""
   cfg = rough_env_cfg(num_envs, seed, map_seed)
+  # 新从零训练线在episode重置时清空执行器延迟历史，避免上一回合极端动作串扰新回合。
+  cfg.actions["joint_pos"].clear_history_on_reset = True
   old = cfg.commands["twist"]
   cfg.commands["twist"] = CompositionCommandCfg(
     **{field.name: copy.deepcopy(getattr(old, field.name)) for field in fields(old)}
@@ -30,8 +47,7 @@ def make_general_configs(
   append_terrain(cfg)
   rl = black_teacher_ppo_runner_cfg()
   rl.seed = seed
-  rl.algorithm.learning_rate = 5e-5
-  rl.algorithm.schedule = "fixed"
+  configure_ppo_schedule(rl, "general")
   rl.experiment_name = "black_general"
   return cfg, rl
 

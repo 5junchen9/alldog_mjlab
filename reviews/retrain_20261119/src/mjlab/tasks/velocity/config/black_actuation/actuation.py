@@ -1,7 +1,7 @@
 """Opt-in Black control laws from super-dog@1b9f15de, not its RL settings.
 
 Black overrides the base LeggedRobot implementation: friction is smooth tanh,
-lag is sampled at reset, and action history is NOT cleared on episode reset.
+lag is sampled at reset, and action history is cleared for the new scratch line.
 The independent stock tasks continue to use their original built-in servo.
 """
 
@@ -70,8 +70,7 @@ class ControlStepDelay:
   """One history shift per policy/control step, never per physics substep.
 
   Source initializes four slots and zero lag, samples U{0,1,2} only on reset,
-  and retains the previous episode's history. Optional clearing is an explicit
-  deviation for episode-isolated experiments, not the source-compatible default.
+  and clears history on reset so a new episode starts from default PD targets.
   """
 
   def __init__(self, num_envs: int, action_dim: int, device: str):
@@ -84,7 +83,7 @@ class ControlStepDelay:
     env_ids: torch.Tensor | slice | None = None,
     *,
     enabled: bool = True,
-    clear_history: bool = False,
+    clear_history: bool = True,
   ) -> None:
     ids = slice(None) if env_ids is None else env_ids
     if enabled:
@@ -105,8 +104,8 @@ class BlackDelayedJointPositionActionCfg(JointPositionActionCfg):
   """Delay actions by a reset-sampled number of complete control steps."""
 
   delay_enabled: bool = True
-  clear_history_on_reset: bool = False
-  """False matches pinned Black; True prevents cross-episode action carryover."""
+  clear_history_on_reset: bool = True
+  """从零训练时阻止上一episode的残余动作进入新物理状态。"""
 
   def build(self, env: ManagerBasedRlEnv) -> BlackDelayedJointPositionAction:
     return BlackDelayedJointPositionAction(self, env)

@@ -15,6 +15,28 @@ from wolf.fault_capture import attach, write_fault
 class NativeEnv(BlackNativeEnv):
   evaluation = None
 
+  def capture_curriculum(self):
+    from wolf.curriculum import capture_curriculum
+
+    return capture_curriculum(self)
+
+  def restore_curriculum(self, saved):
+    from wolf.curriculum import restore_curriculum
+
+    restore_curriculum(self, saved)
+    self.restart_after_curriculum(saved["tick"])
+
+  def critic_context(self):
+    command = self.plant.command_manager.get_term("twist")
+    return torch.stack(
+      (
+        self.plant.episode_length_buf / self.max_episode_controls,
+        command.settled.float() / 50.0,
+        command.entered.float(),
+      ),
+      -1,
+    )
+
   def __init__(
     self,
     count,
@@ -25,6 +47,8 @@ class NativeEnv(BlackNativeEnv):
     evaluation=None,
     max_level=None,
     allow_promotion=True,
+    debug_first_fault=False,
+    training_sensors=False,
   ):
     import warp as wp
     from support.black.chunk_renderer_fixed import ChunkRenderer
@@ -34,6 +58,7 @@ class NativeEnv(BlackNativeEnv):
     from mjlab.rl import RslRlVecEnvWrapper
 
     cfg = configure(course, count, seed, max_level, allow_promotion)
+    self.max_level = max_level
     cfg.observations["history"] = cfg.observations.pop("actor")
     if evaluation is not None:
       evaluation.configure(cfg)
@@ -45,6 +70,11 @@ class NativeEnv(BlackNativeEnv):
       add_camera(spec)
 
     cfg.scene.spec_fn = camera_spec
+    self.training_sensors = training_sensors
+    if training_sensors:
+      from black.camera_randomization import configure as configure_camera
+
+      configure_camera(cfg)
     self.plant = ManagerBasedRlEnv(cfg, device=device)
     self.renderer = self.probe = None
     self.evaluation = evaluation
@@ -63,6 +93,11 @@ class NativeEnv(BlackNativeEnv):
         "control_hz": 50,
         "capture_hz": 10,
       }
+      from black.camera_randomization import SENSOR_NOISE
+
+      self.camera_receipt["training_sensor_randomization"] = (
+        SENSOR_NOISE if training_sensors else None
+      )
       self.renderer, _, self.render_receipt = make_renderer(
         renderer_class=ChunkRenderer,
         mjm=self.plant.sim.mj_model,
@@ -71,16 +106,17 @@ class NativeEnv(BlackNativeEnv):
         camera_id=cid,
         chunk=32 if count < 128 else 128,
       )
-      self.probe = attach(
-        self.plant,
-        lambda: {
-          "tick": self.frames.tick,
-          "episode": self.frames.episode,
-          "command": self.plant.command_manager.get_command("twist"),
-          "policy_update": self.metrics.policy_update,
-          "policy_identity": self.policy_identity,
-        },
-      )
+      if debug_first_fault:
+        self.probe = attach(
+          self.plant,
+          lambda: {
+            "tick": self.frames.tick,
+            "episode": self.frames.episode,
+            "command": self.plant.command_manager.get_command("twist"),
+            "policy_update": self.metrics.policy_update,
+            "policy_identity": self.policy_identity,
+          },
+        )
       self.last_native = self.wrapper.get_observations()
       self.obs = self.bind(self.last_native)
       if evaluation is not None:
@@ -104,10 +140,14 @@ class NativeEnv(BlackNativeEnv):
     if self.evaluation is not None:
       self.evaluation.begin(self.last_native)
     native, reward, done, info = self.wrapper.step(action)
+    from black.fault_capture import check_control_boundary
+
+    check_control_boundary(self.plant)
     info = dict(info)
     info["terminated"] = self.plant.reset_terminated.clone()
     info["time_outs"] = (self.plant.reset_time_outs & ~info["terminated"]).clone()
     info["terminal_critic"] = native["critic"].clone()
+    info["terminal_course_state"] = self.critic_context()
     info["terminal_history"] = native["history"].reshape(self.count, 6, 53).clone()
     # 使用独立estimator_velocity监督组，不直接取critic前三维；目标2×m/s。
     info["next_velocity"] = native["estimator_velocity"].clone()

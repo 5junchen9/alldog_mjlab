@@ -1,0 +1,382 @@
+{
+  "files": [
+    {
+      "path": "runs/review_finish_dev_black001/teacher.pt",
+      "bytes": 9414399,
+      "sha256": "307f5afd70ad72fc4213fbbfd15874ed860cd4de41419b86d123f8d37f7d475b",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_finish_dev_wolf001/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "7b415bc98f31a1c4350841c2ffc15ea89b64860a990a9f8bd41e0455957eddd3",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_001/black/flat_foundation_teacher/teacher.pt",
+      "bytes": 9414399,
+      "sha256": "c0bddae93c1c8d859af60407d60f792c813b337f0bf00f5356f866d53a4e2ca6",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_001/black/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9414399,
+      "sha256": "c0bddae93c1c8d859af60407d60f792c813b337f0bf00f5356f866d53a4e2ca6",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_student/student.pt",
+      "bytes": 1998259,
+      "sha256": "e54b41699caa9ad59d31c8081dcf466d8e8a7ef733ea553f120c95696b941ac0",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_student/student_update_000001.pt",
+      "bytes": 1998259,
+      "sha256": "e54b41699caa9ad59d31c8081dcf466d8e8a7ef733ea553f120c95696b941ac0",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_student_resume/student.pt",
+      "bytes": 1998387,
+      "sha256": "e00d40a9dba005b7dc7d86f938a1dd7288fdf26fe8801069df0eeb184fede945",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 1998387,
+      "sha256": "e00d40a9dba005b7dc7d86f938a1dd7288fdf26fe8801069df0eeb184fede945",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_teacher/teacher.pt",
+      "bytes": 9414399,
+      "sha256": "1038f913051cfac5eb079b2d89475f0f8d725329c11cffa0c79039a5ab29a3a0",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9414399,
+      "sha256": "1038f913051cfac5eb079b2d89475f0f8d725329c11cffa0c79039a5ab29a3a0",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9414783,
+      "sha256": "77dbc25673900d942e91b95f068fb7206766686cc7619b7ef45378604c426bcc",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_002/black/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9414783,
+      "sha256": "77dbc25673900d942e91b95f068fb7206766686cc7619b7ef45378604c426bcc",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_student/student.pt",
+      "bytes": 1998259,
+      "sha256": "0255ecfc15551c3d8d636e34cd5ddf2e1f3f930d88932aa8c1eb1c4b1fba03be",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_student/student_update_000001.pt",
+      "bytes": 1998259,
+      "sha256": "0255ecfc15551c3d8d636e34cd5ddf2e1f3f930d88932aa8c1eb1c4b1fba03be",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_student_resume/student.pt",
+      "bytes": 1998387,
+      "sha256": "a0b365c148cd162c78d076b89aaf49bedfef91098665a2b260905578779e46a5",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 1998387,
+      "sha256": "a0b365c148cd162c78d076b89aaf49bedfef91098665a2b260905578779e46a5",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_teacher/teacher.pt",
+      "bytes": 9414399,
+      "sha256": "2dec6b14142a629a00338c50e41a4b8e7a76f05f6718ae87b9c04f66e987cf92",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9414399,
+      "sha256": "2dec6b14142a629a00338c50e41a4b8e7a76f05f6718ae87b9c04f66e987cf92",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9414783,
+      "sha256": "5a2088a4f988375929d39b26a4423fb6e9e600f6b1aae49e807031bfa94b021e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9414783,
+      "sha256": "5a2088a4f988375929d39b26a4423fb6e9e600f6b1aae49e807031bfa94b021e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/general_teacher/teacher.pt",
+      "bytes": 9415101,
+      "sha256": "679649f18d639c8b2cd0afb79660bcf589ec2f38c177f21256af99ce3176af5b",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/general_teacher/teacher_update_000001.pt",
+      "bytes": 9415101,
+      "sha256": "679649f18d639c8b2cd0afb79660bcf589ec2f38c177f21256af99ce3176af5b",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/general_teacher_resume/teacher.pt",
+      "bytes": 9415485,
+      "sha256": "68bceba2c375621c7474301fa4f0e70233857b7203fb5915d22d78027012f9ca",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/general_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9415485,
+      "sha256": "68bceba2c375621c7474301fa4f0e70233857b7203fb5915d22d78027012f9ca",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/specialty_platform_teacher/teacher.pt",
+      "bytes": 9414527,
+      "sha256": "7cfd56c89138b3e960f8c79e82f2388ab1105291ae8e72cc8547913b6e4352e0",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_003/black/specialty_platform_teacher/teacher_update_000001.pt",
+      "bytes": 9414527,
+      "sha256": "7cfd56c89138b3e960f8c79e82f2388ab1105291ae8e72cc8547913b6e4352e0",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_student/student.pt",
+      "bytes": 1998259,
+      "sha256": "5ebf27ef6fb5845bd9d728ea0f3161d343d096e9d2ff91b8225c80a0626ebe20",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_student/student_update_000001.pt",
+      "bytes": 1998259,
+      "sha256": "5ebf27ef6fb5845bd9d728ea0f3161d343d096e9d2ff91b8225c80a0626ebe20",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_student_resume/student.pt",
+      "bytes": 1998387,
+      "sha256": "42011a64b16eeea460642d9f6a0c56e42f777b78a07a8a873384f3b747d29c57",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 1998387,
+      "sha256": "42011a64b16eeea460642d9f6a0c56e42f777b78a07a8a873384f3b747d29c57",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_teacher/teacher.pt",
+      "bytes": 9414399,
+      "sha256": "126fcf37181d69a82bf39c5b0afe4e0bff6705eca33f4b6d04886a6bfbcda61e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9414399,
+      "sha256": "126fcf37181d69a82bf39c5b0afe4e0bff6705eca33f4b6d04886a6bfbcda61e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9414783,
+      "sha256": "6c3a3ea661b9eb9c4133fa60753259b0305684044f25142da270cc93d3036f8e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9414783,
+      "sha256": "6c3a3ea661b9eb9c4133fa60753259b0305684044f25142da270cc93d3036f8e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/general_teacher/teacher.pt",
+      "bytes": 9415101,
+      "sha256": "a9d5ab120b7046be0383df28c6006c396e03d7d5e6774c0cab0c63bc46ce73f3",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/general_teacher/teacher_update_000001.pt",
+      "bytes": 9415101,
+      "sha256": "a9d5ab120b7046be0383df28c6006c396e03d7d5e6774c0cab0c63bc46ce73f3",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/general_teacher_resume/teacher.pt",
+      "bytes": 9415485,
+      "sha256": "1404cf3d95dd63ab1abfbe35e8063f719b5c08ef6f53e5c73f96af8a168b9189",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/general_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9415485,
+      "sha256": "1404cf3d95dd63ab1abfbe35e8063f719b5c08ef6f53e5c73f96af8a168b9189",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_platform_teacher/teacher.pt",
+      "bytes": 9414527,
+      "sha256": "54f106ca0a1034295a785650f92f18dded52892aeafe1d85c59aa1c1c614badd",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_platform_teacher/teacher_update_000001.pt",
+      "bytes": 9414527,
+      "sha256": "54f106ca0a1034295a785650f92f18dded52892aeafe1d85c59aa1c1c614badd",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_platform_teacher_resume/teacher.pt",
+      "bytes": 9414911,
+      "sha256": "1b3641a25cca9c82c5df293108cc0e50c8a344b1d54f1f90e3b1df7a7a36db04",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_platform_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9414911,
+      "sha256": "1b3641a25cca9c82c5df293108cc0e50c8a344b1d54f1f90e3b1df7a7a36db04",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_stairs_teacher/teacher.pt",
+      "bytes": 9424191,
+      "sha256": "d994ba8c3360e538ba34519a8366173ef11aa6d01ffd2ecf543e36b33e010f76",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_stairs_teacher/teacher_update_000001.pt",
+      "bytes": 9424191,
+      "sha256": "d994ba8c3360e538ba34519a8366173ef11aa6d01ffd2ecf543e36b33e010f76",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_stairs_teacher_resume/teacher.pt",
+      "bytes": 9424767,
+      "sha256": "4526de503a6e382923a924f4b71e7edafeda673e66bf67c4d52b1b2069df5405",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/black/specialty_stairs_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9424767,
+      "sha256": "4526de503a6e382923a924f4b71e7edafeda673e66bf67c4d52b1b2069df5405",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_student/student.pt",
+      "bytes": 2067123,
+      "sha256": "161b14e98f7a8325a14b048743d0b00d511a277dacb21c4cb2acb31ef4fd5cf4",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_student/student_update_000001.pt",
+      "bytes": 2067123,
+      "sha256": "161b14e98f7a8325a14b048743d0b00d511a277dacb21c4cb2acb31ef4fd5cf4",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_student_resume/student.pt",
+      "bytes": 2067315,
+      "sha256": "5ec4760fcee996bf5b52aa6cd419cc340d482cf037eda85ee1b0eb3e50e99818",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_student_resume/student_update_000002.pt",
+      "bytes": 2067315,
+      "sha256": "5ec4760fcee996bf5b52aa6cd419cc340d482cf037eda85ee1b0eb3e50e99818",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "986769dc93a5f94b0b9e614b36a68aa685f24f76597d18798a582d84a51875a6",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "986769dc93a5f94b0b9e614b36a68aa685f24f76597d18798a582d84a51875a6",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "d82149ee0e9927cb43aa5e1a4fa601b7e6ac3829e3b95995a4b3280849caf10e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/flat_foundation_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "d82149ee0e9927cb43aa5e1a4fa601b7e6ac3829e3b95995a4b3280849caf10e",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/general_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "e04a35c7ab6d9822aea96ec7bb749af35b0ab3fcb02113c91bf4181e7d010c8f",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/general_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "e04a35c7ab6d9822aea96ec7bb749af35b0ab3fcb02113c91bf4181e7d010c8f",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/general_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "b61bb0dfea3640afa37fc7ff2297355cf219005abe9ccc9e6abfe6507ff3b7dd",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/general_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "b61bb0dfea3640afa37fc7ff2297355cf219005abe9ccc9e6abfe6507ff3b7dd",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/stairs_teacher/teacher.pt",
+      "bytes": 9519303,
+      "sha256": "b7659ba2624dfe5fea4bd22399ba1565f2b3325d78383b25ad949b349182b076",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/stairs_teacher/teacher_update_000001.pt",
+      "bytes": 9519303,
+      "sha256": "b7659ba2624dfe5fea4bd22399ba1565f2b3325d78383b25ad949b349182b076",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/stairs_teacher_resume/teacher.pt",
+      "bytes": 9519687,
+      "sha256": "3cc450ef594c03920d3bd0f38843b9ab1a4296cc75cbe419e2a85b7a26073d5b",
+      "qualified": false
+    },
+    {
+      "path": "runs/review_completion_20261119_004/wolf/stairs_teacher_resume/teacher_update_000002.pt",
+      "bytes": 9519687,
+      "sha256": "3cc450ef594c03920d3bd0f38843b9ab1a4296cc75cbe419e2a85b7a26073d5b",
+      "qualified": false
+    }
+  ],
+  "freed_bytes": 466728474,
+  "preserved_diagnostic_packets": [
+    "faults/black/FIRST_BAD.pt",
+    "faults/wolf/FIRST_BAD.pt"
+  ],
+  "models_reproducible_with": "scripts/verify_gpu.py; no exact physics replay claimed"
+}

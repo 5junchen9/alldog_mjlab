@@ -293,7 +293,7 @@ def test_constructor_keeps_first_fault_when_diagnostic_or_close_fails(
       for joint in ("hip", "thigh", "calf")
     ]
     scale = 0.25
-    cfg = SimpleNamespace(delay_enabled=True, clear_history_on_reset=False)
+    cfg = SimpleNamespace(delay_enabled=True, clear_history_on_reset=True)
 
   plant = SimpleNamespace(
     max_episode_length=900,
@@ -341,7 +341,9 @@ def test_constructor_keeps_first_fault_when_diagnostic_or_close_fails(
 
     monkeypatch.setattr(fault_capture, "write_fault", fail_write)
   with pytest.raises(FloatingPointError) as caught:
-    NativeEnv(32, 73, "cpu", tmp_path, course="specialty", task="stairs")
+    NativeEnv(
+      32, 73, "cpu", tmp_path, course="specialty", task="stairs", debug_first_fault=True
+    )
   assert caught.value is original
   details = original.__dict__["failure_details"]
   assert details["close_error"] == "OSError('close fault')"

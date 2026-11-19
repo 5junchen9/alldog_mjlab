@@ -80,7 +80,9 @@ def test_built_command_uses_all_flat_first_and_keeps_flat_replay(
   term = cfg.commands["twist"].build(env)
   term.compute(0.02)
   assert int(term.flat_mask.sum()) == flat_count
-  assert term.vel_command_b[term.flat_mask].abs().max() <= 0.5
+  assert term.vel_command_b[term.flat_mask].abs().max() <= (
+    1.0 if course == "specialty" else 0.5
+  )
   if course == "specialty":
     assert term.vel_command_b[~term.flat_mask].eq(9).all()
   else:

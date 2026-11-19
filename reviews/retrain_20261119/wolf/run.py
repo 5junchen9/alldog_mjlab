@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from black.eval_collect import write_json
+from black.eval_collect import device_lock_path, write_json
 from black.student import SharedStudent
 
 from wolf.checkpoint import CONTRACT, load_bundle, save_bundle, teacher_identity
@@ -109,6 +109,8 @@ def execute(args):
       args.course,
       max_level=args.max_level,
       allow_promotion=args.mode == "teacher",
+      debug_first_fault=args.debug_first_fault,
+      training_sensors=args.mode in ("teacher", "student"),
     )
     env.policy_identity = teacher_identity(teacher)
     if args.mode == "probe":
@@ -135,6 +137,7 @@ def execute(args):
       else "same_contract_bundle",
       exact_physical_resume=False,
       capability_evaluated=False,
+      first_fault_probe_enabled=args.debug_first_fault,
     )
     write_json(args.out / "RESULT.json", result)
     return result
@@ -171,8 +174,15 @@ def main():
   source.add_argument("--resume-learner", type=Path)
   parser.add_argument("--out", type=Path)
   parser.add_argument("--execute", action="store_true")
+  parser.add_argument(
+    "--debug-first-fault", action="store_true", help="逐物理子步同步取证，诊断时开启"
+  )
   args = parser.parse_args()
   validate_cap(parser, args.course, args.max_level)
+  from wolf.eval_protocol import SEEDS
+
+  if args.seed in SEEDS:
+    parser.error("训练种子不能使用独立评估保留种子")
   if min(args.num_envs, args.controls, args.rounds, args.save_every) < 1:
     parser.error("环境数、步数、轮数和存档间隔必须为正")
   if not args.execute:
@@ -203,7 +213,7 @@ def main():
   ):
     parser.error("后续课程需要前一阶段同合同教师bundle")
   torch.set_num_threads(2)
-  with Path("/tmp/mjlab_black_matrix_1000_cuda_0.lock").open("a") as lock:
+  with device_lock_path(args.device).open("a") as lock:
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     print(json.dumps(execute(args), ensure_ascii=False))
 

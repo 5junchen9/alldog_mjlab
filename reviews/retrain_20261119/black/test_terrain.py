@@ -9,15 +9,17 @@ from black.terrain import camera_frustum, geometry, reduce_depth, renderer_frust
 
 
 def test_reduce_keeps_nearest_valid_source_pixels_and_owns_renderer_buffer():
-  raw = (torch.arange(90 * 160, dtype=torch.float32) + 1).reshape(1, 90, 160, 1)
+  raw = (0.5 + torch.arange(90 * 160, dtype=torch.float32) / 10000).reshape(
+    1, 90, 160, 1
+  )
   depth, pixels = reduce_depth(raw)
   expected = torch.tensor(
     [[(y * 90 // 48) * 160 + x * 160 // 64 for x in range(64)] for y in range(48)]
   )
   assert torch.equal(pixels[0], expected)
-  torch.testing.assert_close(depth[0, ..., 0], expected.float() + 1)
+  torch.testing.assert_close(depth[0, ..., 0], 0.5 + expected.float() / 10000)
   raw.zero_()
-  torch.testing.assert_close(depth[0, ..., 0], expected.float() + 1)
+  torch.testing.assert_close(depth[0, ..., 0], 0.5 + expected.float() / 10000)
 
 
 def test_projection_uses_selected_original_pixel_ray_and_planar_z():
@@ -35,7 +37,7 @@ def test_projection_uses_selected_original_pixel_ray_and_planar_z():
   assert torch.equal(depth[..., 0][valid], raw.flatten()[pixels[valid]])
 
 
-def test_all_invalid_bins_remain_invalid_and_positive_depth_is_not_clipped():
+def test_invalid_and_out_of_range_depth_never_invent_a_surface():
   raw = torch.full((2, 90, 160, 1), 8.0)
   raw[0] = (
     torch.tensor([0.0, -1.0, float("nan"), float("inf"), -float("inf")])
@@ -49,7 +51,8 @@ def test_all_invalid_bins_remain_invalid_and_positive_depth_is_not_clipped():
   assert torch.isfinite(points).all()
   assert not bool(depth[0].any()) and bool((pixels[0] == -1).all())
   assert not bool(points[0].any())
-  assert bool((points[1, ..., 2] == 2.0).all())
+  assert not bool(depth[1].any()) and bool((pixels[1] == -1).all())
+  assert not bool(points[1].any())
 
 
 def test_camera_frustum_matches_renderer_formula_with_aspect_correction():
@@ -95,12 +98,12 @@ def test_thin_near_pixel_survives_both_reductions_and_near_noise_is_not_hidden()
   depth, pixels = reduce_depth(raw)
   points = geometry(depth, pixels, torch.tensor([-1.0, 1.0, -1.0, 1.0])).view(12, 16, 4)
   torch.testing.assert_close(points[0, 0, 2:], torch.tensor([0.175, 1.0]))
-  # A nearer erroneous positive return also wins: coverage improvement is no denoiser.
+  # 低于0.2m盲区的飞点被丢弃，真实细物体仍保留。
   raw[0, 1, 1, 0] = 0.001
   depth, pixels = reduce_depth(raw)
   points = geometry(depth, pixels, torch.tensor([-1.0, 1.0, -1.0, 1.0])).view(12, 16, 4)
-  torch.testing.assert_close(points[0, 0, 2], torch.tensor(0.001 / 4))
-  assert 161 in pixels[0, :4, :4]
+  torch.testing.assert_close(points[0, 0, 2], torch.tensor(0.7 / 4))
+  assert 161 not in pixels[0, :4, :4]
 
 
 def test_projection_rejects_fabricated_pixel_for_valid_depth():

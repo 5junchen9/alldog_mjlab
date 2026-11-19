@@ -1,9 +1,11 @@
-"""平地起步、通用地形和六专项；专项保留25%平地回放。"""
+"""平地起步、通用地形和六专项；专项与综合均含独立课程与25%平地回放。"""
 
+import copy
 import math
 from dataclasses import dataclass
 
 import torch
+from black.curriculum import GeneralProgress
 
 from mjlab.asset_zoo.robots.wolf.wolf_constants import (
   WOLF_LEG_JOINT_NAMES,
@@ -15,6 +17,7 @@ from mjlab.envs import mdp
 from mjlab.managers import ObservationTermCfg, RewardTermCfg, TerminationTermCfg
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.sensor import GridPatternCfg, ObjRef, RayCastSensorCfg
+from mjlab.tasks.velocity import mdp as velocity_mdp
 from mjlab.tasks.velocity.config.wolf.env_cfg import (
   WOLF_WHEEL_SLIP_CONTACT_SENSOR,
   make_env_cfg,
@@ -38,8 +41,35 @@ COURSES = ("flat_foundation", "flat_axes", "general", *SPECIALTIES)
 SETTLE_CONTROLS = 50
 
 
+def capture_curriculum(env):
+  command = env.plant.command_manager.get_term("twist")
+  return dict(
+    course=env.course,
+    tick=env.plant.common_step_counter,
+    unlocked_level=command.unlocked_level,
+    promotion_successes=command.promotion_successes,
+    promotion_results=list(command.promotion_results),
+    general_ceilings=list(command.general_ceilings),
+    general_windows=copy.deepcopy(command.general_progress.windows),
+  )
+
+
+def restore_curriculum(env, saved):
+  if saved["course"] != env.course:
+    raise ValueError("Wolf课程恢复阶段不一致")
+  command = env.plant.command_manager.get_term("twist")
+  for key in (
+    "unlocked_level",
+    "promotion_successes",
+    "promotion_results",
+    "general_ceilings",
+  ):
+    setattr(command, key, copy.deepcopy(saved[key]))
+  command.general_progress.windows = copy.deepcopy(saved["general_windows"])
+
+
 def flat_command(tick, target, general=False):
-  """先静止1秒，再低速起动、停、反向、停；命令不经过旧0.2m/s死区。"""
+  """先静止1秒，再起动、停、反向、停；命令不经过旧0.2m/s死区。"""
   phase = tick % (1350 if general else 550)
   first_end, second_start, second_end = (550, 700, 1200) if general else (200, 300, 450)
   result = torch.zeros_like(target)
@@ -55,6 +85,7 @@ class CourseCommand(UniformVelocityCommand):
     super().__init__(cfg, env)
     self.course = cfg.course
     self.target = torch.zeros(self.num_envs, 3, device=self.device)
+    self.specialty_speed = torch.full((self.num_envs,), 0.2, device=self.device)
     self.flat_mask = torch.ones(self.num_envs, dtype=torch.bool, device=self.device)
     self.direction = torch.ones(self.num_envs, dtype=torch.long, device=self.device)
     self.settled = torch.zeros_like(self.direction)
@@ -62,17 +93,38 @@ class CourseCommand(UniformVelocityCommand):
     self.failed = torch.zeros_like(self.flat_mask)
     self.entered = torch.zeros_like(self.flat_mask)
     self.contact_steps = torch.zeros_like(self.direction)
+    self.last_root_progress = torch.zeros(self.num_envs, device=self.device)
+    self.last_contact_count = torch.zeros(
+      self.num_envs, dtype=torch.long, device=self.device
+    )
+    self.general_left_platform = torch.zeros_like(self.flat_mask)
+    self.general_escaped = torch.zeros_like(self.flat_mask)
+    self.general_demand = torch.zeros(self.num_envs, device=self.device)
+    self.general_progress_m = torch.zeros_like(self.general_demand)
+    self.general_motion_steps = torch.zeros_like(self.direction)
+    self.general_tracking_steps = torch.zeros_like(self.direction)
     self.last_tick = -1
     self.lengths = self.widths = None
     self.cases = []
     self.unlocked_level = 0
     self.promotion_successes = 0
     self.promotion_results = []
+    self.general_ceilings = [0, 1, 1, 1, 1, 1, 1]
+    self.general_progress = GeneralProgress()
     self.sparse_catalog = None
     self.treads = []
     self.ordered = torch.zeros_like(self.direction)
     self.touched = torch.zeros(self.num_envs, 4, dtype=torch.bool, device=self.device)
-    if self.course in SPECIALTIES:
+    if self.course == "general":
+      terrain = env.scene.terrain
+      self.flat_mask = terrain.terrain_types == 0
+      if cfg.allow_promotion:
+        rough = ~self.flat_mask
+        terrain.terrain_levels[rough] = 1
+        terrain.env_origins[rough] = terrain.terrain_origins[
+          terrain.terrain_levels[rough], terrain.terrain_types[rough]
+        ]
+    elif self.course in SPECIALTIES:
       from support.black.obstacle_geometry import GROUPS, historical_case
 
       self.cases = [historical_case(name)[2] for name in GROUPS[self.course]]
@@ -112,15 +164,86 @@ class CourseCommand(UniformVelocityCommand):
         )
 
   def _resample_command(self, env_ids):
+    n = len(env_ids)
+    device = self.device
     self.target[env_ids] = 0
     course = self.cfg.course
-    axis = torch.zeros(len(env_ids), dtype=torch.long, device=self.device)
-    if course != "flat_foundation":
-      axis = torch.randint(3, (len(env_ids),), device=self.device)
-    signs = torch.randint(2, (len(env_ids),), device=self.device) * 2 - 1
-    magnitudes = torch.where(axis == 2, 0.3, 0.3 if course == "general" else 0.2)
-    self.target[env_ids, axis] = signs * magnitudes
-    self.target[env_ids[torch.rand(len(env_ids), device=self.device) < 0.25]] = 0
+    if course == "flat_foundation":
+      # 基础阶段先学低速前后起停；更高速度和复合命令留给后续阶段。
+      signs = torch.randint(2, (n,), device=device) * 2 - 1
+      self.target[env_ids, 0] = signs * torch.empty(n, device=device).uniform_(0.2, 0.3)
+      self.target[env_ids[torch.rand(n, device=device) < 0.25]] = 0
+      return
+    # flat_axes / general / specialty平地回放：同时覆盖单轴与复合转向(vx+wz/全向)。
+    draw = torch.rand(n, device=device)
+    stand = draw < 0.20
+    mixed = (draw >= 0.20) & (draw < (0.55 if course == "general" else 0.50))
+    single = ~(stand | mixed)
+    if single.any():
+      idx = env_ids[single]
+      m = len(idx)
+      axis = torch.randint(3, (m,), device=device)
+      signs = torch.randint(2, (m,), device=device) * 2 - 1
+      low_band = torch.rand(m, device=device) < 0.5
+      if course == "general" or course in SPECIALTIES:
+        vx_mag = torch.where(
+          low_band,
+          torch.empty(m, device=device).uniform_(0.25, 0.40),
+          torch.empty(m, device=device).uniform_(0.50, 1.20),
+        )
+        vy_mag = torch.where(
+          low_band,
+          torch.empty(m, device=device).uniform_(0.20, 0.35),
+          torch.empty(m, device=device).uniform_(0.35, 0.60),
+        )
+        wz_mag = torch.where(
+          low_band,
+          torch.empty(m, device=device).uniform_(0.30, 0.50),
+          torch.empty(m, device=device).uniform_(0.50, 1.20),
+        )
+      else:
+        vx_mag = torch.where(
+          low_band,
+          torch.empty(m, device=device).uniform_(0.20, 0.30),
+          torch.empty(m, device=device).uniform_(0.40, 0.80),
+        )
+        vy_mag = torch.where(
+          low_band,
+          torch.empty(m, device=device).uniform_(0.20, 0.30),
+          torch.empty(m, device=device).uniform_(0.30, 0.50),
+        )
+        wz_mag = torch.where(
+          low_band,
+          torch.empty(m, device=device).uniform_(0.30, 0.50),
+          torch.empty(m, device=device).uniform_(0.50, 1.00),
+        )
+      mags = torch.where(axis == 0, vx_mag, torch.where(axis == 1, vy_mag, wz_mag))
+      self.target[idx, axis] = signs * mags
+    if mixed.any():
+      idx = env_ids[mixed]
+      m = len(idx)
+      vx_hi = 1.20 if course == "general" else 0.80
+      wz_hi = 1.00 if course == "general" else 0.80
+      vx_sign = torch.randint(2, (m,), device=device) * 2 - 1
+      wz_sign = torch.randint(2, (m,), device=device) * 2 - 1
+      self.target[idx, 0] = vx_sign * torch.empty(m, device=device).uniform_(
+        0.20, vx_hi
+      )
+      self.target[idx, 2] = wz_sign * torch.empty(m, device=device).uniform_(
+        0.20, wz_hi
+      )
+      omni = torch.rand(m, device=device) < 0.30
+      if omni.any():
+        vy_sign = torch.randint(2, (int(omni.sum()),), device=device) * 2 - 1
+        self.target[idx[omni], 1] = vy_sign * torch.empty(
+          int(omni.sum()), device=device
+        ).uniform_(0.15, 0.40)
+    if course in SPECIALTIES:
+      rough = env_ids[~self.flat_mask[env_ids]]
+      if len(rough):
+        self.specialty_speed[rough] = torch.empty(len(rough), device=device).uniform_(
+          0.20, 0.50
+        )
 
   def reset(self, env_ids):
     result = super().reset(env_ids)
@@ -129,6 +252,14 @@ class CourseCommand(UniformVelocityCommand):
     self.failed[env_ids] = False
     self.entered[env_ids] = False
     self.contact_steps[env_ids] = 0
+    self.last_root_progress[env_ids] = 0.0
+    self.last_contact_count[env_ids] = 0
+    self.general_left_platform[env_ids] = False
+    self.general_escaped[env_ids] = False
+    self.general_demand[env_ids] = 0.0
+    self.general_progress_m[env_ids] = 0.0
+    self.general_motion_steps[env_ids] = 0
+    self.general_tracking_steps[env_ids] = 0
     self.ordered[env_ids] = 0
     self.touched[env_ids] = False
     self.last_tick = -1
@@ -141,9 +272,40 @@ class CourseCommand(UniformVelocityCommand):
     self.vel_command_b[ids] = flat_command(
       self._env.episode_length_buf[ids], self.target[ids], self.course == "general"
     )
+    if self.course == "general":
+      rough = ids[~self.flat_mask[ids]]
+      if len(rough):
+        offset = (
+          (
+            self.robot.data.root_link_pos_w[rough, :2]
+            - self._env.scene.env_origins[rough, :2]
+          )
+          .abs()
+          .amax(-1)
+        )
+        self.general_left_platform[rough] |= offset > 1.0
+        self.general_escaped[rough] |= offset > 4.0
+        cmd = self.vel_command_b[rough, :2]
+        speed = cmd.norm(dim=-1)
+        moving = speed > 0.05
+        actual = self.robot.data.root_link_lin_vel_b[rough, :2]
+        projected = (actual * cmd).sum(-1) / speed.clamp_min(1e-8)
+        self.general_demand[rough] += torch.where(
+          moving, speed * self._env.step_dt, 0.0
+        )
+        self.general_progress_m[rough] += torch.where(
+          moving, projected.clamp(min=0.0) * self._env.step_dt, 0.0
+        )
+        self.general_motion_steps[rough] += moving.long()
+        self.general_tracking_steps[rough] += (
+          moving & (projected >= 0.5 * speed)
+        ).long()
+      return
     if self.course not in SPECIALTIES:
       return
     ids = ids[~self.flat_mask[ids]]
+    if not len(ids):
+      return
     level = self._env.scene.terrain.terrain_levels[ids]
     local = self.robot.data.root_link_pos_w[ids] - self._env.scene.env_origins[ids]
     heading = torch.where(self.direction[ids] > 0, 0.0, math.pi)
@@ -154,11 +316,16 @@ class CourseCommand(UniformVelocityCommand):
     progress = torch.where(
       self.direction[ids] > 0, local[:, 0], self.lengths[level] - local[:, 0]
     )
-    speed = torch.where(progress < self.lengths[level] - 0.15, 0.2, 0.0)
+    speed = torch.where(
+      progress < self.lengths[level] - 0.15, self.specialty_speed[ids], 0.0
+    )
     speed = torch.where(self._env.episode_length_buf[ids] < 50, 0.0, speed)
-    self.vel_command_b[ids, 0] = speed * error.cos()
-    self.vel_command_b[ids, 1] = speed * error.sin()
-    self.vel_command_b[ids, 2] = torch.where(speed > 0, error.clamp(-0.3, 0.3), 0.0)
+    # 轮足纠偏采用前向滚动+偏航转向，避免发vy强迫轮子横向硬蹭。
+    self.vel_command_b[ids, 0] = speed * error.cos().clamp(min=0.0)
+    self.vel_command_b[ids, 1] = 0.0
+    self.vel_command_b[ids, 2] = torch.where(
+      speed > 0, (1.5 * error).clamp(-0.6, 0.6), 0.0
+    )
 
   def evidence(self):
     """每控制步一次，在reset前读取材料接触点；底板不能代替桥面/桩顶。"""
@@ -169,6 +336,8 @@ class CourseCommand(UniformVelocityCommand):
     self.last_tick = self._env.common_step_counter
     env = self._env
     ids = (~self.flat_mask).nonzero().flatten()
+    if not len(ids):
+      return
     levels = env.scene.terrain.terrain_levels[ids]
     sensor = env.scene[WOLF_WHEEL_SLIP_CONTACT_SENSOR].data
     points = sensor.pos[ids] - env.scene.env_origins[ids, None, :]
@@ -179,6 +348,8 @@ class CourseCommand(UniformVelocityCommand):
       forward[:, None], points[:, :, 0], self.lengths[levels, None] - points[:, :, 0]
     )
     root_progress = torch.where(forward, root[:, 0], self.lengths[levels] - root[:, 0])
+    self.last_root_progress[ids] = root_progress
+    self.last_contact_count[ids] = contacts.sum(-1)
     inside = (root_progress > 0.75) & (root_progress < self.lengths[levels] - 0.75)
     self.entered[ids] |= inside
     self.contact_steps[ids] += (inside & contacts.any(-1)).long()
@@ -245,6 +416,62 @@ class CourseCommandCfg(UniformVelocityCommandCfg):
 def reset_route(env, env_ids, pose_range, velocity_range):
   ids = torch.arange(env.num_envs, device=env.device) if env_ids is None else env_ids
   command = env.command_manager.get_term("twist")
+  if command.course == "general" and command.cfg.allow_promotion:
+    terrain = env.scene.terrain
+    rough_ids = ids[~command.flat_mask[ids]]
+    if len(rough_ids):
+      attempted = rough_ids[env.episode_length_buf[rough_ids] > 0]
+      if len(attempted):
+        closed = attempted[
+          env.termination_manager.terminated[attempted]
+          | env.termination_manager.time_outs[attempted]
+        ]
+        if len(closed):
+          passed = (
+            (~env.termination_manager.terminated[closed])
+            & command.general_left_platform[closed]
+            & (~command.general_escaped[closed])
+            & (command.general_demand[closed] >= 1.0)
+            & (
+              command.general_progress_m[closed] >= 0.8 * command.general_demand[closed]
+            )
+            & (
+              command.general_tracking_steps[closed]
+              >= 0.90 * command.general_motion_steps[closed]
+            )
+          )
+          rows = (
+            torch.stack(
+              (
+                terrain.terrain_types[closed],
+                terrain.terrain_levels[closed],
+                passed.long(),
+              ),
+              -1,
+            )
+            .cpu()
+            .tolist()
+          )
+          cap = max(1, min(4, int(command.cfg.max_level or 4)))
+          for kind, level, ok in rows:
+            command.general_progress.observe(
+              kind, level, bool(ok), command.general_ceilings
+            )
+            command.general_ceilings[kind] = min(command.general_ceilings[kind], cap)
+      kinds = terrain.terrain_types[rough_ids]
+      ceilings = torch.tensor(
+        command.general_ceilings, device=env.device, dtype=torch.long
+      )[kinds].clamp(min=1)
+      levels = ceilings.clone()
+      replay = (ceilings > 1) & (torch.rand(len(levels), device=env.device) < 0.25)
+      if replay.any():
+        # 在已解锁的[1, ceiling]范围内回放，不退回纯平地level 0。
+        span = (ceilings[replay] - 1).clamp(min=1)
+        levels[replay] = (
+          1 + (torch.rand(int(replay.sum()), device=env.device) * span).long()
+        )
+      terrain.terrain_levels[rough_ids] = levels
+      terrain.env_origins[rough_ids] = terrain.terrain_origins[levels, kinds]
   if command.course in SPECIALTIES and command.cfg.allow_promotion:
     # 只用当前最高关最近16个真实attempt，至少14次完整通过才解锁。
     current = env.scene.terrain.terrain_levels[ids] == command.unlocked_level
@@ -291,7 +518,15 @@ def reset_route(env, env_ids, pose_range, velocity_range):
 def route_finished(env):
   command = env.command_manager.get_term("twist")
   command.evidence()
-  return command.passed
+  # 同一步硬失败优先，不能同时拿通关奖励或晋级票。
+  hard_failures = [
+    env.termination_manager.get_term(name)
+    for name in env.termination_manager.active_terms
+    if name not in ("route_complete", "route_failed", "time_out")
+  ]
+  if hard_failures:
+    command.failed |= torch.stack(hard_failures).any(0)
+  return command.passed & ~command.failed
 
 
 def route_failed(env):
@@ -342,7 +577,29 @@ def configure(
     max_level=0 if max_level is None else max_level,
     allow_promotion=allow_promotion,
   )
+  # 全阶段补齐翻车倾角终止；general保留地形越界终止，仅专项使用自有廊道边界。
+  cfg.terminations["bad_orientation"] = TerminationTermCfg(
+    func=velocity_mdp.bad_orientation,
+    params={"limit_angle": math.radians(70.0)},
+  )
+  # 替换为双尺度速度跟踪核，解决低速0.2m/s下静止白嫖85%满分的问题。
+  cfg.rewards["tracking_lin_vel_x"] = RewardTermCfg(
+    func=rewards.track_linear_velocity_x,
+    weight=1.0,
+    params={"command_name": "twist", "sigma": 0.25, "fine_sigma": 0.02},
+  )
+  cfg.rewards["tracking_lin_vel_y"] = RewardTermCfg(
+    func=rewards.track_linear_velocity_y,
+    weight=1.0,
+    params={"command_name": "twist", "sigma": 0.25, "fine_sigma": 0.02},
+  )
+  cfg.rewards["tracking_ang_vel"] = RewardTermCfg(
+    func=rewards.track_angular_velocity_z,
+    weight=0.75,
+    params={"command_name": "twist", "sigma": 0.25, "fine_sigma": 0.02},
+  )
   if course in SPECIALTIES:
+    rewards.verify_completion_bound(cfg)
     from support.black.obstacle_geometry import GROUPS, SpecialtyTerrainCfg
 
     cap = len(GROUPS[course]) - 1 if max_level is None else max_level
@@ -364,6 +621,7 @@ def configure(
     cfg.episode_length_s = 120.0
     cfg.terminations["route_complete"] = TerminationTermCfg(func=route_finished)
     cfg.terminations["route_failed"] = TerminationTermCfg(func=route_failed)
+    cfg.terminations.pop("out_of_terrain_bounds", None)
     cfg.rewards["base_height"] = RewardTermCfg(
       func=rewards.support_height, weight=-10.0
     )
@@ -377,8 +635,9 @@ def configure(
     )
     for name, term in generator.sub_terrains.items():
       term.proportion = 0.25 if name == "flat" else 0.75 * term.proportion / previous
-    cfg.scene.terrain.max_init_terrain_level = 4 if max_level is None else max_level
-    cfg.commands["twist"].max_level = cfg.scene.terrain.max_init_terrain_level
+    cap = 4 if max_level is None else max_level
+    cfg.scene.terrain.max_init_terrain_level = 1 if allow_promotion else cap
+    cfg.commands["twist"].max_level = cap
     cfg.episode_length_s = 27.0
   wheel_bodies = SceneEntityCfg(
     "robot", body_names=WOLF_WHEEL_BODY_NAMES, preserve_order=True
@@ -417,7 +676,16 @@ def configure(
       "asset_cfg": SceneEntityCfg("robot", joint_names=legs, preserve_order=True)
     },
   )
+  if course in SPECIALTIES:
+    cfg.rewards["route_completion_bonus"] = RewardTermCfg(
+      func=rewards.RouteCompletionBonus, weight=1.0
+    )
+    cfg.rewards["route_progress_shaping"] = RewardTermCfg(
+      func=rewards.RouteProgressShaping, weight=1.0
+    )
+    cfg.rewards["route_stall_penalty"] = RewardTermCfg(
+      func=rewards.RouteStallPenalty, weight=-1.0
+    )
   # 不强迫轮足在障碍上回到标称腿姿；仅保留原hip弱约束及动作平滑。
   cfg.rewards.pop("stand_still", None)
-  cfg.terminations.pop("out_of_terrain_bounds", None)
   return cfg

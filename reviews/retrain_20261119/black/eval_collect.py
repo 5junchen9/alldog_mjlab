@@ -34,6 +34,16 @@ def sha256(path):
   return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def device_lock_path(device: str) -> Path:
+  """同一物理GPU共享锁；不同GPU分开，CPU进程互不阻塞。"""
+  target = torch.device(device)
+  if target.type == "cpu":
+    return Path(f"/tmp/mjlab_retrain_cpu_{os.getpid()}.lock")
+  index = torch.cuda.current_device() if target.index is None else target.index
+  identifier = str(torch.cuda.get_device_properties(index).uuid)
+  return Path(f"/tmp/mjlab_retrain_{identifier}.lock")
+
+
 def write_json(path, value):
   """序列化和写盘都完成后才发布正式名称，已有文件拒覆盖。"""
   path = Path(path)
@@ -401,7 +411,7 @@ def main():
 
   if args.panel:
     args.out.mkdir(parents=True, exist_ok=False)
-  with Path("/tmp/mjlab_black_matrix_1000_cuda_0.lock").open("a") as lock:
+  with device_lock_path(args.device).open("a") as lock:
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     for seed, specs in zip(seeds, plans, strict=True):
       selected = copy(args)

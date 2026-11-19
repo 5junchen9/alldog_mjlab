@@ -25,7 +25,8 @@ class TeacherDeployment(nn.Module):
     self.actor = copy.deepcopy(teacher.actor)
 
   def forward(self, history: Tensor, geometry: Tensor) -> Tensor:
-    encoded = self.encoder(history.flatten(1))
+    proprio = torch.cat((history[:, :, :30], history[:, :, 33:]), -1).flatten(1)
+    encoded = self.encoder(proprio)
     features = torch.cat(
       (
         history[:, -1],
@@ -57,6 +58,7 @@ class StudentDeployment(nn.Module):
     self.projection = copy.deepcopy(student.gru.projection)
     self.actor = copy.deepcopy(student.actor)
     self.max_age = student.gru.max_age
+    self.memory_frames = student.gru.memory_frames
 
   def forward(
     self,
@@ -67,7 +69,8 @@ class StudentDeployment(nn.Module):
     reset: Tensor,
     valid_frame: Tensor,
     frame_age_controls: Tensor,
-  ) -> tuple[Tensor, Tensor]:
+    fresh_count: Tensor,
+  ) -> tuple[Tensor, Tensor, Tensor]:
     if history.dim() != 3 or history.size(1) != 5 or history.size(2) != 45:
       raise ValueError("history must be FP32 [B,5,45], oldest to newest")
     if (
@@ -109,21 +112,25 @@ class StudentDeployment(nn.Module):
     if bool((frame_age_controls < 0).any()):
       raise ValueError("future camera frame forbidden")
     valid = valid_frame & (frame_age_controls <= self.max_age)
-    pixel_valid = torch.isfinite(depth_m) & (depth_m > 0)
+    pixel_valid = torch.isfinite(depth_m) & (depth_m >= 0.2) & (depth_m <= 4.0)
     pixel_valid = pixel_valid & valid[:, None, None, None]
     value = torch.where(pixel_valid, depth_m / 4.0, 0.0)
     image = torch.cat((value, pixel_valid.to(value.dtype)), -1)
     encoded = self.depth_encoder(image.permute(0, 3, 1, 2).contiguous())
-    hidden = torch.where(reset[:, None], 0.0, hidden)
+    fresh_count = torch.where(reset, 0, fresh_count)
+    restart = reset | (fresh & valid & (fresh_count >= self.memory_frames))
+    hidden = torch.where(restart[:, None], 0.0, hidden)
+    fresh_count = torch.where(restart, 0, fresh_count) + (fresh & valid).long()
     ids = (fresh & valid).nonzero().flatten()
     if ids.numel() > 0:
       hidden = hidden.index_copy(0, ids, self.gru_cell(encoded[ids], hidden[ids]))
     visual = encoded + torch.where(valid[:, None], self.projection(hidden), 0.0)
-    him = self.him_encoder(history.flatten(1))
+    proprio = torch.cat((history[:, :, :30], history[:, :, 33:]), -1).flatten(1)
+    him = self.him_encoder(proprio)
     features = torch.cat(
       (history[:, -1], him[:, :3], F.normalize(him[:, 3:], dim=-1), visual), -1
     )
-    return self.actor(features), hidden
+    return self.actor(features), hidden, fresh_count
 
 
 def _publish(path, content):
@@ -152,7 +159,7 @@ def export_student(student, path):
   torch.jit.save(module, buffer)
   content = buffer.getvalue()
   manifest = {
-    "schema": "black_retrain_student_torchscript_v1",
+    "schema": "black_retrain_student_torchscript_v2",
     "teacher_id": teacher_identity(student.teacher),
     "sha256": hashlib.sha256(content).hexdigest(),
     "inputs": {
@@ -163,6 +170,7 @@ def export_student(student, path):
       "reset": "bool[B], true_before_first_action_of_each_new_episode",
       "valid_frame": "bool[B], valid_capture_in_current_episode",
       "frame_age_controls": "int64[B], control_tick_minus_capture_tick",
+      "fresh_count": "int64[B], initially_zero; carry returned count",
     },
     "p45_layout": [
       "angular_velocity",
@@ -172,19 +180,22 @@ def export_student(student, path):
       "command",
       "previous_action",
     ],
-    "outputs": ["policy_action_mean[B,12]", "next_hidden[B,64]"],
+    "outputs": ["policy_action_mean[B,12]", "next_hidden[B,64]", "next_fresh_count[B]"],
     "action_order": CONTRACT["action_order"],
     "action_scale": CONTRACT["action_scale"],
     "action_semantics": "default_joint_position + 0.25 * delayed_policy_action",
     "control_hz": 50,
     "camera_hz": 10,
     "maximum_frame_age_controls": student.gru.max_age,
+    "memory_frames": student.gru.memory_frames,
+    "memory_boundary": "reset_before_51st_fresh_valid_frame",
+    "depth_valid_range_m": [0.2, 4.0],
     "delay": {
       "implementation": "external_native_action_history",
       "history_slots": 4,
       "lag_controls": [0, 1, 2],
       "lag_sampling": "uniform_per_lane_on_episode_reset",
-      "preserve_history_on_reset": True,
+      "preserve_history_on_reset": False,
       "shift": "once_per_control_before_selecting_delayed_action",
     },
     "depth_reduction": "terrain.reduce_depth; never fixed_nearest_pixel_resize",
@@ -207,7 +218,7 @@ def load_student_export(path, runtime_action_order):
   path = Path(path)
   manifest = json.loads(path.with_suffix(path.suffix + ".json").read_text())
   if (
-    manifest["schema"] != "black_retrain_student_torchscript_v1"
+    manifest["schema"] != "black_retrain_student_torchscript_v2"
     or manifest["action_order"] != CONTRACT["action_order"]
   ):
     raise ValueError("unsupported exported student contract")

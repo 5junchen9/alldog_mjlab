@@ -1,0 +1,497 @@
+{
+  "baseline_commit": "323b2e7b043b79d89e443b03619ff14f0606ade9",
+  "implementation_commit": "0a5003ecaadc9dca5b88953507d54102d6a3b43a",
+  "runtime_source_identity": {
+    "black": {
+      "sha256": "ede5266b5c3713a2cd2919d49525688e7bd3dae98160fb24af0fcefd83fd4e78",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.0",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "13.0"
+      }
+    },
+    "wolf": {
+      "sha256": "8a17b90b4e0a124248a8f5488fe892fb366d131bcefed4c6bf2d947413a824c5",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.0",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "13.0"
+      }
+    }
+  },
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/AGENTS.md",
+      "bytes": 1530,
+      "lines": 17,
+      "sha256": "08e947ec4c8baef8bf8695e6520f44df52f0bcf744ad8b7eb628e5048ca4af17",
+      "role": "guidance"
+    },
+    {
+      "path": "Makefile",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/Makefile",
+      "bytes": 871,
+      "lines": 16,
+      "sha256": "9149bd079459f104774a47cb8b696c0985db9d8999c576e3374393bfd182ca71",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "README.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/README.md",
+      "bytes": 3035,
+      "lines": 48,
+      "sha256": "9261f89f2abb9166f7d8d92be054ac5830026a33fe45673f0a9273cef7f78fd8",
+      "role": "guidance"
+    },
+    {
+      "path": "black/camera_randomization.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/camera_randomization.py",
+      "bytes": 1509,
+      "lines": 42,
+      "sha256": "76fdee315e4ba462fab375bc9c2601098cc489b9b23ccfb5e0ef1fcc7982dd24",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/checkpoint.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/checkpoint.py",
+      "bytes": 4994,
+      "lines": 142,
+      "sha256": "5aa87e6af28cc9070189285a9d69ee340837e92b3156d3c24faca61a0281dcb6",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/course_evaluation.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/course_evaluation.py",
+      "bytes": 21565,
+      "lines": 593,
+      "sha256": "8d8ea801f6cbc435c53a0bbb3212a501ebc76bec936cc58034ea3cb570ad920b",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/curriculum.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/curriculum.py",
+      "bytes": 14530,
+      "lines": 422,
+      "sha256": "b20186bce3d27d8a2f6a9c4796680f749c0d265b64b108c3e0bab39121efd9d9",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/eval_collect.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/eval_collect.py",
+      "bytes": 14814,
+      "lines": 432,
+      "sha256": "5f9f0f8b75d058aa40fbb8613017d5a24105b849f36595fb227e8a8374500fb2",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/export.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/export.py",
+      "bytes": 8774,
+      "lines": 229,
+      "sha256": "ea8ce5d8a1b1ab04de9131f8be4e71bcf0990debc7a9a0744af722d0ab86836e",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/fault_capture.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/fault_capture.py",
+      "bytes": 4281,
+      "lines": 140,
+      "sha256": "dbdeef72fa5abfece477a0d75bcc857855be0ce98d4bec9d3bafeed10347cb51",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/model.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/model.py",
+      "bytes": 3314,
+      "lines": 111,
+      "sha256": "dea073c89b99974078537ec6eb0a4470799cc64da5940d26a22961b41bc46b1f",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/ppo.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/ppo.py",
+      "bytes": 4759,
+      "lines": 134,
+      "sha256": "3304beef481f1d972b73915db1595fe49ac51735d2e1f1ef0d0197f828419252",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/run.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/run.py",
+      "bytes": 20976,
+      "lines": 561,
+      "sha256": "26f7f008e01a99d28c8f369a886a1e592a7109aa4ce4d5e2053c05c26896ddbd",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/runtime.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/runtime.py",
+      "bytes": 13627,
+      "lines": 374,
+      "sha256": "bd508744294a5769dd17a9e58e4c197d524df676d2ff95ce72defe6f7081bc88",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/student_training.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/student_training.py",
+      "bytes": 19192,
+      "lines": 469,
+      "sha256": "162c7e0a08f98950ddf2b53cc1b973d347bea8b295889a45a30b9143fa5ebbef",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/terrain.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/terrain.py",
+      "bytes": 5415,
+      "lines": 124,
+      "sha256": "b0c2a07f1f726f9f9b38124155a82d3992aa573f53347b477082a8258ec45ad8",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "black/test_checkpoint.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_checkpoint.py",
+      "bytes": 6315,
+      "lines": 172,
+      "sha256": "0ccd369303013b78cbd149769099bd70c8c58c70bcd452185ebbf785d46faf6d",
+      "role": "test"
+    },
+    {
+      "path": "black/test_curriculum.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_curriculum.py",
+      "bytes": 7585,
+      "lines": 222,
+      "sha256": "4d767e2ed780c85935f8b0f7fc78900cdfb23078994ccd4a72798f200a042b46",
+      "role": "test"
+    },
+    {
+      "path": "black/test_eval_adapter.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_eval_adapter.py",
+      "bytes": 12557,
+      "lines": 354,
+      "sha256": "9d456793ea8abf0211b61c2d00de6df83beed4a8a523c059f6595ae260a297ea",
+      "role": "test"
+    },
+    {
+      "path": "black/test_export.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_export.py",
+      "bytes": 3540,
+      "lines": 102,
+      "sha256": "300ef5b3cfdc2ed5d350d8e777e792fe45930c50c460c3e853a2d7c3c92d99c7",
+      "role": "test"
+    },
+    {
+      "path": "black/test_model.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_model.py",
+      "bytes": 3697,
+      "lines": 96,
+      "sha256": "8b435a50ecaeffff12dc7c14722fb0304e3e4835a852baad1586504ea9582090",
+      "role": "test"
+    },
+    {
+      "path": "black/test_review_fixes.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_review_fixes.py",
+      "bytes": 13056,
+      "lines": 381,
+      "sha256": "42e28c11da1a3aa84fce683e9adf4b971262c62c5d2b4a4ff9f038b109da3139",
+      "role": "test"
+    },
+    {
+      "path": "black/test_student_training.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_student_training.py",
+      "bytes": 22011,
+      "lines": 589,
+      "sha256": "e4b26c3ab25deb6ec2d8941bbd2ce35e938227c355b1981dfb74af65464e907d",
+      "role": "test"
+    },
+    {
+      "path": "black/test_terrain.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/black/test_terrain.py",
+      "bytes": 4428,
+      "lines": 113,
+      "sha256": "745d86f5a2b19dd67ae2b118821f1a7a026228f859259abd01adcc2efda9b2eb",
+      "role": "test"
+    },
+    {
+      "path": "docs/black.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/black.md",
+      "bytes": 9143,
+      "lines": 76,
+      "sha256": "ac4d3c55b9d3264dd904447291fa05a64f1afc5893738b369911ee3f9cc457a3",
+      "role": "guidance"
+    },
+    {
+      "path": "docs/history.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/history.md",
+      "bytes": 6875,
+      "lines": 59,
+      "sha256": "61b05f1a435cc930a997ddb07416797bee799157abf0fbd7effa8ae0806bf815",
+      "role": "guidance"
+    },
+    {
+      "path": "docs/review.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/review.md",
+      "bytes": 7139,
+      "lines": 62,
+      "sha256": "d988f389b289c4e3dd52f35ac4215effdf9f84a07adf746c17f687b1b59dbb3b",
+      "role": "guidance"
+    },
+    {
+      "path": "docs/review_completion_20261119.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/review_completion_20261119.md",
+      "bytes": 9459,
+      "lines": 63,
+      "sha256": "c3bea4d51ce3bc354923150db8e45590fab6017563c9033e6cdb614ed7d1fa33",
+      "role": "guidance"
+    },
+    {
+      "path": "docs/validation_and_cleanup.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/validation_and_cleanup.md",
+      "bytes": 4187,
+      "lines": 38,
+      "sha256": "4d39b00de9b88cffe81d3ac65b4cfca9932c5c35858e95684233f2636c824ad2",
+      "role": "guidance"
+    },
+    {
+      "path": "docs/wolf.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/wolf.md",
+      "bytes": 9898,
+      "lines": 71,
+      "sha256": "1e5eb9f5e63ed3fa086398b4eff50cf80df5903623471140dfcd27678b544a53",
+      "role": "guidance"
+    },
+    {
+      "path": "evidence/review_completion_20261119/scripts/verify_gpu.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/evidence/review_completion_20261119/scripts/verify_gpu.py",
+      "bytes": 8477,
+      "lines": 165,
+      "sha256": "c8072c50ca2cccde9b499b85e617ae93c939a50a5d493fa1bab1ee8e739d1e2a",
+      "role": "verification_script"
+    },
+    {
+      "path": "src/mjlab/rl/wolf_him/estimator.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/src/mjlab/rl/wolf_him/estimator.py",
+      "bytes": 3400,
+      "lines": 104,
+      "sha256": "4e07f967f46a7d50994afc161b46135d8760950bf5b2fa6a22a1df1fbec7fb56",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/black_actuation/actuation.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/src/mjlab/tasks/velocity/config/black_actuation/actuation.py",
+      "bytes": 4732,
+      "lines": 137,
+      "sha256": "dad252f13039949b8c43b265f596c4ea8bff403adcbeade466a5f1f8006acfab",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/config/black_rough/mdp.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/src/mjlab/tasks/velocity/config/black_rough/mdp.py",
+      "bytes": 10134,
+      "lines": 297,
+      "sha256": "8b439a319c4171508f844aa723fe0fbea5f423caa0456bb13398feb354e86038",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "src/mjlab/tasks/velocity/mdp/rewards.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/src/mjlab/tasks/velocity/mdp/rewards.py",
+      "bytes": 18404,
+      "lines": 499,
+      "sha256": "c63cb1c0df31ea8ad3b2f440277d12aea3d190543441926913544cc94287750b",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/causal_visual_gru.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/causal_visual_gru.py",
+      "bytes": 4705,
+      "lines": 137,
+      "sha256": "bc236acb1f79d9238c7a56e94c6ab28493167e6294de10ea8307de75a9829aac",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/config.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/config.py",
+      "bytes": 3142,
+      "lines": 85,
+      "sha256": "5109e3f558300428a3764e83a94a889aab465e65dde793f83379211d25a2dd2c",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/critic.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/critic.py",
+      "bytes": 1129,
+      "lines": 40,
+      "sha256": "d18c4d9f3fd3857aa0a3fabb403efc58a91586890664d18524df7aa836baa3b2",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/depth_him.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/depth_him.py",
+      "bytes": 2748,
+      "lines": 76,
+      "sha256": "4570f9c184a8037f2b1f608a619e89c0e55d0cae9118d70579124a4a74d0d305",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/exit_stability.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/exit_stability.py",
+      "bytes": 3751,
+      "lines": 107,
+      "sha256": "3788e809e72ae9ab3e33b0bc2d3bd4797e8abc465d271b33666f4dcb9a26bfee",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/him_base.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/him_base.py",
+      "bytes": 3546,
+      "lines": 101,
+      "sha256": "ead6aa4b8d92f0416705075fc88404a441a96c4de2d47e8c24ae34df813dc0b4",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/progress_credit.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/progress_credit.py",
+      "bytes": 7867,
+      "lines": 233,
+      "sha256": "a31b7c228079f5d6327f52ae2679244ebaf8a9b3dee9ef657931ac2229e167e3",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/specialty_env.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/specialty_env.py",
+      "bytes": 35198,
+      "lines": 977,
+      "sha256": "6aab1d47d47c4ddc56783125a6c302a8aadfd4270017cc4078a84318d89bd903",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "support/black/stair_metrics.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/support/black/stair_metrics.py",
+      "bytes": 13001,
+      "lines": 379,
+      "sha256": "d8459d50b769226053a78a4e87d0f6a124ff993587778fd619a8f0a8415ed84f",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/checkpoint.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/checkpoint.py",
+      "bytes": 3876,
+      "lines": 115,
+      "sha256": "515fc50cd7511061b429a35ac51e69f0027957ad1b67b08e9e40361bfac90d6b",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/curriculum.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/curriculum.py",
+      "bytes": 27177,
+      "lines": 691,
+      "sha256": "d04bbcaf15c976e07220e8c661708305d3b9cc053c452de259fefa04c9f65ae8",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/eval_adapter.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/eval_adapter.py",
+      "bytes": 4712,
+      "lines": 142,
+      "sha256": "7cb66dc2ce48a1a968402fa7c36a82714793b4ba2f85a40e851d221555f1b707",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/eval_collect.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/eval_collect.py",
+      "bytes": 6643,
+      "lines": 200,
+      "sha256": "06fa04611da56162e7a9f20db521dad6b81a7386f80a9e91ce3247b8f3fd68ab",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/eval_protocol.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/eval_protocol.py",
+      "bytes": 3540,
+      "lines": 132,
+      "sha256": "5e63e997394ecc9c7c8c758a5cd92681847a039c3b37eef2b79f4e4c00834a3e",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/eval_score.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/eval_score.py",
+      "bytes": 11219,
+      "lines": 340,
+      "sha256": "75a568351c73d76fde181f2e00dc4ea9c56a8b033b8758bb6003c43fdbd531e3",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/ppo.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/ppo.py",
+      "bytes": 1940,
+      "lines": 69,
+      "sha256": "17be39c72a1ed4b5a1f3ccb67efee10fb9e0c9d3fc3ff195b1c849aaba1cba0e",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/rewards.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/rewards.py",
+      "bytes": 10945,
+      "lines": 282,
+      "sha256": "0f90ddf5b405e88ccf7947b487965a00883862250c29f03853000b130281fcb6",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/run.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/run.py",
+      "bytes": 7719,
+      "lines": 222,
+      "sha256": "8c564aca0d27cae2c3003b6d75066227a894336b0cec08d554ffd118a6c54bcb",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/runtime.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/runtime.py",
+      "bytes": 6293,
+      "lines": 177,
+      "sha256": "0a2fedf5f9153994e7ba831a1bf305ac3b3e87b0dcf16bacc13f1720579a0b52",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "wolf/tests/test_review_fixes.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/tests/test_review_fixes.py",
+      "bytes": 4652,
+      "lines": 127,
+      "sha256": "a98c124dfb12f97f86d5474efe4230b649e0274fd919f0044b1c2b5a6cb890ae",
+      "role": "test"
+    },
+    {
+      "path": "wolf/training.py",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/wolf/training.py",
+      "bytes": 5990,
+      "lines": 185,
+      "sha256": "10a09a0f8707afb22c9b15df01bdce123b25ee5fc75f3246f790c26faccf904e",
+      "role": "source_or_configuration"
+    },
+    {
+      "path": "docs/windows.md",
+      "absolute_path": "/home/wujuncheng/rl_train/retrain/docs/windows.md",
+      "bytes": 2844,
+      "lines": 36,
+      "sha256": "02e0562c29f191241c9a0c2495bd049b1482883f989d272e4b52cb0d36696488",
+      "role": "guidance"
+    }
+  ],
+  "guidance_finalized_with_evidence": true
+}

@@ -1,86 +1,130 @@
 {
-  "schema": "retrain_engineering_validation_20261119",
-  "source_commit": "4076c5353a098b7ee39e67ad1919cc10c0c2454d",
+  "date": "2026-11-19",
+  "baseline_commit": "323b2e7b043b79d89e443b03619ff14f0606ade9",
+  "implementation_commit": "0a5003ecaadc9dca5b88953507d54102d6a3b43a",
+  "incoming_modified_files": 24,
+  "review_items_addressed": 14,
   "cpu": {
-    "passed": 234,
+    "host": "JC",
+    "passed": 258,
+    "failed": 0,
     "warnings": 13,
-    "scope": "Black/Wolf/shared sparse support; TorchScript and ONNX export counterexamples included"
+    "ruff": "passed",
+    "format": "75 files passed"
   },
-  "black": {
-    "teacher_PPO_calls": [
-      20,
-      40
-    ],
-    "HIM_calls": [
-      1,
-      2
-    ],
-    "student_Adam_calls": [
-      1,
-      2
-    ],
-    "independent_process_resume": true,
-    "teacher_frozen_during_student": true,
-    "eval_trials": {
-      "general": 48,
-      "platform": 6,
-      "broken_bridge": 6
+  "gpu": {
+    "independent_process_checks": 34,
+    "failed": 0,
+    "raw_evaluation_suites": 7,
+    "raw_trials": 174,
+    "raw_successes": 0,
+    "raw_short_results": "incomplete; no qualification",
+    "scale_checks": [
+      {
+        "robot": "black",
+        "num_envs": 4096,
+        "controls": 4,
+        "optimizer_calls": 0,
+        "forced_timeout_reset": true
+      },
+      {
+        "robot": "wolf",
+        "num_envs": 4096,
+        "controls": 4,
+        "optimizer_calls": 0,
+        "forced_timeout_reset": true
+      }
+    ]
+  },
+  "source_identity": {
+    "black": {
+      "sha256": "ede5266b5c3713a2cd2919d49525688e7bd3dae98160fb24af0fcefd83fd4e78",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.0",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "13.0"
+      }
     },
-    "eval_controls": 4,
-    "raw_reevaluated": true,
-    "capability_qualified": false
+    "wolf": {
+      "sha256": "8a17b90b4e0a124248a8f5488fe892fb366d131bcefed4c6bf2d947413a824c5",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.0",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "13.0"
+      }
+    }
   },
-  "wolf": {
-    "independent_gpu_process_checks": 12,
-    "teacher_PPO_calls": [
-      20,
-      40
-    ],
-    "HIM_calls": [
-      1,
-      2
-    ],
-    "student_Adam_calls": [
-      1,
-      2
-    ],
-    "courses": [
-      "general",
-      "stairs",
-      "platform",
-      "high_wall",
-      "slope",
-      "broken_bridge",
-      "plum_stakes"
-    ],
-    "forced_timeout_reset": true,
-    "evaluation_seeds": [
-      1911701,
-      1911702,
-      1911703
-    ],
-    "evaluation_controls": 4,
-    "capability_qualified": false
+  "formal_training_started": false,
+  "qualified_policy_produced": false,
+  "natural_nan_root_cause_established": false,
+  "hardware_validated": false,
+  "windows": {
+    "git_head": "0a5003ecaadc9dca5b88953507d54102d6a3b43a",
+    "dirty": "",
+    "black": {
+      "sha256": "ede5266b5c3713a2cd2919d49525688e7bd3dae98160fb24af0fcefd83fd4e78",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.1+cu126",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "12.6"
+      }
+    },
+    "wolf": {
+      "sha256": "8a17b90b4e0a124248a8f5488fe892fb366d131bcefed4c6bf2d947413a824c5",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.1+cu126",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "12.6"
+      }
+    },
+    "gpu_optimization_validated": false,
+    "cpu_passed": 258,
+    "cpu_failed": 0,
+    "warnings": 13,
+    "ruff": "passed",
+    "code_assets_match_JC": true
   },
-  "fault": {
-    "injected_field": "qacc_warmstart",
-    "lane": 0,
-    "stage": "scene.action_write:before",
-    "optimizer_calls": 0,
-    "atomic_packet_reloaded": true,
-    "natural_nan_reproduced": false,
-    "root_cause_established": false
-  },
-  "limits": [
-    "No formal long training",
-    "No qualified teacher policy",
-    "No 4096 environment long-duration acceptance",
-    "No hardware motion",
-    "Wolf camera mount is a simulation candidate",
-    "Wolf deployment/export and Black student ONNX remain pending"
+  "limitations": [
+    "4096 optimization and long stability not validated",
+    "Reward, HIM temperature, sensor noise and fixed visual memory need training comparisons",
+    "Black student ONNX and Wolf export/deployment are not implemented",
+    "Wolf camera mount remains a simulation candidate"
   ],
+  "local_evidence_commit": "47c6f78393143a4e54c52306b9be5f885b9832ac",
   "public_snapshot": {
-    "robot_model_assets_included": false,
-    "local_complete_repository": true
+    "private_assets_uploaded": false,
+    "full_raw_and_fault_packets": "local Git evidence/review_completion_20261119; binary assets excluded"
   }
 }

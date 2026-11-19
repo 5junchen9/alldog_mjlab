@@ -14,7 +14,7 @@ from wolf.model import initial_models
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = {
-  "schema": "wolf_shared_actor_v1_scratch",
+  "schema": "wolf_shared_actor_v2_scratch",
   "history_shape": [6, 53],
   "input_order": [
     "current53",
@@ -31,11 +31,12 @@ CONTRACT = {
   "wheel_action_scale": 5.0,
   "wheel_signs": [1, -1, 1, -1],
   "camera": CAMERA,
-  "depth": "planar_m_nearest_valid_surface160x90_to64x48",
-  "geometry": "same_depth_original_ray_xyz_div4_valid_12x16",
+  "depth": "planar_m_nearest_valid_surface160x90_to64x48_range0p2to4m",
+  "geometry": "same_depth_original_ray_xyz_div4_range0p2to4m_valid_12x16",
   "control_hz": 50,
+  "visual_memory": "50_fresh_valid_frame_segments_reset_before_51st",
   "camera_hz": 10,
-  "critic": "unnoised_proprio53_true_velocity3_terrain187_valid187",
+  "critic": "unnoised_proprio53_true_velocity3_terrain187_valid187_plus_course_time_hold_entry3",
 }
 
 

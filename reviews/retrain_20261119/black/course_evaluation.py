@@ -14,7 +14,7 @@ import torch
 from support.black.obstacle_geometry import GROUPS, historical_case
 
 from black.checkpoint import load_bundle, teacher_identity
-from black.eval_collect import sha256, source_files, write_json
+from black.eval_collect import device_lock_path, sha256, source_files, write_json
 from black.eval_protocol import EVALUATION_SEEDS, digest
 from black.eval_score import require
 from black.runtime import NativeEnv
@@ -584,7 +584,7 @@ def main():
   ):
     parser.error("执行需要bundle和新的out目录；限步必须为正")
   torch.set_num_threads(2)
-  with Path("/tmp/mjlab_black_matrix_1000_cuda_0.lock").open("a") as lock:
+  with device_lock_path(args.device).open("a") as lock:
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     print(json.dumps(execute(args)))
 

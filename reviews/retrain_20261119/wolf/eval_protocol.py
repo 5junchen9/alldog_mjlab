@@ -4,7 +4,7 @@ from wolf.curriculum import SPECIALTIES
 
 SEEDS = (1911701, 1911702, 1911703)
 PROTOCOL = {
-  "id": "wolf_shared_actor_absolute_v1",
+  "id": "wolf_shared_actor_absolute_v2",
   "seeds": list(SEEDS),
   "control_hz": 50,
   "settle_steps": 50,
@@ -84,6 +84,30 @@ def panel(course, seed, max_level=None):
         "duration": 550,
       }
     )
+    if course == "flat_axes":
+      # 平地资格覆盖训练的中速和前进+转向/横移复合命令。
+      for index, target in enumerate(
+        (
+          [0.8, 0.0, 0.0],
+          [-0.8, 0.0, 0.0],
+          [0.0, 0.5, 0.0],
+          [0.0, -0.5, 0.0],
+          [0.0, 0.0, 0.8],
+          [0.5, 0.0, 0.6],
+          [0.5, 0.0, -0.6],
+          [0.4, 0.25, 0.3],
+          [0.4, -0.25, -0.3],
+        )
+      ):
+        rows.append(
+          dict(
+            case=f"mixed_and_speed_{index}",
+            target=target,
+            orientation=0.0,
+            direction=1,
+            duration=550,
+          )
+        )
   return [
     {
       **row,

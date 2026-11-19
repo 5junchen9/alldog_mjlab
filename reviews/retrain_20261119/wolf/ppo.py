@@ -45,7 +45,7 @@ def build_ppo(obs, teacher, *, num_steps=24, device="cpu"):
     torch.manual_seed(teacher.initialization["critic_seed"])
     critic = MLPModel(
       obs,
-      {"critic": ["critic"]},
+      {"critic": ["critic", "course_state"] if "course_state" in obs else ["critic"]},
       "critic",
       1,
       (512, 256, 128),

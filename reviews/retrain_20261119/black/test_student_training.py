@@ -117,9 +117,10 @@ def test_student_controls_and_teacher_labels_its_states_across_rounds(
   queries, acting, refreshed = [], {}, {}
   original_refresh = training.EpisodePrefix.refresh
 
-  def refresh(self, student, state, device):
-    result = original_refresh(self, student, state, device)
-    refreshed[state.tick] = result
+  def refresh(self, student, state, device, indices=None):
+    result = original_refresh(self, student, state, device, indices)
+    if indices is None:
+      refreshed[state.tick] = result
     return result
 
   monkeypatch.setattr(training.EpisodePrefix, "refresh", refresh)
@@ -143,7 +144,7 @@ def test_student_controls_and_teacher_labels_its_states_across_rounds(
     return result
 
   monkeypatch.setattr(SharedStudent, "forward", forward)
-  result = training.train_student(env, teacher, cnn, gru, 2, tmp_path)
+  result = training.train_student(env, teacher, cnn, gru, 2, tmp_path, epochs=1)
   assert len(env.actions) == result["control_steps"] == 48
   assert result["environment_transitions"] == 96
   assert result["completed_updates"] == 2 and result["final_state_tick"] == 47
@@ -175,40 +176,36 @@ def test_student_controls_and_teacher_labels_its_states_across_rounds(
   optimizer = saved["learning_state"]["optimizer"]
   assert all(int(value["step"]) == 2 for value in optimizer["state"].values())
   assert len(optimizer["state"]) == len(list(cnn.parameters()) + list(gru.parameters()))
-  assert result["recipe"]["exact_long_episode_replay"]
+  assert not result["recipe"]["exact_long_episode_replay"]
+  assert result["recipe"]["prefix_window_frames"] == 50
   assert result["recipe"]["gradient_clip_norm"] == 1.0
   assert result["recipe"]["num_envs"] == env.count
   assert result["starting_updates"] == 0 and result["added_updates"] == 2
   assert not result["learner_resumed"]
 
 
-def test_partial_microbatch_has_lane_weight_and_one_optimizer_step(
-  modules,
-  tmp_path,
-  monkeypatch,
+def test_multiple_epochs_and_partial_minibatch_have_real_adam_updates(
+  modules, tmp_path
 ):
   teacher, cnn, gru = modules
-  copies = copy.deepcopy((teacher, cnn, gru))
-  monkeypatch.setattr(training, "LANES_PER_BATCH", 3)
-  full = training.train_student(FakeEnv(3), teacher, cnn, gru, 1, tmp_path / "full")
-  monkeypatch.setattr(training, "LANES_PER_BATCH", 2)
-  split = training.train_student(FakeEnv(3), *copies, 1, tmp_path / "split")
-  assert full["round_metrics"][0]["loss"] == pytest.approx(
-    split["round_metrics"][0]["loss"],
-    rel=1e-6,
+  result = training.train_student(
+    FakeEnv(3),
+    teacher,
+    cnn,
+    gru,
+    1,
+    tmp_path,
+    epochs=2,
+    minibatch_lanes=2,
   )
-  packets = [torch.load(row["checkpoint"], weights_only=True) for row in (full, split)]
-  full_state, split_state = [
-    row["learning_state"]["optimizer"]["state"] for row in packets
-  ]
-  for key, value in full_state.items():
-    assert int(value["step"]) == int(split_state[key]["step"]) == 1
-    torch.testing.assert_close(
-      value["exp_avg"],
-      split_state[key]["exp_avg"],
-      rtol=1e-4,
-      atol=2e-9,
-    )
+  assert result["optimizer_calls"] == 4  # 2 epochs * ceil(3/2) minibatches
+  assert result["recipe"]["optimizer_updates_per_round"] == 4
+  packet = torch.load(result["checkpoint"], weights_only=True)
+  assert all(
+    int(value["step"]) == 4
+    for value in packet["learning_state"]["optimizer"]["state"].values()
+  )
+  assert result["round_metrics"][0]["loss"] > 0
 
 
 def test_nonfinite_gradient_stops_before_adam_and_preserves_weights(
@@ -298,7 +295,7 @@ def test_invalid_window_preserves_existing_gru_cell_weights_and_adam_moments(
 
   monkeypatch.setattr(torch.optim.Adam, "step", record_step)
   result = training.train_student(
-    FakeEnv(invalid_from=24), teacher, cnn, gru, 2, tmp_path
+    FakeEnv(invalid_from=24), teacher, cnn, gru, 2, tmp_path, epochs=1
   )
   assert [row["gru_cell_used"] for row in result["round_metrics"]] == [True, False]
   assert len(snapshots) == 2
@@ -396,12 +393,13 @@ def test_resume_matches_continuous_learner_at_aligned_cold_episode_boundary(
     env, teacher, cnn, gru, 1, tmp_path / "resumed", resume=packet, save_every=2
   )
   assert collected_prefixes == [None]
-  assert resumed["completed_updates"] == resumed["optimizer_calls"] == 2
+  assert resumed["completed_updates"] == 2
+  assert resumed["optimizer_calls"] == 8
   assert resumed["starting_updates"] == 1 and resumed["added_updates"] == 1
   assert resumed["control_steps"] == 24
   assert resumed["round_metrics"][0]["round"] == 2
   assert resumed["learner_resumed"] and env.metrics.policy_update == 1
-  assert resumed["cold_start"] == ["physics", "curriculum", "camera", "GRU"]
+  assert resumed["cold_start"] == ["physics", "camera", "GRU"]
   assert not resumed["exact_physical_resume"]
   continuous_packet = torch.load(full["checkpoint"], weights_only=True)
   resumed_packet = torch.load(resumed["checkpoint"], weights_only=True)
@@ -411,7 +409,8 @@ def test_resume_matches_continuous_learner_at_aligned_cold_episode_boundary(
   continuous_state = continuous_packet["learning_state"]
   resumed_state = resumed_packet["learning_state"]
   assert (
-    resumed_state["restart_boundary"] == "new_physics_curriculum_camera_gru_episode"
+    resumed_state["restart_boundary"]
+    == "new_physics_camera_gru_episode_preserved_curriculum"
   )
   assert (
     continuous_state["optimizer"]["param_groups"]
@@ -491,9 +490,9 @@ def test_periodic_checkpoints_retain_each_saved_update(modules, tmp_path):
   saved = [torch.load(path, weights_only=True) for path in paths]
   for number, packet in enumerate(saved, start=1):
     assert packet["completed_updates"] == number
-    assert packet["learning_state"]["optimizer_calls"] == number
+    assert packet["learning_state"]["optimizer_calls"] == 4 * number
     assert all(
-      int(value["step"]) == number
+      int(value["step"]) == 4 * number
       for value in packet["learning_state"]["optimizer"]["state"].values()
     )
   assert not torch.equal(saved[0]["cnn"]["0.weight"], saved[2]["cnn"]["0.weight"])
@@ -523,9 +522,9 @@ def test_full_prefix_refresh_matches_new_weights_from_episode_start(modules):
   assert reference is not None
   torch.testing.assert_close(refreshed.hidden, reference.hidden, rtol=1e-6, atol=1e-7)
   assert not torch.equal(refreshed.hidden, old_state.hidden)
-  assert cache.episode == [1, 0]
-  assert [event[1]["tick"] for event in cache.rows[0]] == [17, 22]
-  assert [event[1]["tick"] for event in cache.rows[1]] == [0, 5, 10, 15, 20]
+  assert cache.episode.tolist() == [1, 0]
+  assert cache.lane_ticks(0) == [17, 22]
+  assert cache.lane_ticks(1) == [0, 5, 10, 15, 20]
   second, state = training._collect(env, student, refreshed)
   cache.extend(second)
   with torch.no_grad():
@@ -539,7 +538,7 @@ def test_full_prefix_refresh_matches_new_weights_from_episode_start(modules):
     )
   assert reference is not None
   torch.testing.assert_close(final.hidden, reference.hidden, rtol=1e-6, atol=1e-7)
-  assert [event[1]["tick"] for event in cache.rows[1]][0] == 0
+  assert cache.lane_ticks(1)[0] == 0
 
 
 def test_prefix_bound_stops_instead_of_silently_dropping_early_frames(modules):
@@ -548,7 +547,7 @@ def test_prefix_bound_stops_instead_of_silently_dropping_early_frames(modules):
   cache = training.EpisodePrefix(2, 20, student.gru.max_age)
   with pytest.raises(RuntimeError, match="episode exceeded"):
     cache.extend(sample)
-  assert cache.rows[1][0][1]["tick"] == 0
+  assert cache.lane_ticks(1)[0] == 0
 
 
 def test_memory_shortage_is_rejected_before_sampling_or_optimizer(
@@ -567,7 +566,7 @@ def test_memory_shortage_is_rejected_before_sampling_or_optimizer(
     torch.optim.Adam, "__init__", lambda *_args, **_kwargs: calls.append(True)
   )
   env = FakeEnv()
-  with pytest.raises(MemoryError, match="full episode prefix"):
+  with pytest.raises(MemoryError, match="visual prefix buffer"):
     teacher, cnn, gru = modules
     training.train_student(env, teacher, cnn, gru, 1, tmp_path)
   assert not env.actions and not calls

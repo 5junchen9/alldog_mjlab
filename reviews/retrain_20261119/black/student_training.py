@@ -1,10 +1,11 @@
 """学生实际控制采样；冻结教师在相同访问状态上提供监督。"""
 
+import json
 from pathlib import Path
 
 import torch
+from support.black.causal_visual_gru import State
 
-from black.checkpoint import save_bundle, teacher_identity
 from black.learner_state import (
   SCHEMA,
   capture_rng,
@@ -14,21 +15,26 @@ from black.learner_state import (
 )
 from black.student import SharedStudent, distillation_loss
 
-# isort: split
-# GRU状态由教师和学生共同使用的独立支持模块定义。
-from support.black.causal_visual_gru import State
-
 CONTROL_STEPS = 24
-LANES_PER_BATCH = 128
-LEARNING_RATE = 1e-4
+LANES_PER_BATCH = 256
+REFRESH_BATCH = 512
+LEARNING_RATE = 3e-4
+DEFAULT_EPOCHS = 4
+DEFAULT_PREFIX_WINDOW = 50
 CAMERA_INTERVAL_CONTROLS = 5
 
 
-def _prefix_memory(count, max_controls, history_width=225, geometry_width=768):
-  """按有限episode与10Hz相机估算CPU峰值，开采样前拦截明显内存不足。"""
-  max_frames = (max_controls + CAMERA_INTERVAL_CONTROLS - 1) // CAMERA_INTERVAL_CONTROLS
-  # 每帧2048字节为Python元数据/容器余量；采样stack时会短暂保留两份本轮数据。
-  prefix_bytes = count * max_frames * (48 * 64 * 4 + 2048)
+def _prefix_memory(
+  count,
+  max_controls,
+  max_prefix_frames=DEFAULT_PREFIX_WINDOW,
+  history_width=225,
+  geometry_width=768,
+):
+  """按声明的视觉记忆窗口与10Hz相机估算CPU峰值，开采样前拦截内存不足。"""
+  stored_frames = int(max_prefix_frames)
+  # 向量化连续张量存储：48x64 FP32深度 + 6个int64/bool元数据槽位，无Python dict开销。
+  prefix_bytes = count * stored_frames * (48 * 64 * 4 + 64)
   round_bytes = count * CONTROL_STEPS * (history_width + geometry_width + 48 * 64) * 4
   estimate = prefix_bytes + 2 * round_bytes
   memory = Path("/proc/meminfo").read_text().splitlines()
@@ -37,27 +43,28 @@ def _prefix_memory(count, max_controls, history_width=225, geometry_width=768):
   )
   if estimate > available * 0.8:
     raise MemoryError(
-      f"full episode prefix needs approximately {estimate} CPU bytes; "
-      f"available {available}; reduce num_envs before starting"
+      f"visual prefix buffer needs approximately {estimate} CPU bytes; "
+      f"available {available}; reduce num_envs or prefix window before starting"
     )
-  return max_frames, prefix_bytes, estimate
+  return stored_frames, prefix_bytes, estimate
 
 
-def _state_slice(state, start, stop, device):
+def _state_slice(state, indices, device):
   if state is None:
     return None
   return State(
-    episode=state.episode[start:stop].detach().to(device),
-    frame=state.frame[start:stop].detach().to(device),
-    capture_tick=state.capture_tick[start:stop].detach().to(device),
+    episode=state.episode[indices].detach().to(device),
+    frame=state.frame[indices].detach().to(device),
+    capture_tick=state.capture_tick[indices].detach().to(device),
     tick=state.tick,
-    hidden=state.hidden[start:stop].detach().to(device),
+    hidden=state.hidden[indices].detach().to(device),
+    fresh_count=state.fresh_count[indices].detach().to(device),
   )
 
 
-def _metadata_slice(metadata, start, stop, device):
+def _metadata_slice(metadata, indices, device):
   return {
-    name: value[start:stop].to(device) if torch.is_tensor(value) else value
+    name: value[indices].to(device) if torch.is_tensor(value) else value
     for name, value in metadata.items()
   }
 
@@ -69,17 +76,18 @@ def _collect(env, student, state):
     for _ in range(CONTROL_STEPS):
       current = env.obs["history"].reshape(env.count, *student.teacher.history_shape)
       row = env.frames.metadata()
-      # 在step之前复制，防止环境复用观测/帧缓冲区改变旧样本。
+      frame_depth = env.frames.depth
+      # 在step之前复制，防止环境复用观测/帧缓冲区改变旧样本；采集与监督共用同帧深度。
       history.append(current.detach().cpu().clone())
       geometry.append(env.obs["geometry"].detach().cpu().clone())
-      depth.append(env.frames.depth.detach().cpu().clone())
+      depth.append(frame_depth.detach().cpu().clone())
       metadata.append(
         {
           name: value.detach().cpu().clone() if torch.is_tensor(value) else value
           for name, value in row.items()
         }
       )
-      action, _, state = student(current, env.frames.depth, row, state)
+      action, _, state = student(current, frame_depth, row, state)
       env.step(action)
   return {
     "history": torch.stack(history),
@@ -89,94 +97,122 @@ def _collect(env, student, state):
   }, state
 
 
-def _sequence(student, sample, prefix, start, stop, device):
-  history = sample["history"][:, start:stop].to(device)
-  depth = sample["depth"][:, start:stop].to(device)
-  metadata = [_metadata_slice(row, start, stop, device) for row in sample["metadata"]]
-  state = _state_slice(prefix, start, stop, device)
+def _sequence(student, sample, prefix, indices, device):
+  history = sample["history"][:, indices].to(device)
+  depth = sample["depth"][:, indices].to(device)
+  metadata = [_metadata_slice(row, indices, device) for row in sample["metadata"]]
+  state = _state_slice(prefix, indices, device)
   actions, visual, state = student.forward_sequence(history, depth, metadata, state)
   del actions  # 监督使用相同visual重新过冻结actor，保留这条梯度路径。
   return history, visual, state
 
 
 class EpisodePrefix:
-  """CPU保存每lane本episode所有fresh valid帧；不截断、无旧参数hidden。
+  """向量化保存当前记忆段的有效新帧，满50帧后随GRU一起开启新段。"""
 
-  GRU在held/invalid步不更新hidden，因此完整重算只需实际更新过的相机帧。
-  控制时钟和episode身份仍逐步检查；到episode时长上限未reset就停止。
-  """
-
-  def __init__(self, count, max_controls, max_age):
+  def __init__(
+    self, count, max_controls, max_age, max_prefix_frames=DEFAULT_PREFIX_WINDOW
+  ):
     if max_controls < 1:
       raise ValueError("a finite positive episode control limit is required")
+    if max_prefix_frames < 1:
+      raise ValueError("max_prefix_frames must be positive")
+    self.count = count
     self.max_controls = max_controls
     self.max_age = max_age
-    self.max_frames = (
-      max_controls + CAMERA_INTERVAL_CONTROLS - 1
-    ) // CAMERA_INTERVAL_CONTROLS
-    self.rows = [[] for _ in range(count)]
-    self.episode = [-1] * count
-    self.birth = [0] * count
-    self.last_frame = [-1] * count
+    self.capacity = int(max_prefix_frames)
+    self.depth_buf = torch.zeros(count, self.capacity, 48, 64, 1, dtype=torch.float32)
+    self.tick_buf = torch.zeros(count, self.capacity, dtype=torch.long)
+    self.episode_buf = torch.zeros(count, self.capacity, dtype=torch.long)
+    self.capture_episode_buf = torch.zeros(count, self.capacity, dtype=torch.long)
+    self.frame_buf = torch.full((count, self.capacity), -1, dtype=torch.long)
+    self.capture_tick_buf = torch.full((count, self.capacity), -1, dtype=torch.long)
+    self.mask_buf = torch.zeros(count, self.capacity, dtype=torch.bool)
+    self.length = torch.zeros(count, dtype=torch.long)
+    self.episode = torch.full((count,), -1, dtype=torch.long)
+    self.birth = torch.zeros(count, dtype=torch.long)
+    self.last_frame = torch.full((count,), -1, dtype=torch.long)
+    self.last_capture_tick = torch.full((count,), -1, dtype=torch.long)
+
+  def lane_ticks(self, lane: int) -> list[int]:
+    n = int(self.length[lane])
+    return self.tick_buf[lane, :n].tolist()
 
   def extend(self, sample):
     for depth, metadata in zip(sample["depth"], sample["metadata"], strict=True):
-      tick = metadata["tick"]
-      for lane in range(len(self.rows)):
-        episode = int(metadata["episode"][lane])
-        if episode != self.episode[lane]:
-          self.rows[lane].clear()
-          self.episode[lane] = episode
-          self.birth[lane] = tick
-          self.last_frame[lane] = -1
-        if tick - self.birth[lane] >= self.max_controls:
-          raise RuntimeError("episode exceeded declared prefix replay memory bound")
-        frame = int(metadata["frame"][lane])
-        age = tick - int(metadata["capture_tick"][lane])
-        valid = (
-          bool(metadata["mask"][lane])
-          and int(metadata["capture_episode"][lane]) == episode
-          and frame >= 0
-          and 0 <= age <= self.max_age
-        )
-        if valid and frame != self.last_frame[lane]:
-          if self.rows[lane]:
-            previous_capture = self.rows[lane][-1][1]["capture_tick"]
-            if (
-              int(metadata["capture_tick"][lane]) - previous_capture
-              < CAMERA_INTERVAL_CONTROLS
-            ):
-              raise RuntimeError("camera cadence exceeds declared prefix memory bound")
-          if len(self.rows[lane]) >= self.max_frames:
-            raise RuntimeError("fresh frame count exceeded episode prefix bound")
-          row = {
-            name: int(value[lane]) if torch.is_tensor(value) else value
-            for name, value in metadata.items()
-          }
-          # clone解除与整轮depth tensor的引用，reset即可释放本lane旧episode。
-          self.rows[lane].append((depth[lane].clone(), row))
-          self.last_frame[lane] = frame
+      tick = int(metadata["tick"])
+      ep = metadata["episode"].to(dtype=torch.long, device="cpu")
+      cap_ep = metadata["capture_episode"].to(dtype=torch.long, device="cpu")
+      frame = metadata["frame"].to(dtype=torch.long, device="cpu")
+      cap_tick = metadata["capture_tick"].to(dtype=torch.long, device="cpu")
+      mask = metadata["mask"].to(dtype=torch.bool, device="cpu")
+      changed = ep != self.episode
+      if bool(changed.any()):
+        self.length[changed] = 0
+        self.episode[changed] = ep[changed]
+        self.birth[changed] = tick
+        self.last_frame[changed] = -1
+        self.last_capture_tick[changed] = -1
+      if bool(((tick - self.birth) >= self.max_controls).any()):
+        raise RuntimeError("episode exceeded declared prefix replay memory bound")
+      age = tick - cap_tick
+      valid = mask & (cap_ep == ep) & (frame >= 0) & (age >= 0) & (age <= self.max_age)
+      fresh = valid & (frame != self.last_frame)
+      if not bool(fresh.any()):
+        continue
+      has_prev = fresh & (self.length > 0)
+      if bool(has_prev.any()) and bool(
+        (
+          cap_tick[has_prev] - self.last_capture_tick[has_prev]
+          < CAMERA_INTERVAL_CONTROLS
+        ).any()
+      ):
+        raise RuntimeError("camera cadence exceeds declared prefix memory bound")
+      lanes = fresh.nonzero().flatten()
+      full = self.length[lanes] >= self.capacity
+      # 固定记忆段，不用旧参数hidden或把滑窗近似冒充完整episode记忆。
+      self.length[lanes[full]] = 0
+      slot = self.length[lanes]
+      self.length[lanes] += 1
+      self.depth_buf[lanes, slot] = depth[lanes]
+      self.tick_buf[lanes, slot] = tick
+      self.episode_buf[lanes, slot] = ep[lanes]
+      self.capture_episode_buf[lanes, slot] = cap_ep[lanes]
+      self.frame_buf[lanes, slot] = frame[lanes]
+      self.capture_tick_buf[lanes, slot] = cap_tick[lanes]
+      self.mask_buf[lanes, slot] = True
+      self.last_frame[lanes] = frame[lanes]
+      self.last_capture_tick[lanes] = cap_tick[lanes]
 
-  def refresh(self, student, state, device):
-    """当前参数从零重算每个episode全部fresh帧；不回放物理或监督标签。"""
+  def refresh(self, student, state, device, indices=None):
+    """当前参数从零重算指定lane当前段；无梯度burn-in，最多50帧。"""
     student.eval()
     parts = []
+    indices = torch.arange(self.count) if indices is None else indices
     with torch.no_grad():
-      for start in range(0, len(self.rows), LANES_PER_BATCH):
-        rows = self.rows[start : start + LANES_PER_BATCH]
-        hidden = torch.zeros(len(rows), 64, device=device)
-        for number in range(max(map(len, rows))):
-          lanes = [lane for lane, events in enumerate(rows) if number < len(events)]
-          events = [rows[lane][number] for lane in lanes]
-          depth = torch.stack([event[0] for event in events]).to(device)
+      for start in range(0, len(indices), REFRESH_BATCH):
+        lanes = indices[start : start + REFRESH_BATCH]
+        lengths = self.length[lanes]
+        hidden = torch.zeros(len(lanes), 64, device=device)
+        max_len = int(lengths.max()) if len(lengths) else 0
+        for step in range(max_len):
+          local_ids = (lengths > step).nonzero().flatten()
+          global_ids = lanes[local_ids]
+          slots = torch.full_like(global_ids, step)
+          depth = self.depth_buf[global_ids, slots].to(device)
           metadata = {
-            name: torch.tensor([event[1][name] for event in events], device=device)
-            for name in events[0][1]
+            "tick": self.tick_buf[global_ids, slots].to(device),
+            "episode": self.episode_buf[global_ids, slots].to(device),
+            "capture_episode": self.capture_episode_buf[global_ids, slots].to(device),
+            "frame": self.frame_buf[global_ids, slots].to(device),
+            "capture_tick": self.capture_tick_buf[global_ids, slots].to(device),
+            "mask": self.mask_buf[global_ids, slots].to(device),
           }
-          metadata["mask"] = metadata["mask"].bool()
           encoded = student.encode_depth(depth, metadata)
-          ids = torch.tensor(lanes, device=device)
-          hidden = hidden.index_copy(0, ids, student.gru.gru(encoded, hidden[ids]))
+          ids_dev = local_ids.to(device)
+          hidden = hidden.index_copy(
+            0, ids_dev, student.gru.gru(encoded, hidden[ids_dev])
+          )
         parts.append(hidden)
     return State(
       episode=state.episode,
@@ -184,6 +220,7 @@ class EpisodePrefix:
       capture_tick=state.capture_tick,
       tick=state.tick,
       hidden=torch.cat(parts),
+      fresh_count=state.fresh_count,
     )
 
 
@@ -198,28 +235,44 @@ def train_student(
   *,
   resume: dict | None = None,
   save_every: int = 100,
+  learning_rate: float = LEARNING_RATE,
+  epochs: int = DEFAULT_EPOCHS,
+  minibatch_lanes: int = LANES_PER_BATCH,
+  max_prefix_frames: int = DEFAULT_PREFIX_WINDOW,
+  checkpoint_api=None,
 ):
   """外部检查教师资格后调用；不在这里创建或推断能力验收结果。
 
-  每轮24步、每128lane做一次有限序列BPTT，累积后仅执行一次Adam。
-  BPTT梯度仍截断在本轮起点；更新后从episode起点重算全部视觉hidden。
-  重算不使用旧参数前缀，所需CPU缓存受原生最大episode时长约束。
-  rounds是本次新增轮数。resume仅恢复学习器；调用方先加载该包的模型，
-  物理、课程、相机和GRU记忆均重新初始化，不续接上次物理轨迹。
+  每轮24步采集后按minibatch进行多epoch有限序列BPTT更新，更新后用向量化环缓存
+  以当前参数重算GRU记忆段；采集与部署都在第51张有效新帧前清零。
   """
   if rounds < 1:
     raise ValueError("at least one student round required")
-  if save_every < 1:
-    raise ValueError("save_every must be >=1")
+  if save_every < 1 or epochs < 1 or minibatch_lanes < 1:
+    raise ValueError("save_every, epochs and minibatch_lanes must be >=1")
+  if max_prefix_frames != gru.memory_frames:
+    raise ValueError("prefix容量必须与推理GRU的记忆段长度相同")
+  if checkpoint_api is None:
+    from black import checkpoint as checkpoint_api
   max_controls = getattr(env, "max_episode_controls", None)
   if max_controls is None:
     max_controls = env.plant.max_episode_length
   max_controls = int(max_controls)
-  max_frames, prefix_bytes, memory_estimate = _prefix_memory(env.count, max_controls)
+  history_shape = getattr(teacher, "history_shape", None)
+  history_width = (
+    225 if history_shape is None else int(history_shape[0] * history_shape[1])
+  )
+  max_frames, prefix_bytes, memory_estimate = _prefix_memory(
+    env.count,
+    max_controls,
+    max_prefix_frames=max_prefix_frames,
+    history_width=history_width,
+  )
   output = Path(output)
   output.mkdir(parents=True, exist_ok=True)
   student = SharedStudent(teacher, cnn, gru)
-  env.policy_identity = teacher_identity(teacher)
+  env.policy_identity = checkpoint_api.teacher_identity(teacher)
+  initial_teacher_id = env.policy_identity
   # Adam状态按参数位置绑定，因此记录名称并保持与实际optimizer完全相同的顺序。
   named_parameters = [
     (f"depth_encoder.{name}", parameter)
@@ -228,54 +281,61 @@ def train_student(
   parameters = [parameter for _, parameter in named_parameters]
   signature = parameter_signature(named_parameters)
   gru_cell_parameters = set(student.gru.gru.parameters())
-  optimizer = torch.optim.Adam(parameters, lr=LEARNING_RATE)
+  optimizer = torch.optim.Adam(parameters, lr=learning_rate)
+  minibatches_per_epoch = (env.count + minibatch_lanes - 1) // minibatch_lanes
   recipe = {
     "controls_per_round": CONTROL_STEPS,
-    "lanes_per_microbatch": LANES_PER_BATCH,
+    "lanes_per_microbatch": int(minibatch_lanes),
+    "epochs_per_round": int(epochs),
     "num_envs": env.count,
     "course": env.course,
     "task": getattr(env, "task", None),
     "max_level": getattr(env, "max_level", None),
     "optimizer": "Adam",
-    "learning_rate": LEARNING_RATE,
+    "learning_rate": float(learning_rate),
     "gradient_clip_norm": 1.0,
-    "optimizer_updates_per_round": 1,
+    "optimizer_updates_per_round": int(epochs * minibatches_per_epoch),
     "feature_weight": float(feature_weight),
+    "camera_noise": getattr(env, "training_sensors", False),
     "loss": "Huber(action_mean)+feature_weight*Huber(terrain32)",
-    "recipe_status": "initial_experiment_not_tuned",
     "controller": "student",
     "teacher_queries": "same_student_visited_state",
     "trainable": ["CNN", "GRU"],
-    "recurrent_context": "current_parameters_replay_all_fresh_frames_since_episode_start",
+    "recurrent_context": "current_parameters_replay_current_50_fresh_frame_segment",
     "gradient_context": "BPTT_truncated_at_round_start",
-    "exact_long_episode_replay": True,
+    "exact_long_episode_replay": False,
+    "memory_boundary": "reset_before_each_51st_fresh_valid_frame_and_episode_reset",
+    "prefix_window_frames": max_prefix_frames,
     "prefix_max_episode_controls": max_controls,
     "prefix_max_fresh_frames_per_lane": max_frames,
     "prefix_cpu_bytes_estimate": prefix_bytes,
     "sampling_and_prefix_cpu_bytes_estimate": memory_estimate,
     "prefix_memory_admission": "estimate_must_not_exceed_80_percent_MemAvailable",
-    "prefix_storage": "CPU_FP32_fresh_valid_frames_and_original_metadata",
+    "prefix_storage": "CPU_FP32_vectorized_current_segment",
   }
   completed_updates, optimizer_calls = 0, 0
   if resume is not None:
-    if teacher_identity(teacher) != resume.get("teacher_id"):
+    if checkpoint_api.teacher_identity(teacher) != resume.get("teacher_id"):
       raise ValueError("student resume teacher identity mismatch")
-    from black.checkpoint import source_identity
-
     learning_state = validate_resume(
-      resume, "student", recipe, current_source=source_identity()
+      resume, "student", recipe, current_source=checkpoint_api.source_identity()
     )
     if learning_state.get("parameter_signature") != signature:
       raise ValueError("student optimizer parameter signature mismatch")
     completed_updates = resume["completed_updates"]
     optimizer_calls = learning_state["optimizer_calls"]
-    if optimizer_calls != completed_updates:
-      raise ValueError("student requires one optimizer call per completed update")
+    expected_calls = completed_updates * recipe["optimizer_updates_per_round"]
+    if optimizer_calls != expected_calls:
+      raise ValueError("student optimizer call count disagrees with completed updates")
     optimizer.load_state_dict(learning_state["optimizer"])
+    if hasattr(env, "restore_curriculum"):
+      env.restore_curriculum(learning_state["curriculum"])
     restore_rng(learning_state["rng"], env.device)
 
   def save(path):
-    return save_bundle(
+    if checkpoint_api.teacher_identity(teacher) != initial_teacher_id:
+      raise RuntimeError("学生更新改变了冻结教师")
+    return checkpoint_api.save_bundle(
       path,
       teacher,
       cnn,
@@ -289,70 +349,96 @@ def train_student(
         "optimizer_calls": optimizer_calls,
         "rng": capture_rng(env.device),
         "parameter_signature": signature,
-        "restart_boundary": "new_physics_curriculum_camera_gru_episode",
+        "curriculum": env.capture_curriculum()
+        if hasattr(env, "capture_curriculum")
+        else None,
+        "restart_boundary": "new_physics_camera_gru_episode_preserved_curriculum",
       },
     )
 
   # 不加载上一进程的hidden；旧帧身份和新物理episode不能拼接。
   state = None
-  episode_prefix = EpisodePrefix(env.count, max_controls, student.gru.max_age)
+  episode_prefix = EpisodePrefix(
+    env.count, max_controls, student.gru.max_age, max_prefix_frames=max_prefix_frames
+  )
   starting_updates = completed_updates
   metrics = []
   periodic_checkpoints = []
   for _ in range(rounds):
     env.metrics.policy_update = completed_updates
-    prefix = _state_slice(state, 0, env.count, "cpu")
+    prefix = _state_slice(state, slice(0, env.count), "cpu")
     sample, state = _collect(env, student, state)
-    episode_prefix.extend(sample)
     student.train()
-    optimizer.zero_grad(set_to_none=True)
     summary = {
       "round": completed_updates + 1,
       "loss": 0.0,
       "action_huber": 0.0,
       "feature_huber": 0.0,
     }
-    gru_cell_used = False
+    round_gru_cell_used = False
+    for _epoch in range(epochs):
+      order = (
+        torch.randperm(env.count)
+        if epochs > 1 or minibatch_lanes < env.count
+        else torch.arange(env.count)
+      )
+      for start in range(0, env.count, minibatch_lanes):
+        stop = min(start + minibatch_lanes, env.count)
+        batch_ids = order[start:stop]
+        # 每次Adam前以当前参数重算burn-in；不得复用采样时的旧参数hidden。
+        batch_prefix = _state_slice(prefix, batch_ids, env.device)
+        if batch_prefix is not None:
+          batch_prefix = episode_prefix.refresh(
+            student, batch_prefix, env.device, batch_ids
+          )
+        student.train()
+        optimizer.zero_grad(set_to_none=True)
+        gru_cell_used = False
 
-    def mark_gru_cell_used(_module, _inputs):
-      nonlocal gru_cell_used
-      gru_cell_used = True
+        def mark_gru_cell_used(_module, _inputs):
+          nonlocal gru_cell_used
+          gru_cell_used = True
 
-    # 没有fresh valid帧时，原GRU按设计不调用GRUCell。
-    # 只记录本轮反向重放是否实际调用它，异常退出也会移除hook。
-    with student.gru.gru.register_forward_pre_hook(mark_gru_cell_used):
-      for start in range(0, env.count, LANES_PER_BATCH):
-        stop = min(start + LANES_PER_BATCH, env.count)
-        history, visual, _ = _sequence(student, sample, prefix, start, stop, env.device)
-        geometry = sample["geometry"][:, start:stop].to(env.device)
-        loss, values = distillation_loss(
-          history.flatten(0, 1),
-          geometry.flatten(0, 1),
-          visual.flatten(0, 1),
-          student,
-          teacher,
-          feature_weight,
-        )
-        if not bool(torch.isfinite(loss)):
-          raise FloatingPointError("nonfinite student loss")
-        # 每项loss已对24步和该微批取均值，最后不足128lane也按实际数量加权。
-        weight = (stop - start) / env.count
-        (loss * weight).backward()
+        with student.gru.gru.register_forward_pre_hook(mark_gru_cell_used):
+          history = sample["history"][:, batch_ids].to(env.device)
+          depths = sample["depth"][:, batch_ids].to(env.device)
+          rows = [
+            _metadata_slice(row, batch_ids, env.device) for row in sample["metadata"]
+          ]
+          _, visual, _ = student.forward_sequence(history, depths, rows, batch_prefix)
+          geometry = sample["geometry"][:, batch_ids].to(env.device)
+          loss, values = distillation_loss(
+            history.flatten(0, 1),
+            geometry.flatten(0, 1),
+            visual.flatten(0, 1),
+            student,
+            teacher,
+            feature_weight,
+          )
+          if not bool(torch.isfinite(loss)):
+            raise FloatingPointError("nonfinite student loss")
+          loss.backward()
+        if any(
+          parameter.grad is None
+          and (gru_cell_used or parameter not in gru_cell_parameters)
+          for parameter in parameters
+        ):
+          raise RuntimeError("missing student gradient")
+        # 保留未使用GRUCell的None梯度，Adam会跳过这些参数及其旧动量。
+        torch.nn.utils.clip_grad_norm_(parameters, 1.0, error_if_nonfinite=True)
+        optimizer.step()
+        optimizer_calls += 1
+        round_gru_cell_used |= gru_cell_used
+        weight = (stop - start) / (env.count * epochs)
         summary["loss"] += float(loss.detach()) * weight
         for name in ("action_huber", "feature_huber"):
           summary[name] += float(values[name]) * weight
-    if any(
-      parameter.grad is None and (gru_cell_used or parameter not in gru_cell_parameters)
-      for parameter in parameters
-    ):
-      raise RuntimeError("missing student gradient")
-    # 保留未使用GRUCell的None梯度，Adam会跳过这些参数及其旧动量。
-    summary["gru_cell_used"] = gru_cell_used
-    torch.nn.utils.clip_grad_norm_(parameters, 1.0, error_if_nonfinite=True)
-    optimizer.step()
-    optimizer_calls += 1
+    summary["gru_cell_used"] = round_gru_cell_used
     completed_updates += 1
     metrics.append(summary)
+    with (output / "updates.jsonl").open("a") as stream:
+      stream.write(json.dumps({**summary, "optimizer_calls": optimizer_calls}) + "\n")
+    episode_prefix.extend(sample)
     state = episode_prefix.refresh(student, state, env.device)
     if completed_updates % save_every == 0:
       periodic_path = output / f"student_update_{completed_updates:06d}.pt"
@@ -377,6 +463,7 @@ def train_student(
     "round_metrics": metrics,
     "qualification": "not_assessed_here",
     "learner_resumed": resume is not None,
-    "cold_start": ["physics", "curriculum", "camera", "GRU"],
+    "cold_start": ["physics", "camera", "GRU"],
+    "curriculum_restored": resume is not None and hasattr(env, "restore_curriculum"),
     "exact_physical_resume": False,
   }

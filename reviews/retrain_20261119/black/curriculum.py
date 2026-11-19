@@ -67,6 +67,40 @@ def flat_commands(age, choice, course):
     phase = age % 500
     targets[:] = table[(choice + age // 500) % len(table)]
     targets[(phase < 100) | (phase >= 400)] = 0
+  elif course == "specialty":
+    # 专项25%平地回放：50%保留低速纯轴起停反转 + 50%中速/复合转向全向，防灾难性遗忘。
+    phase = age % 900
+    slot = (choice + age // 900) % 24
+    pure = slot < 12
+    if pure.any():
+      idx = pure.nonzero().flatten()
+      cell = slot[idx]
+      axis = cell // 4
+      magnitude = torch.where(cell % 4 < 2, 0.10, 0.25)
+      sign = torch.where(cell % 2 == 0, -1.0, 1.0)
+      targets[idx, axis] = magnitude * sign
+    if (~pure).any():
+      idx = (~pure).nonzero().flatten()
+      mixed_table = torch.tensor(
+        [
+          [1.0, 0.0, 0.0],
+          [-1.0, 0.0, 0.0],
+          [0.0, 0.8, 0.0],
+          [0.0, -0.8, 0.0],
+          [0.7, 0.0, 0.45],
+          [0.7, 0.0, -0.45],
+          [-0.4, 0.0, 0.4],
+          [-0.4, 0.0, -0.4],
+          [0.35, 0.25, 0.35],
+          [0.35, -0.25, -0.35],
+          [0.0, 0.0, 0.5],
+          [0.0, 0.0, 0.0],
+        ],
+        device=age.device,
+      )
+      targets[idx] = mixed_table[slot[idx] - 12]
+    targets[(phase >= 350) & (phase < 600)] *= -1
+    targets[(phase < 100) | (phase >= 600)] = 0
   else:
     phase = age % 900
     cell = (choice + age // 900) % 12
@@ -192,7 +226,8 @@ def configure(cfg, course="flat_foundation"):
         (~command.flat_mask[selected]) & (env.episode_length_buf[selected] > 0)
       ]
       # Only real episode closure votes. A cold/administrative reset cannot promote.
-      active = active[(env.reset_terminated[active] | env.reset_time_outs[active])]
+      closed = env.termination_manager.terminated | env.termination_manager.time_outs
+      active = active[closed[active]]
       rows = (
         torch.stack(
           (
@@ -277,6 +312,80 @@ class GeneralProgress:
     del history[:-64]
     if len(history) >= 32 and sum(history) / len(history) >= 0.90:
       ceilings[kind] += 1
+
+
+def capture_curriculum(env):
+  """只持久化已结算课程证据；物理、相机、GRU和在途通关状态不续接。"""
+  plant = env.plant
+  saved = dict(course=env.course, tick=plant.common_step_counter)
+  if env.course == "general":
+    from mjlab.tasks.velocity.config.black_rough.mdp import state
+
+    st = state(plant)
+    saved.update(
+      ceilings=list(st.type_ceilings),
+      windows=copy.deepcopy(
+        getattr(plant, "general_progress", GeneralProgress()).windows
+      ),
+      histories=[list(rows) for rows in st.histories],
+      levels=plant.scene.terrain.terrain_levels.cpu().clone(),
+    )
+  elif env.course == "specialty":
+    from support.black.specialty_env import specialty_state
+
+    st = specialty_state(plant)
+    saved.update(
+      height=st.height_level,
+      angle=st.angle_stage,
+      history=copy.deepcopy(st.history),
+      promotions=copy.deepcopy(st.promotions),
+      grid=None if st.grid is None else st.grid.state_dict(),
+      passage=None if st.passage_course is None else st.passage_course.state_dict(),
+    )
+  return saved
+
+
+def restore_curriculum(env, saved):
+  if saved["course"] != env.course:
+    raise ValueError("课程恢复阶段不一致")
+  plant = env.plant
+  if env.course == "general":
+    from collections import deque
+
+    from mjlab.tasks.velocity.config.black_rough.mdp import state
+
+    st = state(plant)
+    st.type_ceilings = list(saved["ceilings"])
+    st.maximum_level = max(st.type_ceilings)
+    st.histories = [deque(rows, maxlen=50) for rows in saved["histories"]]
+    plant.general_progress = GeneralProgress()
+    plant.general_progress.windows = copy.deepcopy(saved["windows"])
+    plant.scene.terrain.terrain_levels.copy_(saved["levels"].to(env.device))
+  elif env.course == "specialty":
+    from support.black.grid_course import GridCurriculum
+    from support.black.specialty_env import specialty_state
+
+    st = specialty_state(plant)
+    st.height_level, st.angle_stage = saved["height"], saved["angle"]
+    st.history, st.promotions = (
+      copy.deepcopy(saved["history"]),
+      copy.deepcopy(saved["promotions"]),
+    )
+    if saved["grid"] is not None:
+      st.grid = GridCurriculum.from_state(saved["grid"])
+      st.history = st.grid.history
+      # 不恢复旧物理路线，保留档位、已结算窗口、抽样配额及其随机序列。
+      st.grid.assigned_birth.clear()
+      st.routes.core.routes.clear()
+      st.routes.core.last_birth.clear()
+      st.routes.sync(torch.arange(env.count, device=env.device))
+    if saved["passage"] is not None:
+      st.passage_course = type(st.passage_course).restore(
+        saved["passage"],
+        st.command.cfg.passage_course_policy,
+        cold_reset=True,
+        explicit_candidate=True,
+      )
 
 
 def limit_student_specialty(cfg, max_level):

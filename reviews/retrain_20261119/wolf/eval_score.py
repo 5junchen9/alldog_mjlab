@@ -22,11 +22,17 @@ def digest(value):
 def geometry_contract(spec):
   if spec["course"] not in SPECIALTIES:
     return None
+  import re
+
   import mujoco
   from support.black.obstacle_geometry import historical_case
+  from support.black.sparse_support import support_plane
 
   model, data, case = historical_case(spec["case"])
+  tx = 0.75 - case["xmin"]
+  ty = -case["y"]
   treads = []
+  surfaces = []
   for gid in range(model.ngeom):
     name = model.geom(gid).name
     if "stairs_" in name and (
@@ -38,32 +44,53 @@ def geometry_contract(spec):
       sx, sy, sz = model.geom_size[gid]
       treads.append(
         [
-          x - sx - case["xmin"] + 0.75,
-          x + sx - case["xmin"] + 0.75,
-          y - sy - case["y"],
-          y + sy - case["y"],
-          z + sz,
+          float(x - sx + tx),
+          float(x + sx + tx),
+          float(y - sy + ty),
+          float(y + sy + ty),
+          float(z + sz),
+        ]
+      )
+    if spec["course"] in ("broken_bridge", "plum_stakes") and re.match(
+      r"^(?:trench_\d+cm|plum(?:_t\d+)?)_", name
+    ):
+      bounds, plane = support_plane(model, data, gid)
+      nx, ny, nz, d_world = [float(v) for v in plane]
+      d_local = d_world - nx * tx - ny * ty
+      surfaces.append(
+        [
+          float(bounds[0] + tx),
+          float(bounds[1] + tx),
+          float(bounds[2] + ty),
+          float(bounds[3] + ty),
+          nx,
+          ny,
+          nz,
+          float(d_local),
         ]
       )
   treads.sort(key=lambda b: b[0], reverse=spec["direction"] < 0)
+  core = case.get("core")
   return {
     "length": case["xmax"] - case["xmin"] + 1.5,
     "width": case["half_width"],
-    "surfaces": [
-      [
-        x0 - case["xmin"] + 0.75,
-        x1 - case["xmin"] + 0.75,
-        y0 - case["y"],
-        y1 - case["y"],
-        z,
-      ]
-      for x0, x1, y0, y1, z in case.get("support_surfaces", [])
-    ],
+    "core": [float(core[0] + tx), float(core[1] + tx)] if core is not None else None,
+    "surfaces": surfaces,
     "treads": treads,
   }
 
 
 def in_surface(points, bounds):
+  if len(bounds) == 8:
+    x0, x1, y0, y1, nx, ny, nz, d = bounds
+    distance = np.abs(points[:, 0] * nx + points[:, 1] * ny + points[:, 2] * nz + d)
+    return (
+      (points[:, 0] >= x0 - 0.02)
+      & (points[:, 0] <= x1 + 0.02)
+      & (points[:, 1] >= y0 - 0.02)
+      & (points[:, 1] <= y1 + 0.02)
+      & (distance <= 0.03)
+    )
   x0, x1, y0, y1, z = bounds
   return (
     (points[:, 0] >= x0 - 0.02)
@@ -124,7 +151,6 @@ def score_trial(rows, spec, geometry):
     # 两段运动均按请求方向单独计量，不让一次反转掩盖失败方向。
     moving = True
     target = np.asarray(spec["target"])
-    axis = int(np.argmax(np.abs(target)))
     windows = (
       ((100, 550, 1), (750, 1200, -1))
       if spec["course"] == "general"
@@ -132,20 +158,27 @@ def score_trial(rows, spec, geometry):
     )
     for first, last, sign in windows:
       segment = rows[first:last]
-      actual = np.asarray(
-        [r["angular"][2] if axis == 2 else r["velocity"][axis] for r in segment]
-      )
       if target.any():
-        moving &= bool(
-          actual.mean() * math.copysign(1, target[axis] * sign)
-          >= abs(target[axis]) * 0.5
-        )
+        for axis in np.flatnonzero(target):
+          actual = np.asarray(
+            [r["angular"][2] if axis == 2 else r["velocity"][axis] for r in segment]
+          )
+          moving &= bool(
+            actual.mean() * math.copysign(1, target[axis] * sign)
+            >= abs(target[axis]) * 0.5
+          )
       else:
         moving &= all(
           np.linalg.norm(row["velocity"]) <= 0.10
           and np.linalg.norm(row["angular"]) <= 0.10
           for row in segment
         )
+    if spec["course"] == "general":
+      roots = np.asarray([r["root"] for r in rows])
+      max_offset = np.abs(roots[:, :2]).max(axis=1)
+      left_platform = bool((max_offset > 1.0).any())
+      within_patch = bool((max_offset <= 4.0).all())
+      moving &= left_platform and within_patch
     return {
       "status": "pass" if stable and moving else "fail",
       "stable_stop": stable,
@@ -153,6 +186,7 @@ def score_trial(rows, spec, geometry):
       "controls": len(rows),
     }
   length, width = geometry["length"], geometry["width"]
+  core = geometry.get("core")
   entered = False
   floor_valid = True
   ordered = 0
@@ -166,11 +200,16 @@ def score_trial(rows, spec, geometry):
     if abs(root[1]) > width - 0.05:
       floor_valid = False
     floor_valid &= not row["lower_floor"]
-    if inside and geometry["surfaces"]:
+    if geometry["surfaces"]:
       support = np.zeros(4, dtype=bool)
       for surface in geometry["surfaces"]:
         support |= in_surface(p, surface)
-      floor_valid &= not bool((contact & ~support).any())
+      apron = ((p[:, 0] < 0.75) | (p[:, 0] > length - 0.75)) & (np.abs(p[:, 2]) <= 0.03)
+      if core is not None:
+        in_core = (p[:, 0] > core[0]) & (p[:, 0] < core[1])
+        floor_valid &= not bool((contact & in_core & ~support).any())
+      if inside:
+        floor_valid &= not bool((contact & ~(support | apron)).any())
     if ordered < len(geometry["treads"]):
       touched |= contact & in_surface(p, geometry["treads"][ordered])
       if touched[:2].any() and touched[2:].any():

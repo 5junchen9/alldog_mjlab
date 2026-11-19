@@ -13,22 +13,29 @@ class State:
   capture_tick: torch.Tensor
   tick: int
   hidden: torch.Tensor
+  fresh_count: torch.Tensor
 
   def detach(self):
     return State(
-      self.episode, self.frame, self.capture_tick, self.tick, self.hidden.detach()
+      self.episode,
+      self.frame,
+      self.capture_tick,
+      self.tick,
+      self.hidden.detach(),
+      self.fresh_count,
     )
 
 
 class CausalVisualGRU(nn.Module):
   """One update per valid fresh frame. No privileged inputs, no official wiring."""
 
-  def __init__(self, enabled=False, max_age=6):
+  def __init__(self, enabled=False, max_age=6, memory_frames=50):
     super().__init__()
     if type(enabled) is not bool or type(max_age) is not int or max_age < 0:
       raise ValueError("configuration")
     self.enabled = enabled
     self.max_age = max_age
+    self.memory_frames = memory_frames
     if enabled:
       self.gru = nn.GRUCell(32, 64)
       self.projection = nn.Linear(64, 32, bias=False)
@@ -77,6 +84,7 @@ class CausalVisualGRU(nn.Module):
       h = visual.new_zeros((n, 64))
       old = torch.full_like(episode, -1)
       old_cap = old.clone()
+      count = torch.zeros_like(episode)
     else:
       if (
         state.hidden.shape != (n, 64)
@@ -91,6 +99,7 @@ class CausalVisualGRU(nn.Module):
       h = torch.where(same[:, None], state.hidden, 0)
       old = torch.where(same, state.frame, -1)
       old_cap = torch.where(same, state.capture_tick, -1)
+      count = torch.where(same, state.fresh_count, 0)
     first = old < 0
     reused = valid & ~first & (frame == old)
     if (reused & (old_cap != capture_tick)).any() or (
@@ -98,6 +107,10 @@ class CausalVisualGRU(nn.Module):
     ).any():
       raise ValueError("stale/rekeyed frame identity")
     fresh = valid & ~reused
+    # 每50张有效新帧开启新记忆段；采样、梯度重算与导出共用这个边界。
+    restart = fresh & (count >= self.memory_frames)
+    h = torch.where(restart[:, None], 0.0, h)
+    count = torch.where(restart, 0, count) + fresh.long()
     indices = fresh.nonzero(as_tuple=True)[0]
     if len(indices):
       h = h.index_copy(0, indices, self.gru(visual[indices], h[indices]))
@@ -107,6 +120,7 @@ class CausalVisualGRU(nn.Module):
       torch.where(fresh, capture_tick, old_cap),
       tick,
       h,
+      count,
     )
     # Unusable frames do not expose carried activations. Keep the original
     # baseline feature for the current (possibly all-invalid) depth; no

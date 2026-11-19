@@ -17,17 +17,24 @@ class SplitNormalizer(torch.nn.Module):
 
   def forward(self, value):
     return torch.cat(
-      (self.raw72(value[..., :RAW72]), self.terrain(value[..., RAW72:])), -1
+      (
+        self.raw72(value[..., :RAW72]),
+        self.terrain(value[..., RAW72:WIDTH]),
+        value[..., WIDTH:],
+      ),
+      -1,
     )
 
   def update(self, value):
     self.raw72.update(value[..., :RAW72])
-    self.terrain.update(value[..., RAW72:])
+    self.terrain.update(value[..., RAW72:WIDTH])
 
 
 class TerrainModel(MLPModel):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    if self.obs_dim != WIDTH or not self.obs_normalization:
-      raise ValueError("Terrain model requires446 and online normalization")
+    if self.obs_dim not in (WIDTH, WIDTH + 3) or not self.obs_normalization:
+      raise ValueError(
+        "Terrain critic requires raw446 plus optional course3 and online normalization"
+      )
     self.obs_normalizer = SplitNormalizer()

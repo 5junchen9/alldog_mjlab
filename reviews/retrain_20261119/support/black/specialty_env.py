@@ -13,7 +13,7 @@ from mjlab.tasks.velocity.config.black_rough import mdp as original_mdp
 from mjlab.tasks.velocity.config.black_rough.terrain_cfgs import DedicatedFlatCfg
 from mjlab.terrains import TerrainGeneratorCfg
 from support.black.completion_value import CompletionValueLedger, verify_return_bound
-from support.black.config import comprehensive_configs
+from support.black.config import comprehensive_configs, configure_ppo_schedule
 from support.black.exit_stability import ExitStabilityLedger
 from support.black.flat_coverage import FlatCoverage, initialize_context, reset_context
 from support.black.grid_course import POLICY as GRID_POLICY
@@ -212,7 +212,9 @@ class SpecialtyState:
 
       self.sparse_catalog = SparseSupportCatalog(env.sim.mj_model, env.device)
     self.stair_ledger = StairLedger(env.num_envs, env.device)
-    self.exit_stability = ExitStabilityLedger(env.num_envs, env.device)
+    self.exit_stability = ExitStabilityLedger(
+      env.num_envs, env.device, settle_steps=self.parameters["settle_steps"]
+    )
     self.completion_value = CompletionValueLedger(env.num_envs, env.device)
     self.stair_counts = torch.tensor(
       (
@@ -237,7 +239,9 @@ class SpecialtyState:
       self.history = self.grid.history
     self.routes = RouteRuntime(self) if self.grid is not None else None
     self.flat_coverage = FlatCoverage() if self.grid is not None else None
-    self.progress_credit = ProgressCredit(env.num_envs, env.device)
+    self.progress_credit = ProgressCredit(
+      env.num_envs, env.device, num_levels=len(self.cases)
+    )
     self.promotions = []
     self.feet, _ = env.scene["robot"].find_sites(
       ("FL", "FR", "RR", "RL"), preserve_order=True
@@ -380,23 +384,23 @@ class SpecialtyState:
       & (self.ledger.settled_steps >= p["settle_steps"])
       & ~self.failed
     )
+    self.exit_stability.prepare(
+      env.common_step_counter,
+      env.step_dt,
+      original_stable_steps=self.ledger.settled_steps,
+      active=rough,
+      failed=self.failed,
+      valid=valid & bounds & contact_valid,
+    )
+    self.completion_value.prepare(
+      env.common_step_counter,
+      env.step_dt,
+      active=rough,
+      finished=self.finished,
+      failed=self.failed,
+      valid=valid & bounds & contact_valid,
+    )
     if self.stair_catalog is not None:
-      self.exit_stability.prepare(
-        env.common_step_counter,
-        env.step_dt,
-        original_stable_steps=self.ledger.settled_steps,
-        active=rough,
-        failed=self.failed,
-        valid=valid & bounds & contact_valid,
-      )
-      self.completion_value.prepare(
-        env.common_step_counter,
-        env.step_dt,
-        active=rough,
-        finished=self.finished,
-        failed=self.failed,
-        valid=valid & bounds & contact_valid,
-      )
       hits = self.stair_catalog.contact_bits(
         env.sim.data,
         direction,
@@ -453,7 +457,7 @@ class SpecialtyState:
       env.step_dt,
       progress=progress,
       command_xy=self.command.command[:, :2],
-      rough=rough & (self.command.cfg.task == "stairs"),
+      rough=rough,
       safe=valid & bounds & contact_valid & ~self.failed,
       supported=contact.sum(-1) >= 2,
       corridor=(footy.abs() <= (width - 0.02)[:, None]).all(-1),
@@ -932,29 +936,42 @@ def make_specialty_configs(
   )
   for group in ("actor", "critic"):
     cfg.observations[group].terms["terrain_height_and_mask"].func = terrain_features
+  # 仅坡道拟合地形法向；其余五项顶面均为水平面，对齐世界竖直方向避免垂直墙/空隙法向突变。
+  if task != "slope":
+    cfg.rewards["upright"].params.pop("terrain_sensor_names", None)
+  # 越障专项只惩罚抬脚不足，不压制跨越20..40cm高台/高墙/台阶的高抬腿。
+  cfg.rewards["foot_clearance"].params["penalize_overshoot"] = False
+  cfg.rewards["foot_swing_height"].params["penalize_overshoot"] = False
+  cfg.rewards["thigh_collision"] = RewardTermCfg(
+    func=original_mdp.rough_collision,
+    weight=-0.2,
+    params={"sensor_name": "thigh_ground_touch"},
+  )
   cfg.rewards["specialty_passage"] = RewardTermCfg(func=SpecialtyEventTerm, weight=1.0)
   cfg.terminations["failure"] = TerminationTermCfg(func=failure)
   if task == "stairs":
     cfg.rewards["specialty_stair_progress"] = RewardTermCfg(
       func=StairProgressReward, weight=1.0
     )
-    cfg.rewards["specialty_exit_stability"] = RewardTermCfg(
-      func=ExitStabilityReward, weight=1.0
-    )
-    verify_return_bound(cfg, rl)
-    cfg.rewards["specialty_completion_value"] = RewardTermCfg(
-      func=CompletionValueReward, weight=1.0
-    )
-    cfg.rewards["specialty_progress_dense_cost"] = RewardTermCfg(
-      func=ProgressDenseCost, weight=-1.0
-    )
-    if cfg.events["push_robot"].func is not common.push_by_setting_velocity:
-      raise ValueError("Do not replace an unknown external push implementation")
-    cfg.events["push_robot"].func = push_with_progress_grace
+  # 全部六项专项均启用稳停塑形、吸收态尾值补偿(+12.0)与停滞扣分，消除非楼梯五专项的吸收态陷阱。
+  cfg.rewards["specialty_exit_stability"] = RewardTermCfg(
+    func=ExitStabilityReward, weight=1.0
+  )
+  verify_return_bound(cfg, rl)
+  cfg.rewards["specialty_completion_value"] = RewardTermCfg(
+    func=CompletionValueReward, weight=1.0
+  )
+  cfg.rewards["specialty_progress_dense_cost"] = RewardTermCfg(
+    func=ProgressDenseCost, weight=-1.0
+  )
+  if cfg.events["push_robot"].func is not common.push_by_setting_velocity:
+    raise ValueError("Do not replace an unknown external push implementation")
+  cfg.events["push_robot"].func = push_with_progress_grace
   cfg.terminations["patch_traversal"] = TerminationTermCfg(func=finish, time_out=False)
   cfg.terminations.pop("out_of_map", None)
   cfg.curriculum = {"specialty_course": CurriculumTermCfg(func=course_update)}
   cfg.events["reset_base"].func = reset_specialty
   cfg.episode_length_s = 120.0
+  configure_ppo_schedule(rl, "specialty")
   rl.experiment_name = "black_specialty_" + task
   return cfg, rl

@@ -16,6 +16,8 @@ DEPTH_HEIGHT, DEPTH_WIDTH = 48, 64
 POINT_HEIGHT, POINT_WIDTH = 12, 16
 GEOMETRY_DIM = POINT_HEIGHT * POINT_WIDTH * 4
 DEPTH_SCALE_M = 4.0
+DEPTH_MIN_M = 0.2
+DEPTH_MAX_M = 4.0
 
 
 def reduce_depth(raw: Tensor) -> tuple[Tensor, Tensor]:
@@ -28,7 +30,7 @@ def reduce_depth(raw: Tensor) -> tuple[Tensor, Tensor]:
   """
   if raw.dtype != torch.float32 or raw.shape[1:] != (RAW_HEIGHT, RAW_WIDTH, 1):
     raise ValueError("expected FP32 metric depth [B,90,160,1]")
-  valid = torch.isfinite(raw) & (raw > 0)
+  valid = torch.isfinite(raw) & (raw >= DEPTH_MIN_M) & (raw <= DEPTH_MAX_M)
   score = torch.where(valid, -raw, -torch.inf).permute(0, 3, 1, 2)
   closest, pixels = F.adaptive_max_pool2d(
     score, (DEPTH_HEIGHT, DEPTH_WIDTH), return_indices=True
@@ -81,8 +83,7 @@ def geometry(depth: Tensor, pixels: Tensor, bounds: Tensor) -> Tensor:
   first reduction's original 160x90 ray. Thus its nearest thin hit is retained
   even when it falls between the former fixed 12x16 sampling locations.
   bounds is [4] or [B,4], from renderer_frustum.
-  Zero, negative and nonfinite depth give (0,0,0,0). Four metres is a scale,
-  not a clipping distance, matching preprocess_raw_depth's existing contract.
+  Depth outside [0.2,4.0]m gives (0,0,0,0), matching preprocess_raw_depth.
   The caller owns same-episode, capture-time, age and fresh-frame alignment.
   """
   if depth.dtype != torch.float32 or depth.shape[1:] != (
@@ -93,7 +94,11 @@ def geometry(depth: Tensor, pixels: Tensor, bounds: Tensor) -> Tensor:
     raise ValueError("expected shared FP32 metric depth [B,48,64,1]")
   if pixels.shape != depth.shape[:3] or pixels.dtype != torch.long:
     raise ValueError("original source pixel index required for every depth64 bin")
-  valid = torch.isfinite(depth[..., 0]) & (depth[..., 0] > 0)
+  valid = (
+    torch.isfinite(depth[..., 0])
+    & (depth[..., 0] >= DEPTH_MIN_M)
+    & (depth[..., 0] <= DEPTH_MAX_M)
+  )
   if bool((valid & ((pixels < 0) | (pixels >= RAW_HEIGHT * RAW_WIDTH))).any()):
     raise ValueError("valid depth requires a real original source pixel")
   score = torch.where(valid, -depth[..., 0], -torch.inf).unsqueeze(1)

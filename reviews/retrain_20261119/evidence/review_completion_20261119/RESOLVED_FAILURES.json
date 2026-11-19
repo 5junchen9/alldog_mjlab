@@ -1,0 +1,20 @@
+[
+  {
+    "run": "001",
+    "error": "cold restore accessed reset_terminated before first physics step",
+    "fixed_in": "black/runtime.py",
+    "regression": "test_cold_curriculum_restart_before_first_physics_step"
+  },
+  {
+    "run": "002",
+    "error": "general curriculum accessed post-step aliases at initial reset",
+    "fixed_in": "black/curriculum.py",
+    "regression": "test_general_curriculum_initial_reset_does_not_read_post_step_aliases"
+  },
+  {
+    "run": "003",
+    "error": "episode metrics referenced removed ExitStability.paid_milli",
+    "fixed_in": "support/black/stair_metrics.py",
+    "regression": "test_external_reset_metrics_accept_full_hold_reward_without_counter_precision_loss"
+  }
+]

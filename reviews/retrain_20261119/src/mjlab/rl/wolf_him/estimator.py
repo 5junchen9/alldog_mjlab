@@ -19,7 +19,7 @@ class HIMEstimator(nn.Module):
     target_encoder_hidden_dims: tuple[int, ...] | list[int] = (128, 64),
     activation: str = "elu",
     num_prototypes: int = 32,
-    temperature: float = 3.0,
+    temperature: float = 0.5,
   ) -> None:
     super().__init__()
     if len(encoder_hidden_dims) < 1 or len(target_encoder_hidden_dims) < 1:
@@ -62,6 +62,10 @@ class HIMEstimator(nn.Module):
   def predict(self, history: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     return self.encode(history)
 
+  @torch.no_grad()
+  def normalize_prototypes(self) -> None:
+    self.proto.weight.copy_(F.normalize(self.proto.weight, dim=-1, p=2))
+
   def losses(
     self,
     history: torch.Tensor,
@@ -70,29 +74,31 @@ class HIMEstimator(nn.Module):
   ) -> tuple[torch.Tensor, torch.Tensor]:
     velocity, source_latent = self.encode(history)
     target_latent = self.encode_target(next_input)
-    with torch.no_grad():
-      normalized_proto = F.normalize(self.proto.weight.data.clone(), dim=-1, p=2)
-      self.proto.weight.copy_(normalized_proto)
-    score_s = source_latent @ self.proto.weight.T
-    score_t = target_latent @ self.proto.weight.T
+    proto = F.normalize(self.proto.weight, dim=-1, p=2)
+    score_s = source_latent @ proto.T
+    score_t = target_latent @ proto.T
     with torch.no_grad():
       q_s = sinkhorn(score_s)
       q_t = sinkhorn(score_t)
     log_p_s = F.log_softmax(score_s / self.temperature, dim=-1)
     log_p_t = F.log_softmax(score_t / self.temperature, dim=-1)
-    swap_loss = -0.5 * (q_s * log_p_t + q_t * log_p_s).mean()
+    swap_loss = -0.5 * (
+      (q_s * log_p_t).sum(dim=-1).mean() + (q_t * log_p_s).sum(dim=-1).mean()
+    )
+    if len(history) == 1:
+      swap_loss = swap_loss * 0.0
     estimation_loss = F.huber_loss(velocity, next_velocity, delta=1.0)
     return (estimation_loss, swap_loss)
 
 
 @torch.no_grad()
 def sinkhorn(out: torch.Tensor, eps: float = 0.05, iters: int = 3) -> torch.Tensor:
-  Q = torch.exp(out / eps).T
+  Q = torch.exp((out - out.max()) / eps).T
   K, B = (Q.shape[0], Q.shape[1])
-  Q /= Q.sum()
+  Q /= Q.sum().clamp_min(1e-8)
   for _ in range(iters):
-    Q /= torch.sum(Q, dim=1, keepdim=True)
+    Q /= torch.sum(Q, dim=1, keepdim=True).clamp_min(1e-8)
     Q /= K
-    Q /= torch.sum(Q, dim=0, keepdim=True)
+    Q /= torch.sum(Q, dim=0, keepdim=True).clamp_min(1e-8)
     Q /= B
   return (Q * B).T

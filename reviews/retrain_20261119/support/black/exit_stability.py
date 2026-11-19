@@ -1,26 +1,36 @@
-"""Once-only shaping for progress toward the unchanged six-step exit hold."""
+"""Once-only shaping for progress across the full strict exit hold horizon."""
 
 import torch
 
-STEP_MILLI = 25
-PARTIAL_STEPS = 5
-CAP_MILLI = STEP_MILLI * PARTIAL_STEPS
-CONFIG = dict(
-  per_new_best_strict_hold_step=0.025,
-  maximum_rewarded_partial_steps=PARTIAL_STEPS,
-  per_episode_cap=0.125,
-  require_original_strict_gates=True,
-  success_and_curriculum_unchanged=True,
-)
+CAP_TOTAL = 1.0
+DEFAULT_SETTLE_STEPS = 50
+
+
+def make_config(settle_steps: int = DEFAULT_SETTLE_STEPS) -> dict:
+  partial_steps = max(1, int(settle_steps) - 1)
+  return dict(
+    version=2,
+    per_new_best_strict_hold_step=CAP_TOTAL / partial_steps,
+    maximum_rewarded_partial_steps=partial_steps,
+    per_episode_cap=CAP_TOTAL,
+    require_original_strict_gates=True,
+    success_and_curriculum_unchanged=True,
+  )
+
+
+CONFIG = make_config(DEFAULT_SETTLE_STEPS)
 
 
 class ExitStabilityLedger:
-  fields = ("best", "paid_milli", "owed_milli", "blocked")
+  fields = ("best", "paid_total", "owed_total", "blocked")
 
-  def __init__(self, n, device):
+  def __init__(self, n, device, settle_steps: int = DEFAULT_SETTLE_STEPS):
+    self.partial_steps = max(1, int(settle_steps) - 1)
+    self.step_reward = CAP_TOTAL / self.partial_steps
+    self.config = make_config(settle_steps)
     self.best = torch.zeros(n, dtype=torch.long, device=device)
-    self.paid_milli = torch.zeros_like(self.best)
-    self.owed_milli = torch.zeros_like(self.best)
+    self.paid_total = torch.zeros(n, dtype=torch.float32, device=device)
+    self.owed_total = torch.zeros(n, dtype=torch.float32, device=device)
     self.blocked = torch.zeros(n, dtype=torch.bool, device=device)
     self.last_step = -1
     self.paid_step = -1
@@ -35,24 +45,23 @@ class ExitStabilityLedger:
     self.last_step, self.dt = step, dt
     invalid = active & (failed | ~valid)
     self.blocked |= invalid
-    self.owed_milli[invalid] = 0
+    self.owed_total[invalid] = 0.0
     live = active & ~self.blocked
-    # This counter already requires all physical/safety/stability gates.
-    # Repeated one-frame contacts or repeated streaks never earn twice.
-    candidate = original_stable_steps.clamp(min=0, max=PARTIAL_STEPS)
+    # Smooth monotone shaping across 1..(settle_steps-1), never pays twice.
+    candidate = original_stable_steps.clamp(min=0, max=self.partial_steps)
     increment = (candidate - self.best).clamp(min=0)
     increment = torch.where(live, increment, 0)
     self.best += increment
-    self.owed_milli += increment * STEP_MILLI
+    self.owed_total += increment.float() * self.step_reward
 
   def consume(self, step):
     if step != self.last_step:
       raise RuntimeError("Original terminal snapshot must precede exit shaping")
     if step == self.paid_step:
-      return torch.zeros_like(self.best, dtype=torch.float32)
-    reward = self.owed_milli.float() / (1000 * self.dt)
-    self.paid_milli += self.owed_milli
-    self.owed_milli.zero_()
+      return torch.zeros_like(self.paid_total)
+    reward = self.owed_total / self.dt
+    self.paid_total += self.owed_total
+    self.owed_total.zero_()
     self.paid_step = step
     return reward
 
@@ -62,8 +71,8 @@ class ExitStabilityLedger:
 
   def state_dict(self):
     return dict(
-      version=1,
-      config=CONFIG,
+      version=2,
+      config=self.config,
       last_step=self.last_step,
       paid_step=self.paid_step,
       dt=self.dt,
@@ -73,11 +82,10 @@ class ExitStabilityLedger:
 
   def load_state_dict(self, saved):
     if saved is None:
-      # No inference from an old episode or its position can pay new credit.
       self.blocked.fill_(True)
       self.migration = "withheld_until_fresh_physical_reset"
       return
-    if saved["version"] != 1 or saved["config"] != CONFIG:
+    if saved["version"] != 2 or saved["config"] != self.config:
       raise ValueError("Exit shaping schema/config mismatch")
     for name in self.fields:
       source = saved["tensors"][name]
@@ -91,9 +99,9 @@ class ExitStabilityLedger:
     self.migration = saved.get("migration")
     if (
       (self.best < 0).any()
-      or (self.best > PARTIAL_STEPS).any()
-      or (self.paid_milli < 0).any()
-      or (self.owed_milli < 0).any()
-      or ((self.paid_milli + self.owed_milli) > self.best * STEP_MILLI).any()
+      or (self.best > self.partial_steps).any()
+      or (self.paid_total < -1e-6).any()
+      or (self.owed_total < -1e-6).any()
+      or ((self.paid_total + self.owed_total) > CAP_TOTAL + 1e-5).any()
     ):
       raise ValueError("Invalid exit shaping budget")

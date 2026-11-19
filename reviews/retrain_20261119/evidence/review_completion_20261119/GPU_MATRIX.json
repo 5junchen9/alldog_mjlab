@@ -1,0 +1,274 @@
+[
+  {
+    "robot": "black",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "black_flat_foundation_teacher.log"
+  },
+  {
+    "robot": "black",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "black_flat_foundation_teacher_resume.log"
+  },
+  {
+    "robot": "black",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "student",
+    "exit_code": 0,
+    "log": "black_flat_foundation_student.log"
+  },
+  {
+    "robot": "black",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "student_resume",
+    "exit_code": 0,
+    "log": "black_flat_foundation_student_resume.log"
+  },
+  {
+    "robot": "black",
+    "course": "general",
+    "task": null,
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "black_general_teacher.log"
+  },
+  {
+    "robot": "black",
+    "course": "general",
+    "task": null,
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "black_general_teacher_resume.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "stairs",
+    "case": "probe",
+    "exit_code": 0,
+    "log": "black_specialty_stairs_probe.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "platform",
+    "case": "probe",
+    "exit_code": 0,
+    "log": "black_specialty_platform_probe.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "high_wall",
+    "case": "probe",
+    "exit_code": 0,
+    "log": "black_specialty_high_wall_probe.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "slope",
+    "case": "probe",
+    "exit_code": 0,
+    "log": "black_specialty_slope_probe.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "broken_bridge",
+    "case": "probe",
+    "exit_code": 0,
+    "log": "black_specialty_broken_bridge_probe.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "plum_stakes",
+    "case": "probe",
+    "exit_code": 0,
+    "log": "black_specialty_plum_stakes_probe.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "platform",
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "black_specialty_platform_teacher.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "platform",
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "black_specialty_platform_teacher_resume.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "stairs",
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "black_specialty_stairs_teacher.log"
+  },
+  {
+    "robot": "black",
+    "course": "specialty",
+    "task": "stairs",
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "black_specialty_stairs_teacher_resume.log"
+  },
+  {
+    "robot": "black",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "fault",
+    "exit_code": 0,
+    "log": "black_flat_foundation_fault.log"
+  },
+  {
+    "robot": "black",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "scale",
+    "exit_code": 0,
+    "log": "black_flat_foundation_scale.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "wolf_flat_foundation_teacher.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "wolf_flat_foundation_teacher_resume.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "student",
+    "exit_code": 0,
+    "log": "wolf_flat_foundation_student.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "student_resume",
+    "exit_code": 0,
+    "log": "wolf_flat_foundation_student_resume.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "general",
+    "task": null,
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "wolf_general_teacher.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "general",
+    "task": null,
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "wolf_general_teacher_resume.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "stairs",
+    "task": null,
+    "case": "probe",
+    "exit_code": 0,
+    "log": "wolf_stairs_probe.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "platform",
+    "task": null,
+    "case": "probe",
+    "exit_code": 0,
+    "log": "wolf_platform_probe.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "high_wall",
+    "task": null,
+    "case": "probe",
+    "exit_code": 0,
+    "log": "wolf_high_wall_probe.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "slope",
+    "task": null,
+    "case": "probe",
+    "exit_code": 0,
+    "log": "wolf_slope_probe.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "broken_bridge",
+    "task": null,
+    "case": "probe",
+    "exit_code": 0,
+    "log": "wolf_broken_bridge_probe.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "plum_stakes",
+    "task": null,
+    "case": "probe",
+    "exit_code": 0,
+    "log": "wolf_plum_stakes_probe.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "stairs",
+    "task": null,
+    "case": "teacher",
+    "exit_code": 0,
+    "log": "wolf_stairs_teacher.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "stairs",
+    "task": null,
+    "case": "teacher_resume",
+    "exit_code": 0,
+    "log": "wolf_stairs_teacher_resume.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "fault",
+    "exit_code": 0,
+    "log": "wolf_flat_foundation_fault.log"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_foundation",
+    "task": null,
+    "case": "scale",
+    "exit_code": 0,
+    "log": "wolf_flat_foundation_scale.log"
+  }
+]

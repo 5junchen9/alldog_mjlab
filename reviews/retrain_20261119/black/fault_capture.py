@@ -10,6 +10,29 @@ import numpy as np
 import torch
 
 
+def check_control_boundary(env):
+  """每控制步检查一次物理字段；不复制健康状态，也不声称定位了首坏子步。"""
+  import warp as wp
+
+  wp.synchronize_device(env.sim.wp_device)
+  data = env.sim.wp_data
+  names = ("qpos", "qvel", "qacc", "qacc_warmstart", "ctrl")
+  bad = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
+  for name in names:
+    value = wp.to_torch(getattr(data, name)).reshape(env.num_envs, -1)
+    bad |= ~torch.isfinite(value).all(-1)
+  if bool(bad.any()):
+    error = FloatingPointError(
+      "控制步末物理状态含NaN/Inf；需开启debug-first-fault定位子步"
+    )
+    error.failure_details = {
+      "stage": "control_boundary_after_physics_before_reset",
+      "bad_environment_ids": bad.nonzero().flatten().cpu().tolist(),
+      "first_bad_substep_captured": False,
+    }
+    raise error
+
+
 def attach(env, context_provider=lambda: {}):
   import warp as wp
   from support.black.probe import FirstBad, bind

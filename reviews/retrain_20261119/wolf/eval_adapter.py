@@ -14,6 +14,7 @@ class EvaluationCommand(CourseCommand):
     self.target[env_ids] = torch.tensor(
       [self.cfg.rows[int(i)]["target"] for i in env_ids], device=self.device
     )
+    self.specialty_speed[env_ids] = self.target[env_ids, 0].abs()
 
 
 @dataclass(kw_only=True)

@@ -82,12 +82,18 @@ class NativeEnv:
     course="flat_foundation",
     task=None,
     max_level=None,
+    debug_first_fault=False,
+    training_sensors=False,
   ):
     native_imports()
     import warp as wp
     from support.black.camera_contract import verify_camera
     from support.black.chunk_renderer_fixed import ChunkRenderer
-    from support.black.config import history_observations, make_general_configs
+    from support.black.config import (
+      configure_ppo_schedule,
+      history_observations,
+      make_general_configs,
+    )
     from support.black.direct160 import make_renderer
     from support.black.parameters import PARAMETERS
     from support.black.passage_course import POLICY
@@ -119,6 +125,7 @@ class NativeEnv:
       )
     else:
       cfg, self.rl = make_general_configs(count, seed)
+    configure_ppo_schedule(self.rl, source_course)
     # 手动局部reset让HIM标签和timeout价值读取同一真实末帧。
     cfg.auto_reset = False
     cfg.observations["history"] = history_observations()
@@ -153,6 +160,11 @@ class NativeEnv:
       )
 
     cfg.scene.spec_fn = add_camera
+    self.training_sensors = training_sensors
+    if training_sensors:
+      from black.camera_randomization import configure as configure_camera
+
+      configure_camera(cfg)
     self.plant = ManagerBasedRlEnv(cfg, device=device)
     self.renderer = self.probe = None
     try:
@@ -164,6 +176,11 @@ class NativeEnv:
       self.renderer = None
       self.probe = None
       self.camera_receipt = verify_camera(self.plant.sim.mj_model, "shared_actor_depth")
+      from black.camera_randomization import SENSOR_NOISE
+
+      self.camera_receipt["training_sensor_randomization"] = (
+        SENSOR_NOISE if training_sensors else None
+      )
       term = self.plant.action_manager.get_term("joint_pos")
       if not isinstance(term, BlackDelayedJointPositionAction):
         raise ValueError("需要原Black带执行器延迟的关节位置动作")
@@ -176,8 +193,8 @@ class NativeEnv:
         (torch.as_tensor(term.scale) == 0.25).all()
       ):
         raise ValueError("原生关节顺序或动作缩放改变")
-      if not term.cfg.delay_enabled or term.cfg.clear_history_on_reset:
-        raise ValueError("执行器延迟约定改变")
+      if not term.cfg.delay_enabled or not term.cfg.clear_history_on_reset:
+        raise ValueError("执行器延迟约定改变（新从零线要求延迟开启且reset清空历史）")
       if hasattr(cfg.commands["twist"], "task"):
         self.metrics = specialty_state(self.plant).episode_metrics
       else:
@@ -200,18 +217,19 @@ class NativeEnv:
         camera_id=cid,
         chunk=32 if count < 128 else 128,
       )
-      self.probe = attach(
-        self.plant,
-        context_provider=lambda: {
-          "tick": self.frames.tick,
-          "episode": self.frames.episode,
-          "command": self.plant.command_manager.get_command("twist"),
-          "policy_kind": "shared_actor_v2_scratch",
-          "cold_physics": True,
-          "policy_identity": getattr(self, "policy_identity", None),
-          "policy_update": self.metrics.policy_update,
-        },
-      )
+      if debug_first_fault:
+        self.probe = attach(
+          self.plant,
+          context_provider=lambda: {
+            "tick": self.frames.tick,
+            "episode": self.frames.episode,
+            "command": self.plant.command_manager.get_command("twist"),
+            "policy_kind": "shared_actor_v2_scratch",
+            "cold_physics": True,
+            "policy_identity": getattr(self, "policy_identity", None),
+            "policy_update": self.metrics.policy_update,
+          },
+        )
       self.wp = wp
       self.last_native = self.wrapper.get_observations()
       self.obs = self.bind(self.last_native)
@@ -239,6 +257,10 @@ class NativeEnv:
     ids = self.frames.due()
     for selected, raw in self.renderer.frames_for(ids):
       self.wp.synchronize_device(self.plant.sim.wp_device)
+      if getattr(self, "training_sensors", False):
+        from support.black.depth_him import augment_depth
+
+        raw = augment_depth(raw)
       depth, source_pixels = reduce_depth(raw)
       points = geometry(depth, source_pixels, renderer_frustum(self.renderer, selected))
       self.frames.capture(selected, depth, points)
@@ -252,6 +274,7 @@ class NativeEnv:
         "history": native["history"].flatten(1).clone(),
         "geometry": self.frames.geometry.clone(),
         "critic": native["critic"].clone(),
+        "course_state": self.critic_context(),
       },
       batch_size=[self.count],
     )
@@ -269,11 +292,17 @@ class NativeEnv:
     if self.evaluation is not None:
       self.evaluation.begin(self.last_native)
     native, reward, done, info = self.wrapper.step(action)
+    if hasattr(self.plant, "sim"):
+      from black.fault_capture import check_control_boundary
+
+      check_control_boundary(self.plant)
     # reset会改写原生buffer；先复制终止标志、奖励和监督目标。
     info = dict(info)
     info["terminated"] = self.plant.reset_terminated.clone()
     info["time_outs"] = (self.plant.reset_time_outs & ~info["terminated"]).clone()
     info["terminal_critic"] = native["critic"].clone()
+    if "course_state" in getattr(self, "obs", {}):
+      info["terminal_course_state"] = self.critic_context()
     info["terminal_history"] = native["history"].reshape(self.count, 5, 45).clone()
     info["next_velocity"] = info["terminal_critic"][:, :3].clone()
     reward = reward.clone()
@@ -297,6 +326,18 @@ class NativeEnv:
       self.evaluation.finish(native, done)
     return self.obs, reward, done, info
 
+  def critic_context(self):
+    """课程计时只供价值估计，actor与学生输入不增加特权通道。"""
+    context = torch.zeros(self.count, 3, device=self.device)
+    context[:, 0] = self.plant.episode_length_buf / self.max_episode_controls
+    if self.course == "specialty":
+      from support.black.specialty_env import specialty_state
+
+      st = specialty_state(self.plant)
+      context[:, 1] = st.ledger.settled_steps / st.parameters["settle_steps"]
+      context[:, 2] = st.ledger.crossed_entry.float()
+    return context
+
   def close(self):
     if self.evaluation is not None:
       self.evaluation.detach()
@@ -306,3 +347,28 @@ class NativeEnv:
       self.renderer.contexts.clear()
       self.renderer._staging.clear()
     self.plant.close()
+
+  def capture_curriculum(self):
+    from black.curriculum import capture_curriculum
+
+    return capture_curriculum(self)
+
+  def restore_curriculum(self, saved):
+    from black.curriculum import restore_curriculum
+
+    restore_curriculum(self, saved)
+    self.restart_after_curriculum(saved["tick"])
+
+  def restart_after_curriculum(self, tick):
+    # 冷启动物理，旧在途episode不投成功/失败票；课程档位与已结算窗口保留。
+    self.plant.episode_length_buf.zero_()
+    # reset_*别名在原生首步后才建立；冷启动恢复必须从已有manager取得。
+    self.plant.reset_terminated = self.plant.termination_manager.terminated
+    self.plant.reset_time_outs = self.plant.termination_manager.time_outs
+    self.plant.reset_terminated.zero_()
+    self.plant.reset_time_outs.zero_()
+    self.plant.common_step_counter = tick + 1
+    native, _ = self.plant.reset()
+    self.frames = AlignedFrames(self.count, self.device)
+    self.last_native = native
+    self.obs = self.bind(native)

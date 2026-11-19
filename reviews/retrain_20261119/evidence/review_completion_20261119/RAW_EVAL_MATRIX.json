@@ -1,0 +1,86 @@
+[
+  {
+    "robot": "black",
+    "course": "general",
+    "exit_code": 0,
+    "directory": "black_raw_general",
+    "trials": 48,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/black_raw_general"
+  },
+  {
+    "robot": "black",
+    "course": "platform",
+    "exit_code": 0,
+    "directory": "black_raw_platform",
+    "trials": 6,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/black_raw_platform"
+  },
+  {
+    "robot": "black",
+    "course": "broken_bridge",
+    "exit_code": 0,
+    "directory": "black_raw_broken_bridge",
+    "trials": 6,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/black_raw_broken_bridge"
+  },
+  {
+    "robot": "wolf",
+    "course": "flat_axes",
+    "exit_code": 0,
+    "directory": "wolf_raw_flat_axes",
+    "trials": 66,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/wolf_raw_flat_axes"
+  },
+  {
+    "robot": "wolf",
+    "course": "general",
+    "exit_code": 0,
+    "directory": "wolf_raw_general",
+    "trials": 36,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/wolf_raw_general"
+  },
+  {
+    "robot": "wolf",
+    "course": "broken_bridge",
+    "exit_code": 0,
+    "directory": "wolf_raw_broken_bridge",
+    "trials": 6,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/wolf_raw_broken_bridge"
+  },
+  {
+    "robot": "wolf",
+    "course": "plum_stakes",
+    "exit_code": 0,
+    "directory": "wolf_raw_plum_stakes",
+    "trials": 6,
+    "max_controls": 4,
+    "raw_rescored": true,
+    "incomplete": true,
+    "successes": 0,
+    "evidence_directory": "evidence/review_completion_20261119/raw/wolf_raw_plum_stakes"
+  }
+]

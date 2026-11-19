@@ -21,6 +21,7 @@ from black.checkpoint import (
   teacher_identity,
   tensor_digest,
 )
+from black.eval_collect import device_lock_path
 from black.learner_state import (
   SCHEMA,
   capture_rng,
@@ -107,14 +108,15 @@ def update_him(him, optimizer, samples, device):
   him.enable_learning()
   velocity_sum = swap_sum = 0.0
   try:
-    for start in range(0, count, 2048):
-      stop = min(start + 2048, count)
+    # 均分批次，2049条不能切成2048+1的退化Sinkhorn尾批。
+    batches = torch.arange(count).tensor_split((count + 2047) // 2048)
+    for ids in batches:
       velocity_loss, swap_loss = him.estimator_losses(
-        history[start:stop].to(device),
-        next_frame[start:stop].to(device),
-        next_velocity[start:stop].to(device),
+        history[ids].to(device),
+        next_frame[ids].to(device),
+        next_velocity[ids].to(device),
       )
-      weight = (stop - start) / count
+      weight = len(ids) / count
       loss = (velocity_loss + swap_loss) * weight
       if not bool(torch.isfinite(loss)):
         raise FloatingPointError("HIM损失非有限，停止更新")
@@ -126,6 +128,7 @@ def update_him(him, optimizer, samples, device):
       raise FloatingPointError("HIM梯度缺失，停止更新")
     torch.nn.utils.clip_grad_norm_(parameters, 1.0, error_if_nonfinite=True)
     optimizer.step()
+    him.normalize_prototypes()
   finally:
     him.freeze()
   return {
@@ -151,10 +154,11 @@ def train_teacher(
     if key in accepted
   }
   recipe = {
-    "algorithm": "black_retrain_teacher_ppo_v1",
+    "algorithm": "black_retrain_teacher_ppo_v2",
     "course": env.course,
     "task": getattr(env, "task", None),
     "num_envs": env.count,
+    "camera_noise": getattr(env, "training_sensors", False),
     "controls_per_round": 24,
     "ppo_options": options,
     "critic_seed": teacher.initialization["critic_seed"],
@@ -164,6 +168,9 @@ def train_teacher(
       "learning_rate": 1e-4,
       "loss": "Huber(next_velocity)+prototype_swap",
       "microbatch": 2048,
+      "batch_partition": "balanced_no_single_row_tail",
+      "prototype_temperature": 0.5,
+      "swap_reduction": "sum_over_prototypes_mean_over_rows",
       "gradient_clip": 1.0,
     },
   }
@@ -205,6 +212,8 @@ def train_teacher(
       type(him_optimizer_calls) is not int or not 0 <= him_optimizer_calls <= completed
     ):
       raise ValueError("HIM optimizer计数不一致")
+    if hasattr(env, "restore_curriculum"):
+      env.restore_curriculum(saved["curriculum"])
     restore_rng(saved["rng"], env.device)
 
   def snapshot(path, update):
@@ -225,7 +234,10 @@ def train_teacher(
         "rng": capture_rng(env.device),
         "parameter_signature": signature,
         "optimizer_calls": optimizer_calls,
-        "restart_boundary": "new_physics_curriculum_camera_episode",
+        "curriculum": env.capture_curriculum()
+        if hasattr(env, "capture_curriculum")
+        else None,
+        "restart_boundary": "new_physics_camera_episode_preserved_curriculum",
       },
     )
 
@@ -315,7 +327,7 @@ def train_teacher(
     "recipe": recipe,
     "learner_resumed": saved is not None,
     "exact_physical_resume": False,
-    "restart_boundary": "new_physics_curriculum_camera_episode",
+    "restart_boundary": "new_physics_camera_episode_preserved_curriculum",
   }
 
 
@@ -325,6 +337,9 @@ def main():
     "--mode", choices=("plan", "probe", "teacher", "student"), default="plan"
   )
   parser.add_argument("--execute", action="store_true")
+  parser.add_argument(
+    "--debug-first-fault", action="store_true", help="逐物理子步同步取证，诊断时开启"
+  )
   parser.add_argument("--controller", choices=("teacher", "student"), default="teacher")
   parser.add_argument("--out", type=Path)
   source = parser.add_mutually_exclusive_group()
@@ -390,7 +405,7 @@ def main():
   args.out.mkdir(parents=True, exist_ok=False)
   env = None
   failure = None
-  with Path("/tmp/mjlab_black_matrix_1000_cuda_0.lock").open("a") as lock:
+  with device_lock_path(args.device).open("a") as lock:
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     try:
       random.seed(args.seed)
@@ -448,6 +463,8 @@ def main():
         course=args.course,
         task=args.task,
         max_level=max_level,
+        debug_first_fault=args.debug_first_fault,
+        training_sensors=args.mode in ("teacher", "student"),
       )
       env.policy_identity = teacher_identity(teacher)
       if args.mode == "probe":
@@ -504,6 +521,7 @@ def main():
         ),
         exact_failure_replay=False,
         capability_evaluated=False,
+        first_fault_probe_enabled=args.debug_first_fault,
       )
       (args.out / "RESULT.json").write_text(json.dumps(result, indent=2) + "\n")
       print(json.dumps(result))

@@ -53,8 +53,9 @@ class ProgressCredit:
     "withheld_rate",
   )
 
-  def __init__(self, n, device):
+  def __init__(self, n, device, num_levels=16):
     self.n = n
+    self.num_levels = max(16, int(num_levels))
     self.last_step = -1
     self.cursor = 0
     self.migration = None
@@ -68,7 +69,7 @@ class ProgressCredit:
     self.gate.fill_(1)
     self.credit_history = torch.zeros(100, n, device=device)
     self.demand_history = torch.zeros_like(self.credit_history)
-    self.occupancy_seconds = torch.zeros(10, 2, device=device)
+    self.occupancy_seconds = torch.zeros(self.num_levels, 2, device=device)
     self.suppressed_seconds = torch.zeros_like(self.occupancy_seconds)
 
   def reset(self, ids):
@@ -133,7 +134,7 @@ class ProgressCredit:
     self.gate = torch.where(rough & ~finite, 0.0, self.gate)
     self.recovery_left = (self.recovery_left - dt).clamp(min=0)
     self.qualified = credible
-    key = levels * 2 + augmented.long()
+    key = levels.clamp(0, self.num_levels - 1) * 2 + augmented.long()
     ids = rough.nonzero().flatten()
     self.occupancy_seconds.view(-1).index_add_(
       0, key[ids], torch.full_like(speed[ids], dt)

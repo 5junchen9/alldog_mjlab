@@ -49,7 +49,9 @@ def test_scratch_never_reads_weights_and_repeats_given_seed(monkeypatch):
 def test_him_preserves_next_velocity_and_unit_latent_semantics():
   him, _, _, _ = make_modules()
   history = torch.randn(4, 5, 45)
-  encoded = him.encoder(history.flatten(start_dim=1))
+  encoded = him.encoder(
+    torch.cat((history[..., :30], history[..., 33:]), -1).flatten(start_dim=1)
+  )
   actual = him(history)
   assert torch.equal(actual[:, :3], encoded[:, :3])
   assert torch.equal(actual[:, 3:], F.normalize(encoded[:, 3:], dim=-1))

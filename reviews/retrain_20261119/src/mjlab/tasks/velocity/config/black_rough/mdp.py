@@ -51,7 +51,7 @@ class MixedUpright(upright):
 
 
 def rough_collision(env, sensor_name):
-  return velocity.self_collision_cost(env, sensor_name) * (~flat_mask(env))
+  return velocity.self_collision_cost(env, sensor_name)
 
 
 def root_clearance(env):
@@ -69,7 +69,9 @@ class FailureState:
   def __init__(self, env):
     self.env = env
     n, device = env.num_envs, env.device
-    self.age = torch.zeros(n, 3, device=device)
+    # Columns: 0=thigh, 1=trunk, 2=tilt, 3=low_clearance (keeps -1 == clearance).
+    self.age = torch.zeros(n, 4, device=device)
+    self.flat_low_age = torch.zeros(n, device=device)
     self.failed = torch.zeros(n, dtype=torch.bool, device=device)
     self.reason = torch.zeros(n, 4, dtype=torch.bool, device=device)
     self.last_xy = torch.zeros(n, 2, device=device)
@@ -115,21 +117,36 @@ class FailureState:
     self.valid_steps += valid & (speed > 0.04)
     angle = torch.acos((-robot.data.projected_gravity_b[:, 2]).clamp(-1, 1))
     clearance, support = root_clearance(env)
+    thigh = velocity.illegal_contact(env, "thigh_ground_touch")
+    trunk_touch = contact_magnitude(env.scene["trunk_ground_touch"]) > 10
     persistent = torch.stack(
       (
-        contact_magnitude(env.scene["trunk_ground_touch"]) > 10,
+        thigh,
+        trunk_touch,
         angle > torch.pi * 70 / 180,
         support & (clearance < 0.15),
       ),
       -1,
     )
     self.age = torch.where(persistent, self.age + env.step_dt, 0)
-    thigh = velocity.illegal_contact(env, "thigh_ground_touch")
-    rough_reason = torch.cat((thigh[:, None], self.age >= 0.10 - 1e-6), -1)
-    self.reason = rough_reason & (~flat_mask(env))[:, None]
-    self.failed = torch.where(
-      flat_mask(env), angle > torch.pi * 70 / 180, self.reason.any(-1)
+    self.flat_low_age = torch.where(
+      support & (clearance < 0.12), self.flat_low_age + env.step_dt, 0
     )
+    thresholds = torch.tensor(
+      [0.15 - 1e-6, 0.10 - 1e-6, 0.10 - 1e-6, 0.10 - 1e-6], device=self.age.device
+    )
+    rough_reason = self.age >= thresholds
+    flat_reason = torch.stack(
+      (
+        torch.zeros_like(thigh),
+        self.age[:, 1] >= 0.10 - 1e-6,
+        angle > torch.pi * 70 / 180,
+        self.flat_low_age >= 0.15 - 1e-6,
+      ),
+      -1,
+    )
+    self.reason = torch.where(flat_mask(env)[:, None], flat_reason, rough_reason)
+    self.failed = self.reason.any(-1)
     self.failed |= ~torch.isfinite(robot.data.root_link_pos_w).all(-1)
     if self.enforce_patch_bounds:
       displacement = xy - env.scene.env_origins[:, :2]
@@ -146,7 +163,14 @@ class FailureState:
       self.failed |= wrong_exit
 
   def reset(self, ids):
-    for name in ["age", "progress", "demand", "valid_steps", "motion_steps"]:
+    for name in [
+      "age",
+      "flat_low_age",
+      "progress",
+      "demand",
+      "valid_steps",
+      "motion_steps",
+    ]:
       getattr(self, name)[ids] = 0
     self.failed[ids] = False
     self.traversal[ids] = False
@@ -155,6 +179,7 @@ class FailureState:
   def state_dict(self):
     names = [
       "age",
+      "flat_low_age",
       "failed",
       "reason",
       "last_xy",

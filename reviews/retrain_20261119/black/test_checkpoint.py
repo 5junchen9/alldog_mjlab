@@ -61,7 +61,7 @@ def test_v2_provenance_roundtrip_and_legacy_contract_rejection(modules, tmp_path
   path = tmp_path / "new.pt"
   checkpoint.save_bundle(path, *modules, phase="probe", updates=0)
   _, _, _, packet = checkpoint.load_bundle(path)
-  assert packet["contract"]["schema"] == "black_retrain_shared_actor_v1"
+  assert packet["contract"]["schema"] == "black_retrain_shared_actor_v2"
   assert packet["initialization"]["mode"] == "scratch"
   assert set(packet["initialization"]["modules"]) == {
     "HIM",

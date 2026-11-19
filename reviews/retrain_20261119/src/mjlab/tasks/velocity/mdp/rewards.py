@@ -245,6 +245,7 @@ def feet_clearance(
   command_name: str | None = None,
   command_threshold: float = 0.01,
   asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+  penalize_overshoot: bool = True,
 ) -> torch.Tensor:
   """Penalize deviation from target clearance height, weighted by foot velocity."""
   asset: Entity = env.scene[asset_cfg.name]
@@ -255,7 +256,14 @@ def feet_clearance(
   foot_height = height_sensor.data.heights  # [B, F]
   foot_vel_xy = asset.data.site_lin_vel_w[:, asset_cfg.site_ids, :2]  # [B, F, 2]
   vel_norm = torch.norm(foot_vel_xy, dim=-1)  # [B, F]
-  delta = torch.abs(foot_height - target_height)  # [B, F]
+  if penalize_overshoot:
+    delta = torch.abs(foot_height - target_height)  # [B, F]
+  else:
+    delta = torch.clamp(target_height - foot_height, min=0.0)  # [B, F]
+  support_hit = getattr(height_sensor, "support_ray_hit", None)
+  if support_hit is not None:
+    # 断桥/梅花桩空隙无支撑命中时返回饱和量程，不能当作高抬脚误罚。
+    delta = torch.where(support_hit, delta, 0.0)
   cost = torch.sum(delta * vel_norm, dim=1)  # [B]
   if command_name is not None:
     command = env.command_manager.get_command(command_name)
@@ -280,6 +288,9 @@ class feet_swing_height:
     self.peak_heights = torch.zeros(
       (env.num_envs, num_feet), device=env.device, dtype=torch.float32
     )
+    self.had_support_sample = torch.zeros(
+      (env.num_envs, num_feet), device=env.device, dtype=torch.bool
+    )
     self.step_dt = env.step_dt
 
   def __call__(
@@ -290,6 +301,7 @@ class feet_swing_height:
     target_height: float,
     command_name: str,
     command_threshold: float,
+    penalize_overshoot: bool = True,
   ) -> torch.Tensor:
     contact_sensor: ContactSensor = env.scene[sensor_name]
     command = env.command_manager.get_command(command_name)
@@ -297,20 +309,30 @@ class feet_swing_height:
     height_sensor: TerrainHeightSensor = env.scene[height_sensor_name]
     foot_heights = height_sensor.data.heights
     in_air = contact_sensor.data.found == 0
+    support_hit = getattr(height_sensor, "support_ray_hit", None)
+    sample_valid = in_air if support_hit is None else (in_air & support_hit)
     self.peak_heights = torch.where(
-      in_air,
+      sample_valid,
       torch.maximum(self.peak_heights, foot_heights),
       self.peak_heights,
     )
+    self.had_support_sample |= sample_valid
     first_contact = contact_sensor.compute_first_contact(dt=self.step_dt)
     linear_norm = torch.norm(command[:, :2], dim=1)
     angular_norm = torch.abs(command[:, 2])
     total_command = linear_norm + angular_norm
     active = (total_command > command_threshold).float()
     error = self.peak_heights / target_height - 1.0
-    cost = torch.sum(torch.square(error) * first_contact.float(), dim=1) * active
-    num_landings = torch.sum(first_contact.float())
-    peak_heights_at_landing = self.peak_heights * first_contact.float()
+    if not penalize_overshoot:
+      error = torch.clamp(error, max=0.0)
+    scored_landing = (
+      first_contact
+      if support_hit is None
+      else (first_contact & self.had_support_sample)
+    )
+    cost = torch.sum(torch.square(error) * scored_landing.float(), dim=1) * active
+    num_landings = torch.sum(scored_landing.float())
+    peak_heights_at_landing = self.peak_heights * scored_landing.float()
     mean_peak_height = torch.sum(peak_heights_at_landing) / torch.clamp(
       num_landings, min=1
     )
@@ -320,12 +342,18 @@ class feet_swing_height:
       torch.zeros_like(self.peak_heights),
       self.peak_heights,
     )
+    self.had_support_sample = torch.where(
+      first_contact,
+      torch.zeros_like(self.had_support_sample),
+      self.had_support_sample,
+    )
     return cost
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
     if env_ids is None:
       env_ids = slice(None)
     self.peak_heights[env_ids] = 0.0
+    self.had_support_sample[env_ids] = False
 
 
 def feet_slip(
