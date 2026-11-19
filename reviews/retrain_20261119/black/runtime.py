@@ -22,6 +22,7 @@ class AlignedFrames:
     self.capture_tick = torch.full_like(self.episode, -1)
     self.frame = torch.full_like(self.episode, -1)
     self.valid = torch.zeros(count, dtype=torch.bool, device=device)
+    self.has_hit = torch.zeros_like(self.valid)
     self.depth = torch.zeros(count, 48, 64, 1, device=device)
     self.geometry = torch.zeros(count, 768, device=device)
     self.sequence = 0
@@ -30,15 +31,17 @@ class AlignedFrames:
     due = ((self.tick - self.birth) % 5 == 0) | (self.frame < 0)
     return (due & (self.capture_tick != self.tick)).nonzero().flatten()
 
-  def capture(self, ids, depth, points):
-    self.depth[ids] = depth
-    self.geometry[ids] = points
+  def capture(self, ids, depth, points, healthy):
+    # healthy在原始帧过滤/加噪前计算。空视野也是一次正常曝光，不能当作断流。
+    self.depth[ids] = torch.where(healthy[:, None, None, None], depth, 0.0)
+    self.geometry[ids] = torch.where(healthy[:, None], points, 0.0)
     self.capture_tick[ids] = self.tick
     self.frame[ids] = torch.arange(
       self.sequence, self.sequence + len(ids), device=ids.device
     )
     self.sequence += len(ids)
-    self.valid[ids] = (torch.isfinite(depth) & (depth > 0)).flatten(1).any(1)
+    self.valid[ids] = healthy
+    self.has_hit[ids] = healthy & (depth > 0).flatten(1).any(1)
 
   def advance(self, done):
     self.tick += 1
@@ -47,6 +50,7 @@ class AlignedFrames:
     self.birth[ids] = self.tick
     self.frame[ids] = -1
     self.valid[ids] = False
+    self.has_hit[ids] = False
     self.depth[ids] = 0
     self.geometry[ids] = 0
 
@@ -204,7 +208,7 @@ class NativeEnv:
       self.metrics.configure(
         output,
         {
-          "policy_kind": "shared_actor_v2_scratch",
+          "policy_kind": "shared_actor_v3_scratch",
           "source_actual_updates": 0,
         },
       )
@@ -224,7 +228,7 @@ class NativeEnv:
             "tick": self.frames.tick,
             "episode": self.frames.episode,
             "command": self.plant.command_manager.get_command("twist"),
-            "policy_kind": "shared_actor_v2_scratch",
+            "policy_kind": "shared_actor_v3_scratch",
             "cold_physics": True,
             "policy_identity": getattr(self, "policy_identity", None),
             "policy_update": self.metrics.policy_update,
@@ -257,13 +261,15 @@ class NativeEnv:
     ids = self.frames.due()
     for selected, raw in self.renderer.frames_for(ids):
       self.wp.synchronize_device(self.plant.sim.wp_device)
+      # Warp未命中射线返回有限的哨兵值；NaN/Inf标记本次曝光不健康。
+      healthy = torch.isfinite(raw).flatten(1).all(1)
       if getattr(self, "training_sensors", False):
         from support.black.depth_him import augment_depth
 
         raw = augment_depth(raw)
       depth, source_pixels = reduce_depth(raw)
       points = geometry(depth, source_pixels, renderer_frustum(self.renderer, selected))
-      self.frames.capture(selected, depth, points)
+      self.frames.capture(selected, depth, points, healthy)
     if (
       not torch.isfinite(native["history"]).all()
       or not torch.isfinite(native["critic"]).all()

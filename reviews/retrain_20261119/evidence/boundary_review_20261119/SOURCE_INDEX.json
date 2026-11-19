@@ -1,0 +1,1462 @@
+{
+  "base_commit": "47c6f78393143a4e54c52306b9be5f885b9832ac",
+  "runtime_code_commit": "31c219ae2bb2bb85bbd2d0bf165de6b8d09c2582",
+  "source_and_guidance_files": 42,
+  "includes_unchanged_reused_gpu_helper": true,
+  "hash_scope": "current files; source code fixed at runtime_code_commit; docs and evidence may be later commits",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/AGENTS.md",
+      "Windows": "D:/RLTrain/retrain/AGENTS.md",
+      "bytes": 1571,
+      "lines": 17,
+      "sha256": "e72d3aced99854f435a87668d6b1b14f9013bc0b86959ece80beaf6b281177e2"
+    },
+    {
+      "path": "Makefile",
+      "JC": "/home/wujuncheng/rl_train/retrain/Makefile",
+      "Windows": "D:/RLTrain/retrain/Makefile",
+      "bytes": 913,
+      "lines": 16,
+      "sha256": "d5c42070cd27a421193fd8635e380b614686c0b52be0bc1d394718db5523a336"
+    },
+    {
+      "path": "README.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/README.md",
+      "Windows": "D:/RLTrain/retrain/README.md",
+      "bytes": 3197,
+      "lines": 48,
+      "sha256": "7a7ce71b04d4dea96257ce8c2274aaee5dff3c73fa9782ab5068a55fd981a119"
+    },
+    {
+      "path": "black/checkpoint.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/checkpoint.py",
+      "Windows": "D:/RLTrain/retrain/black/checkpoint.py",
+      "bytes": 5090,
+      "lines": 143,
+      "sha256": "72895f97cc413feb11d1da044126ea7b42188d19ea5323a1db286d39dab5b3e1",
+      "symbols": [
+        {
+          "name": "tensor_digest",
+          "line": 37,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "teacher_identity",
+          "line": 46,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "source_identity",
+          "line": 53,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "initial_models",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "save_bundle",
+          "line": 73,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load_bundle",
+          "line": 111,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_teacher_evaluation",
+          "line": 133,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/course_evaluation.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/course_evaluation.py",
+      "Windows": "D:/RLTrain/retrain/black/course_evaluation.py",
+      "bytes": 21849,
+      "lines": 599,
+      "sha256": "92d6b4f311266462807604f328e649743a0094e44d804c021aa1e30cce867398",
+      "symbols": [
+        {
+          "name": "roster",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "CourseAdapter",
+          "line": 61,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "score_trial",
+          "line": 262,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "score_attempt",
+          "line": 397,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_execute",
+          "line": 447,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "execute",
+          "line": 551,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 560,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/eval_collect.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/eval_collect.py",
+      "Windows": "D:/RLTrain/retrain/black/eval_collect.py",
+      "bytes": 14908,
+      "lines": 434,
+      "sha256": "7b6d3fbf39acab96b30c068661f8d07fa78055c1d120f76993fc71a20fd4566c",
+      "symbols": [
+        {
+          "name": "sha256",
+          "line": 33,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "device_lock_path",
+          "line": 37,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "write_json",
+          "line": 47,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "runtime_identity",
+          "line": 70,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "source_files",
+          "line": 90,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "new_trial",
+          "line": 134,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "collect_batch",
+          "line": 142,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "close_environment",
+          "line": 254,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "execute",
+          "line": 266,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 383,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/eval_protocol.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/eval_protocol.py",
+      "Windows": "D:/RLTrain/retrain/black/eval_protocol.py",
+      "bytes": 4867,
+      "lines": 155,
+      "sha256": "14885cf07787efd1d5b4570bf2c1454ed7646407dfdc367833aa5e3e1da15344",
+      "symbols": [
+        {
+          "name": "digest",
+          "line": 51,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "command",
+          "line": 56,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "roster",
+          "line": 75,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "padded_batch",
+          "line": 148,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/eval_score.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/eval_score.py",
+      "Windows": "D:/RLTrain/retrain/black/eval_score.py",
+      "bytes": 23264,
+      "lines": 687,
+      "sha256": "8c913f2bed8b41a43664486b516c3633c758ddc415a339b0457dd504f3ed998f",
+      "symbols": [
+        {
+          "name": "require",
+          "line": 31,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "file_sha256",
+          "line": 36,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "mean",
+          "line": 40,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "finite_vector",
+          "line": 44,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate_spec",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "validate_rows",
+          "line": 85,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "flat8_metrics",
+          "line": 297,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "response_latency",
+          "line": 335,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "settle_time",
+          "line": 341,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "axis_metrics",
+          "line": 357,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "stairs_metrics",
+          "line": 417,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "score_trial",
+          "line": 451,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "absent_trial",
+          "line": 492,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "coverage",
+          "line": 508,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "score_attempt",
+          "line": 546,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 671,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/export.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/export.py",
+      "Windows": "D:/RLTrain/retrain/black/export.py",
+      "bytes": 9914,
+      "lines": 250,
+      "sha256": "ef5a58d82d5292502c909ce8c69541cefd03986ebc12521d32b952ad5401fbb1",
+      "symbols": [
+        {
+          "name": "TeacherDeployment",
+          "line": 18,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "teacher_inference_module",
+          "line": 42,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "StudentDeployment",
+          "line": 46,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "_publish",
+          "line": 150,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "export_student",
+          "line": 165,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load_student_export",
+          "line": 237,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/model.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/model.py",
+      "Windows": "D:/RLTrain/retrain/black/model.py",
+      "bytes": 3314,
+      "lines": 111,
+      "sha256": "ad57924968646ae034706ffed02a34998e7861ce7ece0b99b08176545aa6bbd0",
+      "symbols": [
+        {
+          "name": "HIM",
+          "line": 18,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "Teacher",
+          "line": 47,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "make_student_modules",
+          "line": 94,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "make_modules",
+          "line": 99,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/runtime.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/runtime.py",
+      "Windows": "D:/RLTrain/retrain/black/runtime.py",
+      "bytes": 14077,
+      "lines": 380,
+      "sha256": "b4432ae2b725c6d12b1e85ad422636243d46d6c00697f99f7a98858927e2fb0b",
+      "symbols": [
+        {
+          "name": "AlignedFrames",
+          "line": 15,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "native_imports",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "NativeEnv",
+          "line": 73,
+          "kind": "ClassDef"
+        }
+      ]
+    },
+    {
+      "path": "black/student_training.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/student_training.py",
+      "Windows": "D:/RLTrain/retrain/black/student_training.py",
+      "bytes": 19895,
+      "lines": 488,
+      "sha256": "075fceb912e8bba008be11db1cbf4338e4a60785fc971ce62975afa75fb7c1bc",
+      "symbols": [
+        {
+          "name": "_prefix_memory",
+          "line": 27,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_state_slice",
+          "line": 52,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_metadata_slice",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_collect",
+          "line": 73,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "_sequence",
+          "line": 101,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "EpisodePrefix",
+          "line": 111,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "train_student",
+          "line": 246,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_boundary_review.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_boundary_review.py",
+      "Windows": "D:/RLTrain/retrain/black/test_boundary_review.py",
+      "bytes": 6139,
+      "lines": 159,
+      "sha256": "588059e94ad58302bd0d938362c868dd589f8782b6bb651157f59b97db4ebe33",
+      "symbols": [
+        {
+          "name": "test_empty_range_is_healthy_but_nonfinite_raw_capture_is_not",
+          "line": 21,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_noise_does_not_create_an_extra_half_of_boundary_dropouts",
+          "line": 57,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_course_empty_view_can_pass_but_unhealthy_capture_cannot",
+          "line": 70,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_flat_evaluation_does_not_grant_camera_failure_a_pass",
+          "line": 80,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_handoff_promotes_warm_memory_instead_of_zeroing_and_blends_gradually",
+          "line": 94,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_overlap_window_is_bounded_and_bad_or_held_frames_do_not_advance",
+          "line": 130,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_overlap_requires_two_equal_nonempty_halves",
+          "line": 157,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_checkpoint.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_checkpoint.py",
+      "Windows": "D:/RLTrain/retrain/black/test_checkpoint.py",
+      "bytes": 6315,
+      "lines": 172,
+      "sha256": "4a3e262cf9edb45647428545dbf97674ef710d8b622579ccfa46109cea9169f0",
+      "symbols": [
+        {
+          "name": "modules",
+          "line": 11,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_interrupted_write_does_not_publish_or_damage_previous_bundle",
+          "line": 19,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_existing_target_is_not_overwritten",
+          "line": 44,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_v3_provenance_roundtrip_and_legacy_contract_rejection",
+          "line": 60,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_changed_runtime_code_or_asset_blocks_model_loading",
+          "line": 81,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_runtime_change_allows_weight_transfer_but_rejects_optimizer_resume",
+          "line": 101,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_source_relocation_loads_same_bundle_and_tests_docs_do_not_change_identity",
+          "line": 128,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_checkpoint_without_code_identity_cannot_load",
+          "line": 165,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_course_evaluation.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_course_evaluation.py",
+      "Windows": "D:/RLTrain/retrain/black/test_course_evaluation.py",
+      "bytes": 12652,
+      "lines": 397,
+      "sha256": "b23261230b2d0982a39d96db2cd7ba4c679af090c7ad9f12e3754e0bdfb58c7e",
+      "symbols": [
+        {
+          "name": "make_trial",
+          "line": 26,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "save_attempt",
+          "line": 96,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_complete_fixed_roster_and_raw_success",
+          "line": 131,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_general_rejects_false_training_success",
+          "line": 156,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_specialty_requires_actual_supported_full_route",
+          "line": 202,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_attempt_rejects_hash_change_identity_and_failed_marker",
+          "line": 232,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_fixed_assignment_subset_and_snapshot_survive_reset",
+          "line": 246,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_student_limits_specialty_levels_and_angles",
+          "line": 290,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_capture_clones_real_terminal_state_before_reset",
+          "line": 318,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_actual_spawn_heading_must_match_registered_orientation",
+          "line": 392,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_eval_collect.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_eval_collect.py",
+      "Windows": "D:/RLTrain/retrain/black/test_eval_collect.py",
+      "bytes": 6936,
+      "lines": 221,
+      "sha256": "0c829057c1e0882ecfaead7641c8c066cd503a0d0c3518d32ced419f23ad9f15",
+      "symbols": [
+        {
+          "name": "test_fixed_roster_and_command_boundaries",
+          "line": 22,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "FakeEnv",
+          "line": 40,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "trials_for",
+          "line": 92,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_first_terminal_is_retained_without_reset_rows_or_padding",
+          "line": 103,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_nonfinite_action_preserves_unstarted_physics_and_partial_trial",
+          "line": 116,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_cleanup_failure_keeps_original_error",
+          "line": 126,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_nonfinite_measurement_stops_before_physics",
+          "line": 141,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_json_publication_never_leaves_half_result",
+          "line": 157,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_publication_failure_retains_trials_and_failed_record",
+          "line": 171,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_eval_score.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_eval_score.py",
+      "Windows": "D:/RLTrain/retrain/black/test_eval_score.py",
+      "bytes": 12617,
+      "lines": 362,
+      "sha256": "cd3240bad98c5fa7cfcdb9dc1b7ae4e66d23b29235972b6d153ede587009495f",
+      "symbols": [
+        {
+          "name": "make_trial",
+          "line": 28,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "terminate",
+          "line": 94,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "save_attempt",
+          "line": 103,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_flat8_preserves_absolute_case_thresholds",
+          "line": 141,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_failure_remains_failure_and_cannot_be_padded_by_reset_rows",
+          "line": 154,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_administrative_short_trace_is_incomplete",
+          "line": 170,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_pure_axis_start_reverse_and_full_park",
+          "line": 177,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_axis_park_needs_50_consecutive_supported_frames_and_all_250_rows",
+          "line": 197,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_mixed_target_cannot_fill_a_pure_axis_cell",
+          "line": 215,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_stairs_requires_physical_passage_and_strict_finish",
+          "line": 222,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_stairs_rejects_skipped_contact_landing_and_wrong_terminal_time",
+          "line": 247,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_stair_strict_flag_requires_actual_native_terminal_and_reset",
+          "line": 263,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_stair_counter_cannot_replace_fifty_actual_supported_frames",
+          "line": 271,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_attempt_keeps_full_denominator_and_never_registers_qualification",
+          "line": 283,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_attempt_reports_unassigned_pure_axis_gaps_and_invalid_trace",
+          "line": 296,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_wrong_teacher_identity_is_rejected_even_with_updated_file_hash",
+          "line": 308,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_duplicate_trial_cannot_expand_denominator",
+          "line": 317,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_trial_hash_change_is_rejected",
+          "line": 325,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_false_complete_summary_is_rejected",
+          "line": 334,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_failed_attempt_cannot_use_an_already_published_result",
+          "line": 341,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_attempt_requires_frozen_mean_policy_without_optimizer",
+          "line": 355,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_export.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_export.py",
+      "Windows": "D:/RLTrain/retrain/black/test_export.py",
+      "bytes": 3701,
+      "lines": 104,
+      "sha256": "e8c92b6197320529d1d119bdeedc19cebe5838e35677fce382b3aa25de7ef0bb",
+      "symbols": [
+        {
+          "name": "student",
+          "line": 13,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_independent_student_jit_matches_fresh_held_invalid_and_reset",
+          "line": 24,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_export_rejects_other_rear_leg_order_before_loading",
+          "line": 68,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_teacher_jit_uses_the_same_him_geometry_and_actor",
+          "line": 82,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_serialization_failure_does_not_publish_partial_model",
+          "line": 93,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_pipeline.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_pipeline.py",
+      "Windows": "D:/RLTrain/retrain/black/test_pipeline.py",
+      "bytes": 3299,
+      "lines": 90,
+      "sha256": "9f358fb1434f0aa02a49621344d06b70d2c782ffeba96cb3666fb75797db5bef",
+      "symbols": [
+        {
+          "name": "test_new_bundle_is_independent_of_r800_file",
+          "line": 12,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_frames_hold_once_and_reset_only_finished_lanes",
+          "line": 35,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_unqualified_teacher_cannot_start_student_training",
+          "line": 57,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_true_terminal_wins_over_simultaneous_timeout",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_manual_pass_summary_cannot_open_student_training",
+          "line": 76,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_review_fixes.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_review_fixes.py",
+      "Windows": "D:/RLTrain/retrain/black/test_review_fixes.py",
+      "bytes": 13165,
+      "lines": 384,
+      "sha256": "cba897853841a31e5791af31a4a82ceb3e0d5bad1eb00a586551b0eed1bae2a2",
+      "symbols": [
+        {
+          "name": "test_all_six_specialties_compensate_completion_and_shape_all_49_hold_steps",
+          "line": 21,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_scratch_stage_learning_rates",
+          "line": 58,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_him_command_changes_cannot_change_dynamics_encoding_and_tail_is_balanced",
+          "line": 64,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_overlapping_segment_cache_matches_live_gru_after_new_weights",
+          "line": 91,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_range_filter_preserves_real_ray_and_rejects_near_and_far_background",
+          "line": 145,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_boundary_guard_finds_hidden_warmstart_nan_without_observation_nan",
+          "line": 156,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_delay_reset_clears_only_the_reset_lane",
+          "line": 180,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_general_curriculum_roundtrip_preserves_closed_windows_and_levels",
+          "line": 193,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_gap_miss_does_not_poison_clearance_or_next_landing_peak",
+          "line": 216,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_course_privilege_is_available_to_critic_without_changing_actor",
+          "line": 264,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_cold_curriculum_restart_before_first_physics_step",
+          "line": 288,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_general_curriculum_initial_reset_does_not_read_post_step_aliases",
+          "line": 310,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_external_reset_metrics_accept_full_hold_reward_without_counter_precision_loss",
+          "line": 346,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "black/test_student_training.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/black/test_student_training.py",
+      "Windows": "D:/RLTrain/retrain/black/test_student_training.py",
+      "bytes": 22656,
+      "lines": 604,
+      "sha256": "56acd09071d944be9097cdda16533606417181ff5a087b6c55204fb1a392b337",
+      "symbols": [
+        {
+          "name": "FakeFrames",
+          "line": 16,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "FakeEnv",
+          "line": 59,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "modules",
+          "line": 99,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_student_controls_and_teacher_labels_its_states_across_rounds",
+          "line": 108,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_multiple_epochs_and_partial_minibatch_have_real_adam_updates",
+          "line": 187,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_nonfinite_gradient_stops_before_adam_and_preserves_weights",
+          "line": 211,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_all_invalid_window_trains_cnn_without_initializing_gru_cell_adam",
+          "line": 244,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_invalid_window_preserves_existing_gru_cell_weights_and_adam_moments",
+          "line": 272,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "RoundResetFrames",
+          "line": 316,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "RoundResetEnv",
+          "line": 340,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "test_resume_matches_continuous_learner_at_aligned_cold_episode_boundary",
+          "line": 362,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_resume_rejects_parameter_order_before_loading_optimizer_or_sampling",
+          "line": 429,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_resume_rejects_changed_frozen_teacher_before_sampling",
+          "line": 449,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_resume_rejects_changed_student_recipe",
+          "line": 468,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_periodic_checkpoints_retain_each_saved_update",
+          "line": 483,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_full_prefix_refresh_matches_new_weights_from_episode_start",
+          "line": 505,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_real_student_optimizer_crosses_memory_handoff",
+          "line": 544,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_prefix_bound_stops_instead_of_silently_dropping_early_frames",
+          "line": 559,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_memory_shortage_is_rejected_before_sampling_or_optimizer",
+          "line": 568,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_student_resume_binds_specialty_and_difficulty_scope",
+          "line": 591,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "docs/black.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/black.md",
+      "Windows": "D:/RLTrain/retrain/docs/black.md",
+      "bytes": 9765,
+      "lines": 76,
+      "sha256": "8d3d2e39f7250da9dfbfe28b9639507ba12c700ff6cbf14ba5d167882927b4c3"
+    },
+    {
+      "path": "docs/boundary_review_20261119.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/boundary_review_20261119.md",
+      "Windows": "D:/RLTrain/retrain/docs/boundary_review_20261119.md",
+      "bytes": 7443,
+      "lines": 48,
+      "sha256": "d9786703dad4baa50114e159d01db06563aad0127e34e91248d3b03d9f7f0884"
+    },
+    {
+      "path": "docs/history.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/history.md",
+      "Windows": "D:/RLTrain/retrain/docs/history.md",
+      "bytes": 6893,
+      "lines": 59,
+      "sha256": "1cabcb67cb3a743f991ccbdf1f773589feb514ccda27269ed7fd27db815c0c76"
+    },
+    {
+      "path": "docs/review.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/review.md",
+      "Windows": "D:/RLTrain/retrain/docs/review.md",
+      "bytes": 7438,
+      "lines": 64,
+      "sha256": "02906592c80d8152466d802a51bac81ae06e0c6621dfefaa8c71c39fdf244a31"
+    },
+    {
+      "path": "docs/review_completion_20261119.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/review_completion_20261119.md",
+      "Windows": "D:/RLTrain/retrain/docs/review_completion_20261119.md",
+      "bytes": 9664,
+      "lines": 65,
+      "sha256": "f8289e8e941283adfd32d44c4e08ea3d13bb2b70936fd6d17897b26da4d58795"
+    },
+    {
+      "path": "docs/validation_and_cleanup.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/validation_and_cleanup.md",
+      "Windows": "D:/RLTrain/retrain/docs/validation_and_cleanup.md",
+      "bytes": 4187,
+      "lines": 38,
+      "sha256": "bdfd4c0e44615285b489e6e6c72ffa7bfe6d9a58a674d329b6ae2f5be30ce0f4"
+    },
+    {
+      "path": "docs/windows.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/windows.md",
+      "Windows": "D:/RLTrain/retrain/docs/windows.md",
+      "bytes": 3610,
+      "lines": 42,
+      "sha256": "74ee07b68801e898ff6758dac05e55dc349474722fb23d5b1133eda67a45c17f"
+    },
+    {
+      "path": "docs/wolf.md",
+      "JC": "/home/wujuncheng/rl_train/retrain/docs/wolf.md",
+      "Windows": "D:/RLTrain/retrain/docs/wolf.md",
+      "bytes": 10182,
+      "lines": 71,
+      "sha256": "9808375a32dedef8bf3b5f2f2cb023421a147fc029d21a5935cd8e10aaf73958"
+    },
+    {
+      "path": "evidence/boundary_review_20261119/scripts/verify_boundaries_gpu.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/evidence/boundary_review_20261119/scripts/verify_boundaries_gpu.py",
+      "Windows": "D:/RLTrain/retrain/evidence/boundary_review_20261119/scripts/verify_boundaries_gpu.py",
+      "bytes": 6274,
+      "lines": 163,
+      "sha256": "ff67d664ab2b8fbb873fefc567cd325c4aa2a63754629b782239b5e7988c23ee",
+      "symbols": [
+        {
+          "name": "main",
+          "line": 23,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "evidence/boundary_review_20261119/scripts/verify_evidence.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/evidence/boundary_review_20261119/scripts/verify_evidence.py",
+      "Windows": "D:/RLTrain/retrain/evidence/boundary_review_20261119/scripts/verify_evidence.py",
+      "bytes": 2473,
+      "lines": 67,
+      "sha256": "56d5fff3dcd5fe13dcde3543516b381faf6053eb3f3795547cc6bc0bd83a4250",
+      "symbols": [
+        {
+          "name": "main",
+          "line": 18,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "evidence/review_completion_20261119/scripts/verify_gpu.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/evidence/review_completion_20261119/scripts/verify_gpu.py",
+      "Windows": "D:/RLTrain/retrain/evidence/review_completion_20261119/scripts/verify_gpu.py",
+      "bytes": 8477,
+      "lines": 165,
+      "sha256": "c8072c50ca2cccde9b499b85e617ae93c939a50a5d493fa1bab1ee8e739d1e2a",
+      "symbols": [
+        {
+          "name": "main",
+          "line": 20,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "support/black/causal_visual_gru.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/support/black/causal_visual_gru.py",
+      "Windows": "D:/RLTrain/retrain/support/black/causal_visual_gru.py",
+      "bytes": 5596,
+      "lines": 154,
+      "sha256": "93cb11958a1002ab0841c59b9f9f2763a9f4ee70aa30c5a3dd81d7350db54b0a",
+      "symbols": [
+        {
+          "name": "State",
+          "line": 10,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "CausalVisualGRU",
+          "line": 31,
+          "kind": "ClassDef"
+        }
+      ]
+    },
+    {
+      "path": "support/black/depth_him.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/support/black/depth_him.py",
+      "Windows": "D:/RLTrain/retrain/support/black/depth_him.py",
+      "bytes": 2864,
+      "lines": 77,
+      "sha256": "19b07e37b946a12cffb9140b1d8a1b61e189d4b34f56e5a72c3655a9dde91461",
+      "symbols": [
+        {
+          "name": "DepthContract",
+          "line": 10,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "make_depth_encoder",
+          "line": 29,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "augment_depth",
+          "line": 44,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "preprocess_raw_depth",
+          "line": 56,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/checkpoint.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/checkpoint.py",
+      "Windows": "D:/RLTrain/retrain/wolf/checkpoint.py",
+      "bytes": 3971,
+      "lines": 116,
+      "sha256": "b1bbd2a8fd49d48b396674d3b0e90e05701e390d567c76dd19eccaf8f97f9724",
+      "symbols": [
+        {
+          "name": "source_identity",
+          "line": 44,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "teacher_identity",
+          "line": 66,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "save_bundle",
+          "line": 74,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "load_bundle",
+          "line": 103,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/eval_collect.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/eval_collect.py",
+      "Windows": "D:/RLTrain/retrain/wolf/eval_collect.py",
+      "bytes": 7095,
+      "lines": 209,
+      "sha256": "2e2d6ba358684c146cbae35ee12a118743994f876c2df1db08395ffac97b4416",
+      "symbols": [
+        {
+          "name": "collect",
+          "line": 22,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "execute",
+          "line": 88,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 170,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/eval_protocol.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/eval_protocol.py",
+      "Windows": "D:/RLTrain/retrain/wolf/eval_protocol.py",
+      "bytes": 3658,
+      "lines": 134,
+      "sha256": "4b508d4f568970b8e4830cd4b5d336d45c195822faba809b727a6e1b8c7a3224",
+      "symbols": [
+        {
+          "name": "panel",
+          "line": 32,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "requirements",
+          "line": 124,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/eval_score.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/eval_score.py",
+      "Windows": "D:/RLTrain/retrain/wolf/eval_score.py",
+      "bytes": 11846,
+      "lines": 355,
+      "sha256": "d2c1b23835ecd7b64a57d75b9a150ad5a3ecb210990dbaa738db25627573e40b",
+      "symbols": [
+        {
+          "name": "digest",
+          "line": 16,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "geometry_contract",
+          "line": 22,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "in_surface",
+          "line": 83,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "score_trial",
+          "line": 104,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "score",
+          "line": 267,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "require_qualification",
+          "line": 302,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "main",
+          "line": 347,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/ppo.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/ppo.py",
+      "Windows": "D:/RLTrain/retrain/wolf/ppo.py",
+      "bytes": 2709,
+      "lines": 92,
+      "sha256": "c833e3da1d5dd54ce881e9f896ef0822b05866f9a080a780acc09c01cbd1b623",
+      "symbols": [
+        {
+          "name": "CourseNormalizer",
+          "line": 12,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "CourseCritic",
+          "line": 26,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "PPOActor",
+          "line": 34,
+          "kind": "ClassDef"
+        },
+        {
+          "name": "build_ppo",
+          "line": 63,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/tests/test_boundary_review.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/tests/test_boundary_review.py",
+      "Windows": "D:/RLTrain/retrain/wolf/tests/test_boundary_review.py",
+      "bytes": 2182,
+      "lines": 65,
+      "sha256": "625e855d2c00bfe49455b5e5f7b761b2d2982360ec94f79e2513ae62e34ce561",
+      "symbols": [
+        {
+          "name": "test_course_state_survives_long_zero_history_and_ppo_save_restore",
+          "line": 15,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_wolf_requires_healthy_aligned_camera_but_allows_empty_view",
+          "line": 49,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/tests/test_contract.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/tests/test_contract.py",
+      "Windows": "D:/RLTrain/retrain/wolf/tests/test_contract.py",
+      "bytes": 12432,
+      "lines": 334,
+      "sha256": "767d90fb7d969a2b11fa44ed332216dc2184c29d3b6d56ef497018e03aabc3df",
+      "symbols": [
+        {
+          "name": "test_shared_actor_gradient_paths",
+          "line": 18,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_him_update_only_changes_him",
+          "line": 38,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_ppo_has_16_actions_and_no_him_parameters",
+          "line": 51,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_checkpoint_rejects_old_and_other_robot",
+          "line": 67,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_course_config_contract",
+          "line": 86,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_student_cap_and_complete_seed_panels",
+          "line": 113,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "flat_rows",
+          "line": 132,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_raw_scorer_rejects_incomplete_spoof_and_failed_reverse",
+          "line": 170,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_geometry_contract_preserves_real_cases",
+          "line": 188,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_qualification_recomputes_raw_and_enforces_complete_panel",
+          "line": 199,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_support_height_uses_contact_surface_and_ignores_airborne_wheel",
+          "line": 247,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_weights_may_cross_runtime_but_full_resume_cannot",
+          "line": 274,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_complete_resume_requires_same_identity_and_recipe",
+          "line": 297,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "test_source_digest_excludes_runtime_and_tests",
+          "line": 315,
+          "kind": "FunctionDef"
+        }
+      ]
+    },
+    {
+      "path": "wolf/training.py",
+      "JC": "/home/wujuncheng/rl_train/retrain/wolf/training.py",
+      "Windows": "D:/RLTrain/retrain/wolf/training.py",
+      "bytes": 5993,
+      "lines": 185,
+      "sha256": "977e2cd5ea299c8716ed0e0719acf94395f67c0ca9480057dbb634a6fae4beef",
+      "symbols": [
+        {
+          "name": "validate_resume",
+          "line": 25,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "recipe",
+          "line": 34,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "train_teacher",
+          "line": 50,
+          "kind": "FunctionDef"
+        },
+        {
+          "name": "train_student",
+          "line": 170,
+          "kind": "FunctionDef"
+        }
+      ]
+    }
+  ]
+}

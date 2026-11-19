@@ -88,7 +88,7 @@ def test_him_command_changes_cannot_change_dynamics_encoding_and_tail_is_balance
   assert all(p.grad is None for p in teacher.him.parameters())
 
 
-def test_fifty_frame_segment_cache_matches_live_gru_after_new_weights(monkeypatch):
+def test_overlapping_segment_cache_matches_live_gru_after_new_weights(monkeypatch):
   torch.set_num_threads(1)
   student = SharedStudent(*initial_models())
   count, frames = 2, 107
@@ -123,8 +123,8 @@ def test_fifty_frame_segment_cache_matches_live_gru_after_new_weights(monkeypatc
     )
   cache = EpisodePrefix(count, 6000, student.gru.max_age)
   cache.extend(sample)
-  assert cache.length.tolist() == [7, 7]
-  assert state.fresh_count.tolist() == [7, 7]
+  assert cache.length.tolist() == [32, 32]
+  assert state.fresh_count.tolist() == [32, 32]
   with torch.no_grad():
     student.depth_encoder[0].weight.add_(0.01)
     _, _, reference = student.forward_sequence(
@@ -132,6 +132,9 @@ def test_fifty_frame_segment_cache_matches_live_gru_after_new_weights(monkeypatc
     )
   refreshed = cache.refresh(student, state, "cpu")
   torch.testing.assert_close(refreshed.hidden, reference.hidden, rtol=1e-6, atol=1e-7)
+  torch.testing.assert_close(
+    refreshed.warm_hidden, reference.warm_hidden, rtol=1e-6, atol=1e-7
+  )
   monkeypatch.setattr(
     "black.student_training.Path.read_text", lambda _: "MemAvailable: 67108864 kB\n"
   )

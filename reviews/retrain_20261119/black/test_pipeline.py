@@ -37,7 +37,7 @@ def test_frames_hold_once_and_reset_only_finished_lanes():
   ids = frames.due()
   depth = torch.ones(2, 48, 64, 1)
   points = torch.ones(2, 768)
-  frames.capture(ids, depth, points)
+  frames.capture(ids, depth, points, torch.ones(2, dtype=torch.bool))
   assert not len(frames.due())  # 同tick再次取观测不能重采样。
   first = frames.frame.clone()
   frames.advance(torch.tensor([False, True]))
@@ -45,7 +45,7 @@ def test_frames_hold_once_and_reset_only_finished_lanes():
   assert frames.episode.tolist() == [0, 1]
   assert frames.frame[0] == first[0]
   assert frames.depth[0].eq(1).all() and frames.depth[1].eq(0).all()
-  frames.capture(torch.tensor([1]), depth[1:], points[1:])
+  frames.capture(torch.tensor([1]), depth[1:], points[1:], torch.tensor([True]))
   for _ in range(4):
     frames.advance(torch.zeros(2, dtype=torch.bool))
   assert frames.tick == 5 and frames.due().tolist() == [0]

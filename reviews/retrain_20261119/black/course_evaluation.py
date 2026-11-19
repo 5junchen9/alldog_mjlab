@@ -19,7 +19,7 @@ from black.eval_protocol import EVALUATION_SEEDS, digest
 from black.eval_score import require
 from black.runtime import NativeEnv
 
-SCHEMA = "black_retrain_course_evaluation_v1"
+SCHEMA = "black_retrain_course_evaluation_v2"
 SUITES = ("general", "platform", "high_wall", "slope", "broken_bridge", "plum_stakes")
 DOMAINS = ("slope_up", "slope_down", "stairs_up", "stairs_down", "rough", "wave")
 
@@ -278,6 +278,7 @@ def score_trial(spec, trial):
       or row["episode"] != 0
       or row["failed"] is not False
       or row["depth_valid"] is not True
+      or type(row["depth_has_hit"]) is not bool
       or not 0 <= row["capture_tick"] <= tick
       or tick - row["capture_tick"] >= 5
       or row["frame"] < 0
@@ -421,6 +422,9 @@ def score_attempt(manifest_path, result_path):
         trial_id=spec["trial_id"],
         success=score_trial(spec, trial),
         invalid_depth_frames=sum(not row["depth_valid"] for row in trial["rows"]),
+        healthy_empty_depth_frames=sum(
+          row["depth_valid"] and not row["depth_has_hit"] for row in trial["rows"]
+        ),
       )
     )
   return dict(
@@ -493,6 +497,7 @@ def _execute(args):
         for tick in range(limit):
           episodes = env.frames.episode.cpu().clone()
           valid = env.frames.valid.cpu().clone()
+          has_hit = env.frames.has_hit.cpu().clone()
           frame = env.frames.frame.cpu().clone()
           captured = env.frames.capture_tick.cpu().clone()
           action = teacher(env.obs["history"].reshape(-1, 5, 45), env.obs["geometry"])
@@ -509,6 +514,7 @@ def _execute(args):
               episode=int(episodes[lane]),
               action=action[lane].tolist(),
               depth_valid=bool(valid[lane]),
+              depth_has_hit=bool(has_hit[lane]),
               frame=int(frame[lane]),
               capture_tick=int(captured[lane]),
               post_episode=int(env.frames.episode[lane]),

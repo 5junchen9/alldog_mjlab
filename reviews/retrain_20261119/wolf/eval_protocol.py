@@ -4,9 +4,11 @@ from wolf.curriculum import SPECIALTIES
 
 SEEDS = (1911701, 1911702, 1911703)
 PROTOCOL = {
-  "id": "wolf_shared_actor_absolute_v2",
+  "id": "wolf_shared_actor_absolute_v3",
   "seeds": list(SEEDS),
   "control_hz": 50,
+  "camera_validity": "finite_raw_capture_in_current_episode; empty_range_is_healthy",
+  "camera_max_age_controls": 4,
   "settle_steps": 50,
   "stop_linear_max": 0.10,
   "stop_angular_max": 0.10,

@@ -59,6 +59,7 @@ def _state_slice(state, indices, device):
     tick=state.tick,
     hidden=state.hidden[indices].detach().to(device),
     fresh_count=state.fresh_count[indices].detach().to(device),
+    warm_hidden=state.warm_hidden[indices].detach().to(device),
   )
 
 
@@ -108,15 +109,15 @@ def _sequence(student, sample, prefix, indices, device):
 
 
 class EpisodePrefix:
-  """向量化保存当前记忆段的有效新帧，满50帧后随GRU一起开启新段。"""
+  """保存当前重叠记忆段；满50帧保留后25帧，再追加下一帧。"""
 
   def __init__(
     self, count, max_controls, max_age, max_prefix_frames=DEFAULT_PREFIX_WINDOW
   ):
     if max_controls < 1:
       raise ValueError("a finite positive episode control limit is required")
-    if max_prefix_frames < 1:
-      raise ValueError("max_prefix_frames must be positive")
+    if max_prefix_frames < 2 or max_prefix_frames % 2:
+      raise ValueError("max_prefix_frames must be an even window >=2")
     self.count = count
     self.max_controls = max_controls
     self.max_age = max_age
@@ -170,8 +171,19 @@ class EpisodePrefix:
         raise RuntimeError("camera cadence exceeds declared prefix memory bound")
       lanes = fresh.nonzero().flatten()
       full = self.length[lanes] >= self.capacity
-      # 固定记忆段，不用旧参数hidden或把滑窗近似冒充完整episode记忆。
-      self.length[lanes[full]] = 0
+      retained = self.capacity // 2
+      full_lanes = lanes[full]
+      for buffer in (
+        self.depth_buf,
+        self.tick_buf,
+        self.episode_buf,
+        self.capture_episode_buf,
+        self.frame_buf,
+        self.capture_tick_buf,
+        self.mask_buf,
+      ):
+        buffer[full_lanes, :retained] = buffer[full_lanes, retained:]
+      self.length[full_lanes] = retained
       slot = self.length[lanes]
       self.length[lanes] += 1
       self.depth_buf[lanes, slot] = depth[lanes]
@@ -185,15 +197,16 @@ class EpisodePrefix:
       self.last_capture_tick[lanes] = cap_tick[lanes]
 
   def refresh(self, student, state, device, indices=None):
-    """当前参数从零重算指定lane当前段；无梯度burn-in，最多50帧。"""
+    """当前参数从零重算旧段和预热段；无梯度burn-in，最多50帧。"""
     student.eval()
-    parts = []
+    parts, warm_parts = [], []
     indices = torch.arange(self.count) if indices is None else indices
     with torch.no_grad():
       for start in range(0, len(indices), REFRESH_BATCH):
         lanes = indices[start : start + REFRESH_BATCH]
         lengths = self.length[lanes]
         hidden = torch.zeros(len(lanes), 64, device=device)
+        warm_hidden = torch.zeros_like(hidden)
         max_len = int(lengths.max()) if len(lengths) else 0
         for step in range(max_len):
           local_ids = (lengths > step).nonzero().flatten()
@@ -213,7 +226,12 @@ class EpisodePrefix:
           hidden = hidden.index_copy(
             0, ids_dev, student.gru.gru(encoded, hidden[ids_dev])
           )
+          if step >= self.capacity // 2:
+            warm_hidden = warm_hidden.index_copy(
+              0, ids_dev, student.gru.gru(encoded, warm_hidden[ids_dev])
+            )
         parts.append(hidden)
+        warm_parts.append(warm_hidden)
     return State(
       episode=state.episode,
       frame=state.frame,
@@ -221,6 +239,7 @@ class EpisodePrefix:
       tick=state.tick,
       hidden=torch.cat(parts),
       fresh_count=state.fresh_count,
+      warm_hidden=torch.cat(warm_parts),
     )
 
 
@@ -244,7 +263,7 @@ def train_student(
   """外部检查教师资格后调用；不在这里创建或推断能力验收结果。
 
   每轮24步采集后按minibatch进行多epoch有限序列BPTT更新，更新后用向量化环缓存
-  以当前参数重算GRU记忆段；采集与部署都在第51张有效新帧前清零。
+  以当前参数重算重叠GRU记忆；采集与部署都在满窗后提升已预热的后半段。
   """
   if rounds < 1:
     raise ValueError("at least one student round required")
@@ -301,10 +320,10 @@ def train_student(
     "controller": "student",
     "teacher_queries": "same_student_visited_state",
     "trainable": ["CNN", "GRU"],
-    "recurrent_context": "current_parameters_replay_current_50_fresh_frame_segment",
+    "recurrent_context": "current_parameters_replay_50_frame_segment_with_25_frame_overlap",
     "gradient_context": "BPTT_truncated_at_round_start",
     "exact_long_episode_replay": False,
-    "memory_boundary": "reset_before_each_51st_fresh_valid_frame_and_episode_reset",
+    "memory_boundary": "half_window_warmup_crossfade_then_handoff; zero_only_on_episode_reset",
     "prefix_window_frames": max_prefix_frames,
     "prefix_max_episode_controls": max_controls,
     "prefix_max_fresh_frames_per_lane": max_frames,

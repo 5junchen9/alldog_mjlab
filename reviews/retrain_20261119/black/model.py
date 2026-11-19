@@ -12,7 +12,7 @@ from support.black.depth_him import (  # noqa: E402
 from support.black.him_base import HIMStudent  # noqa: E402
 from torch import nn
 
-MODEL_KIND = "black_retrain_shared_actor_v2"
+MODEL_KIND = "black_retrain_shared_actor_v3"
 
 
 class HIM(HIMStudent):

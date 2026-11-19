@@ -45,7 +45,8 @@ def augment_depth(depth_m: torch.Tensor) -> torch.Tensor:
   """每次真实采集只扰动一次原始深度，之后教师几何与学生图像共用该帧。"""
   valid = torch.isfinite(depth_m) & (depth_m >= 0.2) & (depth_m <= 4.0)
   noise = torch.randn_like(depth_m) * (0.015 * depth_m.clamp(0.2, 4.0))
-  value = depth_m + noise
+  # 量程内像素的测量噪声保持在量程内；丢点只由下面的独立掩码产生。
+  value = (depth_m + noise).clamp(0.2, 4.0)
   spikes = valid & (torch.rand_like(depth_m) < 0.001)
   value = torch.where(spikes, torch.empty_like(value).uniform_(0.25, 0.80), value)
   dropped = torch.rand_like(depth_m) < 0.01

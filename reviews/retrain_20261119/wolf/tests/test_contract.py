@@ -139,6 +139,13 @@ def flat_rows(spec):
     rows.append(
       {
         "tick": tick,
+        "control_tick": tick,
+        "episode": 0,
+        "capture_episode": 0,
+        "frame": tick // 5,
+        "capture_tick": tick // 5 * 5,
+        "depth_valid": True,
+        "depth_has_hit": True,
         "velocity": command[:2] + [0.0],
         "angular": [0.0, 0.0, command[2]],
         "tilt": 0.0,

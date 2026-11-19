@@ -1,0 +1,64 @@
+{
+  "schema": "black_wolf_boundary_review_v3",
+  "base_commit": "47c6f78393143a4e54c52306b9be5f885b9832ac",
+  "code_commit": "31c219ae2bb2bb85bbd2d0bf165de6b8d09c2582",
+  "source_identity": {
+    "black": {
+      "sha256": "0b2a81fa8203e6ffbba1fc9779772181931d629ffa73d33eeee347ac653d631d",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.0",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "13.0"
+      }
+    },
+    "wolf": {
+      "sha256": "621a3805547a2af005f69eb55f577539cd7ad01a5b857dbca873b88f898f846f",
+      "runtime": {
+        "python": "3.13.15",
+        "packages": {
+          "torch": "2.14.0",
+          "mujoco": "3.11.0",
+          "mujoco-warp": "3.11.0",
+          "warp-lang": "1.14.0",
+          "rsl-rl-lib": "5.5.1",
+          "numpy": "2.5.1",
+          "tensordict": "0.14.2"
+        },
+        "torch_cuda_build": "13.0"
+      }
+    }
+  },
+  "cpu_tests_passed": 277,
+  "cpu_warnings": 13,
+  "gpu_independent_process_checks": 32,
+  "raw_suites": 10,
+  "raw_trials": 232,
+  "raw_success": 0,
+  "raw_qualified": false,
+  "long_formal_training_started": false,
+  "windows": {
+    "cpu_tests_passed": 277,
+    "same_source_assets": true,
+    "runtime_differs_from_JC": true,
+    "code_commit": "31c219ae2bb2bb85bbd2d0bf165de6b8d09c2582",
+    "gpu_checks_passed": 10,
+    "gpu_optimizer_scope": "32_env_teacher_student_one_round_and_independent_process_resume; synthetic_memory_boundaries"
+  },
+  "natural_nan_root_cause_established": false,
+  "optimization_4096_validated": false,
+  "windows_gpu_optimization_validated": true,
+  "hardware_validated": false,
+  "static_files_checked": 79,
+  "test_model_cleanup": 32,
+  "test_model_bytes_deleted": 243515736,
+  "windows_gpu_optimization_scope": "32_env_teacher_student_one_round_and_independent_process_resume; synthetic_memory_boundaries",
+  "windows_test_weights_removed": 16
+}

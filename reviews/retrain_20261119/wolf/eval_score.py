@@ -106,6 +106,21 @@ def score_trial(rows, spec, geometry):
     return {"status": "incomplete", "controls": len(rows)}
   if [row["tick"] for row in rows] != list(range(len(rows))):
     return {"status": "invalid", "reason": "noncontinuous control clock"}
+  first_control = rows[0]["control_tick"]
+  if any(
+    row["control_tick"] != first_control + row["tick"]
+    or row["episode"] != rows[0]["episode"]
+    or row["capture_episode"] != row["episode"]
+    or row["frame"] < 0
+    or not 0 <= row["control_tick"] - row["capture_tick"] < 5
+    or row["capture_tick"] < 0
+    or type(row["depth_valid"]) is not bool
+    or type(row["depth_has_hit"]) is not bool
+    for row in rows
+  ):
+    return {"status": "invalid", "reason": "camera identity or age mismatch"}
+  if any(not row["depth_valid"] for row in rows):
+    return {"status": "fail", "reason": "unhealthy_camera_capture"}
   values = np.asarray(
     [[*row["velocity"], *row["angular"], row["tilt"], *row["command"]] for row in rows]
   )

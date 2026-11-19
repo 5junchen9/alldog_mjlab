@@ -3,9 +3,32 @@
 import torch
 from black.ppo import TerminalPPO
 from rsl_rl.models import MLPModel
+from rsl_rl.modules import EmpiricalNormalization
 from rsl_rl.storage import RolloutStorage
 
 from wolf.model import ACTION_DIM, ACTOR_DIM, HISTORY_SHAPE
+
+
+class CourseNormalizer(torch.nn.Module):
+  """只更新原430维观测的统计量，末尾有界课程状态直接传给critic。"""
+
+  def __init__(self):
+    super().__init__()
+    self.observation = EmpiricalNormalization(430)
+
+  def forward(self, value):
+    return torch.cat((self.observation(value[..., :430]), value[..., 430:]), -1)
+
+  def update(self, value):
+    self.observation.update(value[..., :430])
+
+
+class CourseCritic(MLPModel):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    if self.obs_dim not in (430, 433) or not self.obs_normalization:
+      raise ValueError("Wolf critic需要原430维观测及可选course3")
+    self.obs_normalizer = CourseNormalizer()
 
 
 class PPOActor(MLPModel):
@@ -43,7 +66,7 @@ def build_ppo(obs, teacher, *, num_steps=24, device="cpu"):
   actor = PPOActor(obs, teacher).to(device)
   with torch.random.fork_rng(devices=[]):
     torch.manual_seed(teacher.initialization["critic_seed"])
-    critic = MLPModel(
+    critic = CourseCritic(
       obs,
       {"critic": ["critic", "course_state"] if "course_state" in obs else ["critic"]},
       "critic",

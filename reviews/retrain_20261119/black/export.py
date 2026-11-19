@@ -70,7 +70,8 @@ class StudentDeployment(nn.Module):
     valid_frame: Tensor,
     frame_age_controls: Tensor,
     fresh_count: Tensor,
-  ) -> tuple[Tensor, Tensor, Tensor]:
+    warm_hidden: Tensor,
+  ) -> tuple[Tensor, Tensor, Tensor, Tensor]:
     if history.dim() != 3 or history.size(1) != 5 or history.size(2) != 45:
       raise ValueError("history must be FP32 [B,5,45], oldest to newest")
     if (
@@ -80,14 +81,15 @@ class StudentDeployment(nn.Module):
       or depth_m.size(3) != 1
     ):
       raise ValueError("metric depth must be FP32 [B,48,64,1]")
-    if hidden.shape != (history.size(0), 64):
-      raise ValueError("hidden must be FP32 [B,64]")
+    if hidden.shape != (history.size(0), 64) or warm_hidden.shape != hidden.shape:
+      raise ValueError("hidden and warm_hidden must be FP32 [B,64]")
     if (
       history.dtype != torch.float32
       or depth_m.dtype != torch.float32
       or hidden.dtype != torch.float32
+      or warm_hidden.dtype != torch.float32
     ):
-      raise ValueError("history, depth and hidden must be FP32")
+      raise ValueError("history, depth and both hidden states must be FP32")
     if depth_m.size(0) != history.size(0):
       raise ValueError("depth and history batch sizes differ")
     if (
@@ -95,6 +97,7 @@ class StudentDeployment(nn.Module):
       or reset.shape != fresh.shape
       or valid_frame.shape != fresh.shape
       or frame_age_controls.shape != fresh.shape
+      or fresh_count.shape != fresh.shape
     ):
       raise ValueError("camera metadata must contain one value per lane")
     if (
@@ -103,10 +106,10 @@ class StudentDeployment(nn.Module):
       or valid_frame.dtype != torch.bool
     ):
       raise ValueError("fresh/reset/valid_frame must be bool [B]")
-    if frame_age_controls.dtype != torch.long:
-      raise ValueError("frame_age_controls must be int64 [B]")
+    if frame_age_controls.dtype != torch.long or fresh_count.dtype != torch.long:
+      raise ValueError("frame_age_controls and fresh_count must be int64 [B]")
     if not bool(torch.isfinite(history).all()) or not bool(
-      torch.isfinite(hidden).all()
+      torch.isfinite(hidden).all() and torch.isfinite(warm_hidden).all()
     ):
       raise ValueError("nonfinite policy input")
     if bool((frame_age_controls < 0).any()):
@@ -117,20 +120,31 @@ class StudentDeployment(nn.Module):
     value = torch.where(pixel_valid, depth_m / 4.0, 0.0)
     image = torch.cat((value, pixel_valid.to(value.dtype)), -1)
     encoded = self.depth_encoder(image.permute(0, 3, 1, 2).contiguous())
+    hidden = torch.where(reset[:, None], 0.0, hidden)
+    warm_hidden = torch.where(reset[:, None], 0.0, warm_hidden)
     fresh_count = torch.where(reset, 0, fresh_count)
-    restart = reset | (fresh & valid & (fresh_count >= self.memory_frames))
-    hidden = torch.where(restart[:, None], 0.0, hidden)
-    fresh_count = torch.where(restart, 0, fresh_count) + (fresh & valid).long()
+    half = self.memory_frames // 2
+    handoff = fresh & valid & (fresh_count >= self.memory_frames)
+    hidden = torch.where(handoff[:, None], warm_hidden, hidden)
+    warm_hidden = torch.where(handoff[:, None], 0.0, warm_hidden)
+    fresh_count = torch.where(handoff, half, fresh_count) + (fresh & valid).long()
     ids = (fresh & valid).nonzero().flatten()
     if ids.numel() > 0:
       hidden = hidden.index_copy(0, ids, self.gru_cell(encoded[ids], hidden[ids]))
-    visual = encoded + torch.where(valid[:, None], self.projection(hidden), 0.0)
+    warm_ids = (fresh & valid & (fresh_count > half)).nonzero().flatten()
+    if warm_ids.numel() > 0:
+      warm_hidden = warm_hidden.index_copy(
+        0, warm_ids, self.gru_cell(encoded[warm_ids], warm_hidden[warm_ids])
+      )
+    weight = ((fresh_count - half).to(encoded.dtype) / half).clamp(0, 1)[:, None]
+    memory = (1 - weight) * hidden + weight * warm_hidden
+    visual = encoded + torch.where(valid[:, None], self.projection(memory), 0.0)
     proprio = torch.cat((history[:, :, :30], history[:, :, 33:]), -1).flatten(1)
     him = self.him_encoder(proprio)
     features = torch.cat(
       (history[:, -1], him[:, :3], F.normalize(him[:, 3:], dim=-1), visual), -1
     )
-    return self.actor(features), hidden, fresh_count
+    return self.actor(features), hidden, fresh_count, warm_hidden
 
 
 def _publish(path, content):
@@ -159,7 +173,7 @@ def export_student(student, path):
   torch.jit.save(module, buffer)
   content = buffer.getvalue()
   manifest = {
-    "schema": "black_retrain_student_torchscript_v2",
+    "schema": "black_retrain_student_torchscript_v3",
     "teacher_id": teacher_identity(student.teacher),
     "sha256": hashlib.sha256(content).hexdigest(),
     "inputs": {
@@ -171,6 +185,7 @@ def export_student(student, path):
       "valid_frame": "bool[B], valid_capture_in_current_episode",
       "frame_age_controls": "int64[B], control_tick_minus_capture_tick",
       "fresh_count": "int64[B], initially_zero; carry returned count",
+      "warm_hidden": "FP32[B,64], initially_zero; carry returned warm state",
     },
     "p45_layout": [
       "angular_velocity",
@@ -180,7 +195,12 @@ def export_student(student, path):
       "command",
       "previous_action",
     ],
-    "outputs": ["policy_action_mean[B,12]", "next_hidden[B,64]", "next_fresh_count[B]"],
+    "outputs": [
+      "policy_action_mean[B,12]",
+      "next_hidden[B,64]",
+      "next_fresh_count[B]",
+      "next_warm_hidden[B,64]",
+    ],
     "action_order": CONTRACT["action_order"],
     "action_scale": CONTRACT["action_scale"],
     "action_semantics": "default_joint_position + 0.25 * delayed_policy_action",
@@ -188,7 +208,8 @@ def export_student(student, path):
     "camera_hz": 10,
     "maximum_frame_age_controls": student.gru.max_age,
     "memory_frames": student.gru.memory_frames,
-    "memory_boundary": "reset_before_51st_fresh_valid_frame",
+    "memory_boundary": "25_frame_warmup_crossfade_handoff; zero_only_on_episode_reset",
+    "valid_frame_semantics": "healthy_capture_even_if_no_in_range_pixels; current_episode_required",
     "depth_valid_range_m": [0.2, 4.0],
     "delay": {
       "implementation": "external_native_action_history",
@@ -218,7 +239,7 @@ def load_student_export(path, runtime_action_order):
   path = Path(path)
   manifest = json.loads(path.with_suffix(path.suffix + ".json").read_text())
   if (
-    manifest["schema"] != "black_retrain_student_torchscript_v2"
+    manifest["schema"] != "black_retrain_student_torchscript_v3"
     or manifest["action_order"] != CONTRACT["action_order"]
   ):
     raise ValueError("unsupported exported student contract")

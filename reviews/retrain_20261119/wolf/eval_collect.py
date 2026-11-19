@@ -32,6 +32,8 @@ def collect(env, teacher, specs, paths, max_controls=None):
         history = env.obs["history"].reshape(-1, 6, 53)
         commands = env.plant.command_manager.get_command("twist").cpu().clone()
         history_commands = history[:, -1, :3].cpu().clone()
+        camera = env.frames.metadata()
+        has_hit = env.frames.has_hit.cpu().clone()
         action = teacher(history, env.obs["geometry"])
         requested = action.cpu().clone()
         _, _, done, _ = env.step(action)
@@ -59,6 +61,13 @@ def collect(env, teacher, specs, paths, max_controls=None):
           }
           row.update(
             tick=tick,
+            control_tick=camera["tick"],
+            episode=int(camera["episode"][lane]),
+            capture_episode=int(camera["capture_episode"][lane]),
+            frame=int(camera["frame"][lane]),
+            capture_tick=int(camera["capture_tick"][lane]),
+            depth_valid=bool(camera["mask"][lane]),
+            depth_has_hit=bool(has_hit[lane]),
             command=commands[lane].tolist(),
             history_command=history_commands[lane].tolist(),
             action=requested[lane].tolist(),

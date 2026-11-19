@@ -1,9 +1,11 @@
-# 当前审查快照：Black/Wolf共享actor v2
+# Black/Wolf从零训练v3审查快照
 
-本目录同步本地实现0a5003e及证据提交47c6f78；原版对照为本PR前一提交da6efa6。当前教师从随机参数开始，顺序为平地基础→轴向起停→综合六域→六专项分支。模型合同已升到v2。
+当前主线：随机初始化→基础平地→轴向起停→综合六域→六个专项分支。两种机器人各有权重，内部教师与学生共享actor/HIM；完整特权状态用于critic和HIM监督。
 
-先读docs/review_completion_20261119.md的14项差异，再按evidence/review_completion_20261119/SOURCE_INDEX.json审查代码；验证汇总为VALIDATION.json。学生使用50张有效新帧的固定记忆段，每次Adam前重算burn-in。默认只做控制步物理有限性检查，debug-first-fault显式启用逐子步探针。
+v3将原始相机健康与量程命中分开，噪声在有效量程内夹紧；Wolf课程状态免在线归一化。学生最多缓存50帧，后25帧预热与逐渐交接；Black学生JIT新增warm_hidden，合同显式升级。
 
-JC与Windows各258项CPU检查通过；34组有限GPU检查及7组真实原始采集/复评分完成。4096仅4步、0优化；174条截短attempt全部未完成、成功0，没有策略资格。正式长训未启动，旧自然NaN根因和实机能力未确认。
+JC与Windows各277项CPU测试通过，JC32组、Windows10组有限GPU检查通过。232条截短原始试次均未完成，成功数0。4096仅做4控制步0优化；没有正式长训或实机能力结论。
 
-公开快照保存代码、说明及紧凑摘要，未上传机器人XML、URDF、网格、权重或故障二进制包。运行需要本地团队资产，哈希见ASSET_REQUIREMENTS.json；完整原始轨迹和故障包保存在本地Git。相关资产不提供公开下载。Windows仅验收CPU，本轮GPU优化未验证。
+详见docs/boundary_review_20261119.md、docs/black.md、docs/wolf.md和evidence/boundary_review_20261119/。上一轮review_completion_20261119证据归属v2，不能代替当前v3结果。
+
+公开快照只包含源码、架构说明和紧凑验证摘要。ASSET_REQUIREMENTS.json列出本地必需资产指纹，不上传团队模型、权重、完整原始轨迹或故障二进制。完整仿真、make check和证据复核请使用本地私有资产仓库。此分支供审计，未合并main。

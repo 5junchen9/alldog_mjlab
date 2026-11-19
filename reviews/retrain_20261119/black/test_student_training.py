@@ -541,6 +541,21 @@ def test_full_prefix_refresh_matches_new_weights_from_episode_start(modules):
   assert cache.lane_ticks(1)[0] == 0
 
 
+def test_real_student_optimizer_crosses_memory_handoff(modules, tmp_path):
+  teacher, cnn, gru = modules
+  env = FakeEnv()
+  env.max_episode_controls = 6000
+  teacher_before = teacher_identity(teacher)
+  result = training.train_student(
+    env, teacher, cnn, gru, 12, tmp_path, epochs=1, minibatch_lanes=2
+  )
+  assert result["control_steps"] == 288 and result["optimizer_calls"] == 12
+  assert result["final_state_tick"] == 287
+  assert teacher_identity(teacher) == teacher_before
+  assert all(torch.isfinite(parameter).all() for parameter in cnn.parameters())
+  assert all(torch.isfinite(parameter).all() for parameter in gru.parameters())
+
+
 def test_prefix_bound_stops_instead_of_silently_dropping_early_frames(modules):
   student = SharedStudent(*modules)
   sample, _ = training._collect(FakeEnv(), student, None)

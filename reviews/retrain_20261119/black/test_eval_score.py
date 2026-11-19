@@ -43,6 +43,7 @@ def make_trial(spec, ticks=None):
       "frame": tick // 5,
       "capture_tick": tick // 5 * 5,
       "depth_valid": True,
+      "depth_has_hit": True,
       "action": [0.0] * 12,
       "delayed_action": [0.0] * 12,
       "processed_target": [0.0] * 12,

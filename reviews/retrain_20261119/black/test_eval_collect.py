@@ -44,7 +44,9 @@ class FakeEnv:
     self.camera_receipt = {}
     self.render_receipt = {}
     self.closed = []
-    self.frames = SimpleNamespace(episode=torch.zeros(2, dtype=torch.long))
+    self.frames = SimpleNamespace(
+      episode=torch.zeros(2, dtype=torch.long), has_hit=torch.ones(2, dtype=torch.bool)
+    )
     self.frames.metadata = lambda: dict(
       frame=torch.zeros(2, dtype=torch.long),
       capture_tick=torch.zeros(2, dtype=torch.long),

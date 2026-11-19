@@ -30,15 +30,16 @@ def test_independent_student_jit_matches_fresh_held_invalid_and_reset(
   assert readback == manifest and not manifest["physical_deployment_validated"]
   state = None
   hidden = torch.zeros(2, 64)
+  warm_hidden = torch.zeros_like(hidden)
   count = torch.zeros(2, dtype=torch.long)
   old_episode = torch.full((2,), -1)
   old_frame = torch.full((2,), -1)
-  for tick in range(265):
+  for tick in range(540):
     episode = torch.tensor([int(tick >= 8), 0])
     birth = torch.tensor([8 if tick >= 8 else 0, 0])
     capture = birth + ((tick - birth) // 5) * 5
     frame = capture * 2 + torch.arange(2)
-    mask = torch.tensor([True, tick < 7])
+    mask = torch.tensor([True, tick < 7 or tick >= 270])
     row = dict(
       tick=tick,
       episode=episode,
@@ -54,12 +55,13 @@ def test_independent_student_jit_matches_fresh_held_invalid_and_reset(
     fresh = mask & ((frame != old_frame) | reset)
     with torch.no_grad():
       expected, _, state = student(history, depth, row, state)
-      action, hidden, count = loaded(
-        history, depth, hidden, fresh, reset, mask, tick - capture, count
+      action, hidden, count, warm_hidden = loaded(
+        history, depth, hidden, fresh, reset, mask, tick - capture, count, warm_hidden
       )
     torch.testing.assert_close(action, expected, rtol=0, atol=0)
     torch.testing.assert_close(hidden, state.hidden, rtol=0, atol=0)
     torch.testing.assert_close(count, state.fresh_count)
+    torch.testing.assert_close(warm_hidden, state.warm_hidden, rtol=0, atol=0)
     old_episode, old_frame = episode, state.frame
 
 

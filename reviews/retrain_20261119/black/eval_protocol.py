@@ -8,8 +8,8 @@ from typing import Any
 
 from black.curriculum import EVALUATION_SEEDS, SETTLE_STEPS
 
-SCHEMA = "shared_actor_evaluation_v2"
-PROTOCOL_ID = "shared_actor_absolute_qualification_v2"
+SCHEMA = "shared_actor_evaluation_v3"
+PROTOCOL_ID = "shared_actor_absolute_qualification_v3"
 QUALIFICATION_ID = "black_retrain_qualification_v1"
 FLAT8 = {
   "forward": [0.3, 0.0, 0.0],
@@ -24,6 +24,8 @@ FLAT8 = {
 HEIGHTS_CM = (4, 6, 8, 10, 12, 15, 20, 25, 30)
 PROTOCOL: dict[str, Any] = {
   "control_hz": 50,
+  "camera_validity": "finite_raw_capture_in_current_episode; empty_range_is_healthy",
+  "camera_max_age_controls": 4,
   "batch_size": 32,
   "motion_fraction": 0.5,
   "park_mean_planar_max": 0.10,

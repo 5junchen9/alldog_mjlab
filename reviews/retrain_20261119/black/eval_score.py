@@ -116,7 +116,14 @@ def validate_rows(spec, trial):
     require(
       row["episode"] == trial["episode"], "reset episode cannot supplement a trial"
     )
-    for name in ("terminated", "truncated", "failed", "support_proxy", "depth_valid"):
+    for name in (
+      "terminated",
+      "truncated",
+      "failed",
+      "support_proxy",
+      "depth_valid",
+      "depth_has_hit",
+    ):
       require(type(row[name]) is bool, f"invalid {name} flag")
     done = row["terminated"] or row["truncated"]
     require(
@@ -157,6 +164,8 @@ def validate_rows(spec, trial):
         row["frame"] >= 0 and row["capture_tick"] >= 0,
         "valid depth lacks frame identity",
       )
+      require(row["control_tick"] - row["capture_tick"] < 5, "stale camera frame")
+    require(not row["depth_has_hit"] or row["depth_valid"], "hit in unhealthy frame")
     if spec["kind"] == "flat":
       expected = command(spec, tick)
       require(
@@ -453,7 +462,8 @@ def score_trial(spec, trial):
   else:
     metrics = stairs_metrics(trial)
   complete = end != "administrative_incomplete"
-  success = complete and metrics["passed"]
+  camera_healthy = bool(rows) and all(row["depth_valid"] for row in rows)
+  success = complete and metrics["passed"] and camera_healthy
   return {
     "trial_id": spec["trial_id"],
     "program": spec["program"],
@@ -472,6 +482,9 @@ def score_trial(spec, trial):
       trial[name] for name in ("batch_id", "seed", "lane", "episode", "birth")
     ],
     "invalid_depth_frames": sum(not row["depth_valid"] for row in rows),
+    "healthy_empty_depth_frames": sum(
+      row["depth_valid"] and not row["depth_has_hit"] for row in rows
+    ),
     "metrics": metrics,
   }
 

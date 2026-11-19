@@ -31,6 +31,12 @@ VIRTUAL_ENV=/mnt/d/RLTrain/.venv /mnt/d/RLTrain/tools/bin/uv run --active --no-s
 
 后续从D:\RLTrain\retrain工作，代码改动用Git记录；不要把原有旧头PT交给新入口。跨机可以载入同代码/资产的教师权重，目标机需重新验收；运行库不同不接续原优化器。
 
-## 本轮v2同步
+## 历史v2同步
 
-2026-11-19中断改动补完后，Windows源码与JC运行源码/资产指纹一致，258项CPU检查通过。当前模型合同为v2；视觉学生使用50帧记忆段，GPU子步探针通过`--debug-first-fault`显式启用。Windows没有进行本轮GPU优化验证。JC与Win的Torch/CUDA版本不同，完整学习器不能跨运行库续接。详细记录见`evidence/review_completion_20261119/WINDOWS_CHECK.json`。
+2026-11-19中断改动补完后，Windows源码与JC运行源码/资产指纹一致，258项CPU检查通过。该次模型合同为v2；视觉学生使用50帧记忆段，GPU子步探针通过`--debug-first-fault`显式启用。Windows没有进行本轮GPU优化验证。JC与Win的Torch/CUDA版本不同，完整学习器不能跨运行库续接。详细记录见`evidence/review_completion_20261119/WINDOWS_CHECK.json`。
+
+## 当前v3
+
+本轮修复相机健康与命中分离、Wolf课程状态归一化、深度边界噪声及50/25帧重叠记忆。两机同步与当前检查以`evidence/boundary_review_20261119/`为准，v2的258项结果不能代替v3结果。Windows实际训练环境为WSL2，当前可见内存约15.33GiB；不采用复审文字里未经核对的62GiB假设。跨机只加载同代码/资产的权重，完整优化器恢复仍要求相同运行库。
+
+本轮v3在Windows完成277项CPU和10组GPU检查：Black/Wolf各自的教师更新与独立恢复、学生4→8次Adam与独立恢复、相机空视野及合成记忆边界。GPU更新均为32环境有限窗口，4096优化和长期收敛未验证。验证用16份权重已清理，保留紧凑JSON结果。

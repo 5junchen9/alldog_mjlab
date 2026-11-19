@@ -50,6 +50,7 @@ def make_trial(spec):
       episode=0,
       failed=False,
       depth_valid=True,
+      depth_has_hit=True,
       frame=tick // 5,
       capture_tick=tick - tick % 5,
       post_episode=int(done),

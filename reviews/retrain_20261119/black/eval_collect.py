@@ -164,6 +164,7 @@ def collect_batch(env, teacher, specs, trials, max_controls=None):
       frame = metadata["frame"].cpu().clone()
       capture_tick = metadata["capture_tick"].cpu().clone()
       valid = metadata["mask"].cpu().clone()
+      has_hit = env.frames.has_hit.cpu().clone()
       action = teacher(env.obs["history"].reshape(-1, 5, 45), env.obs["geometry"])
       if not bool(torch.isfinite(action).all()):
         raise FloatingPointError("评估教师动作非有限")
@@ -202,6 +203,7 @@ def collect_batch(env, teacher, specs, trials, max_controls=None):
           frame=int(frame[lane]),
           capture_tick=int(capture_tick[lane]),
           depth_valid=bool(valid[lane]),
+          depth_has_hit=bool(has_hit[lane]),
           action=actions[lane].tolist(),
           delayed_action=post["delayed_action"][lane].tolist(),
           processed_target=post["processed_target"][lane].tolist(),

@@ -1,4 +1,4 @@
-"""Wolf教师PPO/HIM交替更新；视觉学生复用统一的50帧记忆段训练。"""
+"""Wolf教师PPO/HIM交替更新；视觉学生复用统一的50帧重叠记忆训练。"""
 
 import json
 from pathlib import Path
@@ -33,7 +33,7 @@ def validate_resume(packet, phase, configuration):
 
 def recipe(env, phase):
   return {
-    "algorithm": "wolf_shared_actor_v2",
+    "algorithm": "wolf_shared_actor_v3",
     "phase": phase,
     "course": env.course,
     "max_level": env.plant.command_manager.get_term("twist").cfg.max_level,
