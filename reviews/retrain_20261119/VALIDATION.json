@@ -1,0 +1,86 @@
+{
+  "schema": "retrain_engineering_validation_20261119",
+  "source_commit": "4076c5353a098b7ee39e67ad1919cc10c0c2454d",
+  "cpu": {
+    "passed": 234,
+    "warnings": 13,
+    "scope": "Black/Wolf/shared sparse support; TorchScript and ONNX export counterexamples included"
+  },
+  "black": {
+    "teacher_PPO_calls": [
+      20,
+      40
+    ],
+    "HIM_calls": [
+      1,
+      2
+    ],
+    "student_Adam_calls": [
+      1,
+      2
+    ],
+    "independent_process_resume": true,
+    "teacher_frozen_during_student": true,
+    "eval_trials": {
+      "general": 48,
+      "platform": 6,
+      "broken_bridge": 6
+    },
+    "eval_controls": 4,
+    "raw_reevaluated": true,
+    "capability_qualified": false
+  },
+  "wolf": {
+    "independent_gpu_process_checks": 12,
+    "teacher_PPO_calls": [
+      20,
+      40
+    ],
+    "HIM_calls": [
+      1,
+      2
+    ],
+    "student_Adam_calls": [
+      1,
+      2
+    ],
+    "courses": [
+      "general",
+      "stairs",
+      "platform",
+      "high_wall",
+      "slope",
+      "broken_bridge",
+      "plum_stakes"
+    ],
+    "forced_timeout_reset": true,
+    "evaluation_seeds": [
+      1911701,
+      1911702,
+      1911703
+    ],
+    "evaluation_controls": 4,
+    "capability_qualified": false
+  },
+  "fault": {
+    "injected_field": "qacc_warmstart",
+    "lane": 0,
+    "stage": "scene.action_write:before",
+    "optimizer_calls": 0,
+    "atomic_packet_reloaded": true,
+    "natural_nan_reproduced": false,
+    "root_cause_established": false
+  },
+  "limits": [
+    "No formal long training",
+    "No qualified teacher policy",
+    "No 4096 environment long-duration acceptance",
+    "No hardware motion",
+    "Wolf camera mount is a simulation candidate",
+    "Wolf deployment/export and Black student ONNX remain pending"
+  ],
+  "public_snapshot": {
+    "robot_model_assets_included": false,
+    "local_complete_repository": true
+  }
+}

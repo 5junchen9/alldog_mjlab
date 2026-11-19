@@ -1,0 +1,3 @@
+from typing import Any
+SCRATCH_SLOTS: int
+def convex_narrowphase(m: Any, d: Any, ctx: Any, collision_table: Any) -> None: ...

@@ -1,0 +1,16 @@
+.venv
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.pyc
+*.pt
+*.pth
+*.onnx
+*.zip
+*.tar*
+*.log
+runs/
+outputs/
+wandb/
+.DS_Store
