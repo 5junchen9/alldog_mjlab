@@ -70,6 +70,24 @@ black_reliability隔离候选已在Win完成4096环境×24步零更新验证；�
 
 固定采样可能漏薄物体；冻结HIM在新策略下的分布变化需验证；纯timeout使用V(s_t)近似；GRU长episode前缀是截断近似；旧楼梯课程pass_timeout_no_stop可晋级，不能代替严格停车资格；原strict仅0.12秒稳定；学生GPU学习器恢复、4096规模新架构长时稳定性、导出和实机链尚未验收。
 
+## 与GitHub主分支的已核实接口差异
+
+核验基准为主分支提交2913d3f449f8eb5b0505156c460ad2f61e4c49fd。以下差异来自实际代码，当前reviews归档不会改变这些生产接口。
+
+|接口|GitHub主分支|本地共享actor候选|
+|---|---|---|
+|actor关节与动作顺序|FL→FR→RL→RR|FL→FR→RR→RL|
+|45维观测command位置|0:3，缩放(2,2,0.25)|30:33，无额外缩放|
+|HIM历史|6帧，进入编码器前转为新→旧|5帧，旧→新直接展平|
+|HIM编码器输入|每帧去command，6×42=252|保留command，5×45=225|
+|critic输入|259维|446维|
+
+直接把本地权重放入主分支任务会遇到维度不兼容或控制语义错位。即使全部从头训练，也必须先明确采用哪套观测与动作约定，再统一训练、导出和部署；仅交换两条后腿不能完成接入。远端critic的关节顺序另为FL→FR→RR→RL，不能据此判断actor与本地相同。
+
+远端代码依据：[关节定义](https://github.com/5junchen9/alldog_mjlab/blob/2913d3f449f8eb5b0505156c460ad2f61e4c49fd/src/alldog_mjlab/robots/black/black_constants.py#L23-L30)、[动作构造](https://github.com/5junchen9/alldog_mjlab/blob/2913d3f449f8eb5b0505156c460ad2f61e4c49fd/src/alldog_mjlab/tasks/black/env_cfg.py#L213-L228)、[actor观测](https://github.com/5junchen9/alldog_mjlab/blob/2913d3f449f8eb5b0505156c460ad2f61e4c49fd/src/alldog_mjlab/tasks/black/env_cfg.py#L358-L397)、[6帧历史](https://github.com/5junchen9/alldog_mjlab/blob/2913d3f449f8eb5b0505156c460ad2f61e4c49fd/src/alldog_mjlab/tasks/black/mdp/him.py#L57-L66)、[历史反转及去command](https://github.com/5junchen9/alldog_mjlab/blob/2913d3f449f8eb5b0505156c460ad2f61e4c49fd/src/alldog_mjlab/algorithms/him/spec.py#L80-L96)。
+
+本地依据：候选checkpoint.py:23–28、runtime.py:147–158、model.py:40–42；原项目src/mjlab/tasks/velocity/config/black_teacher/student_env_cfg.py:14–43及black_reliability_20261119/student/him_base.py:33–38。
+
 ## 代码与复现范围
 
 source/包含原候选的26个Python源码/测试文件及配置快照，保持原字节。该目录是审查快照，当前sys.path和ROOT计算依赖原工程位置，不能直接从这里运行。
