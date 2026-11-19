@@ -1,0 +1,25 @@
+{
+  "test_only": true,
+  "injected_field": "qacc_warmstart",
+  "injected_lane": 0,
+  "stage": "scene.action_write:before",
+  "source_sha256": "015c7f7c5022718fd06e6180ec94161edbd60d1606ea14ed043989dc286219ca",
+  "optimizer_calls": 0,
+  "error": "InvalidPhysics('nonfinite native input before scene.action_write')",
+  "fields": [
+    "qpos",
+    "qvel",
+    "ctrl",
+    "qacc",
+    "qacc_warmstart",
+    "act",
+    "qfrc_applied",
+    "xfrc_applied",
+    "qfrc_actuator"
+  ],
+  "atomic_packet_loaded": true,
+  "natural_nan_reproduced": false,
+  "original_root_cause_established": false,
+  "replayable": false,
+  "policy_identity_saved": true
+}

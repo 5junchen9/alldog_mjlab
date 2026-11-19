@@ -1,0 +1,133 @@
+{
+  "checkpoint": "/home/wujuncheng/Documents/Codex/2026-11-11/task/black_rough_v2/preparation/rough_v2/shared_actor_v2_20261119/evidence/gpu_student_resume_final002/student.pt",
+  "teacher_id": "f20d7970b878aca894aba338af468031c60dc3a8af2dc5406c44d8dead4c92c6",
+  "completed_updates": 2,
+  "starting_updates": 1,
+  "added_updates": 1,
+  "optimizer_calls": 2,
+  "periodic_checkpoints": [
+    "/home/wujuncheng/Documents/Codex/2026-11-11/task/black_rough_v2/preparation/rough_v2/shared_actor_v2_20261119/evidence/gpu_student_resume_final002/student_update_000002.pt"
+  ],
+  "control_steps": 24,
+  "environment_transitions": 768,
+  "final_state_tick": 23,
+  "recipe": {
+    "controls_per_round": 24,
+    "lanes_per_microbatch": 128,
+    "num_envs": 32,
+    "course": "flat_foundation",
+    "optimizer": "Adam",
+    "learning_rate": 0.0001,
+    "gradient_clip_norm": 1.0,
+    "optimizer_updates_per_round": 1,
+    "feature_weight": 1.0,
+    "loss": "Huber(action_mean)+feature_weight*Huber(terrain32)",
+    "recipe_status": "initial_experiment_not_tuned",
+    "controller": "student",
+    "teacher_queries": "same_student_visited_state",
+    "trainable": [
+      "CNN",
+      "GRU"
+    ],
+    "recurrent_context": "current_parameters_replay_all_fresh_frames_since_episode_start",
+    "gradient_context": "BPTT_truncated_at_round_start",
+    "exact_long_episode_replay": true,
+    "prefix_max_episode_controls": 6000,
+    "prefix_max_fresh_frames_per_lane": 1200,
+    "prefix_cpu_bytes_estimate": 550502400,
+    "sampling_and_prefix_cpu_bytes_estimate": 575477760,
+    "prefix_memory_admission": "estimate_must_not_exceed_80_percent_MemAvailable",
+    "prefix_storage": "CPU_FP32_fresh_valid_frames_and_original_metadata"
+  },
+  "round_metrics": [
+    {
+      "round": 2,
+      "loss": 0.014392892830073833,
+      "action_huber": 9.122455230681226e-05,
+      "feature_huber": 0.014301667921245098,
+      "gru_cell_used": true
+    }
+  ],
+  "qualification": "not_assessed_here",
+  "learner_resumed": true,
+  "cold_start": [
+    "physics",
+    "curriculum",
+    "camera",
+    "GRU"
+  ],
+  "exact_physical_resume": false,
+  "visual_changed": {
+    "cnn": true,
+    "gru": true
+  },
+  "export": {
+    "schema": "black_shared_actor_v2_student_torchscript",
+    "teacher_id": "f20d7970b878aca894aba338af468031c60dc3a8af2dc5406c44d8dead4c92c6",
+    "sha256": "c0687b5f95b5bafdcdc84f6e9fcac5f21180c884744ff8e2da606b7b6f00c887",
+    "inputs": {
+      "history": "FP32[B,5,45], oldest_to_newest, current_frame_last",
+      "depth_m": "FP32[B,48,64,1], planar_z_metres, nearest_valid_raw160x90_bins",
+      "hidden": "FP32[B,64], initially_zero",
+      "fresh": "bool[B], true_once_per_new_eligible_camera_frame",
+      "reset": "bool[B], true_before_first_action_of_each_new_episode",
+      "valid_frame": "bool[B], valid_capture_in_current_episode",
+      "frame_age_controls": "int64[B], control_tick_minus_capture_tick"
+    },
+    "p45_layout": [
+      "angular_velocity",
+      "gravity",
+      "joint_position",
+      "joint_velocity",
+      "command",
+      "previous_action"
+    ],
+    "outputs": [
+      "policy_action_mean[B,12]",
+      "next_hidden[B,64]"
+    ],
+    "action_order": [
+      "FL_hip",
+      "FL_thigh",
+      "FL_calf",
+      "FR_hip",
+      "FR_thigh",
+      "FR_calf",
+      "RR_hip",
+      "RR_thigh",
+      "RR_calf",
+      "RL_hip",
+      "RL_thigh",
+      "RL_calf"
+    ],
+    "action_scale": 0.25,
+    "action_semantics": "default_joint_position + 0.25 * delayed_policy_action",
+    "control_hz": 50,
+    "camera_hz": 10,
+    "maximum_frame_age_controls": 6,
+    "delay": {
+      "implementation": "external_native_action_history",
+      "history_slots": 4,
+      "lag_controls": [
+        0,
+        1,
+        2
+      ],
+      "lag_sampling": "uniform_per_lane_on_episode_reset",
+      "preserve_history_on_reset": true,
+      "shift": "once_per_control_before_selecting_delayed_action"
+    },
+    "depth_reduction": "terrain.reduce_depth; never fixed_nearest_pixel_resize",
+    "physical_deployment_validated": false,
+    "onnx": "not_implemented_or_validated"
+  },
+  "case": "student_resume",
+  "environments": 32,
+  "test_only": true,
+  "teacher_qualification_granted": false,
+  "formal_student_started": false,
+  "teacher_unchanged": true,
+  "all_flat": true,
+  "source_sha256": "015c7f7c5022718fd06e6180ec94161edbd60d1606ea14ed043989dc286219ca",
+  "capability_evaluated": false
+}

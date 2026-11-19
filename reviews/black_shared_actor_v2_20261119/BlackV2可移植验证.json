@@ -1,0 +1,34 @@
+{
+  "schema": "black_v2_relocation_receipt_v1",
+  "source_root": "/home/wujuncheng/Documents/Codex/2026-11-11/task/black_rough_v2",
+  "relocated_root": "/home/wujuncheng/Documents/Codex/2026-11-19/wo-x/work/v2_portable_identity",
+  "original_probe_passed": true,
+  "relocated_probe_passed": true,
+  "original_source_sha256": "015c7f7c5022718fd06e6180ec94161edbd60d1606ea14ed043989dc286219ca",
+  "relocated_source_sha256": "015c7f7c5022718fd06e6180ec94161edbd60d1606ea14ed043989dc286219ca",
+  "source_identities_equal": true,
+  "identity_entries": 572,
+  "missing_identity_paths": [],
+  "changed_identity_paths": [],
+  "original_tree_code_loaded": {},
+  "checkpoint_load_forbidden": true,
+  "cuda_initialized": false,
+  "physics_environment_constructed": false,
+  "physics_steps": 0,
+  "optimizer_updates": 0,
+  "uv_lock_check_offline_passed": true,
+  "installed_source_record_check": {
+    "mujoco-warp": {
+      "python_files_checked": 73,
+      "changed_from_install_record": []
+    },
+    "warp-lang": {
+      "python_files_checked": 413,
+      "changed_from_install_record": []
+    },
+    "rsl-rl-lib": {
+      "python_files_checked": 30,
+      "changed_from_install_record": []
+    }
+  }
+}

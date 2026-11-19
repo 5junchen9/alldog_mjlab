@@ -1,0 +1,5 @@
+Black共享actor v2评估规范入口：EVALUATION_PROTOCOL.md
+
+当前使用固定多seed完整面板、原始证据复评分及50步严格稳停。阈值、试验清单、阶段资格和执行说明以同目录EVALUATION_PROTOCOL.md为准。
+
+v1原协议与历史证据保留在../shared_actor_v1_20261119；旧诊断记录不能授予v2资格。

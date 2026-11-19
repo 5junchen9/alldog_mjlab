@@ -1,0 +1,105 @@
+# Black当前执行指导（2026-11-19，shared actor v2）
+
+当前实现位于`preparation/rough_v2/shared_actor_v2_20261119`，按用户要求全部从零、先平地，再通过独立资格逐段进入纯轴和楼梯。正式长训与自动跟进继续停止，未部署Win，尚无通过v2完整资格的教师。本轮代码、测试与有限GPU证据以[BlackV2审计索引](/home/wujuncheng/Documents/Codex/2026-11-19/wo-x/outputs/BlackV2审计索引.txt)为准；代码和证据汇总包为`BlackV2代码与证据.zip`。不得把旧v1诊断成绩或短程更新写成v2能力通过。
+
+## 模型与梯度约定
+
+- 默认随机初始化HIM、actor、几何编码器、critic、CNN和GRU，不加载r800、8954或旧Adam。种子在模型创建前设置，critic使用独立种子，初始化来源进入bundle。旧类定义可复用，旧权重与旧训练入口不改。
+- 教师与学生使用同一个actor及HIM对象。actor输入固定为当前p45＋HIM19＋地形32，共96维，输出12维动作。HIM19保持下一步机身速度预测3维＋归一化隐变量16维；禁止用真值替换推理输出。学生没有第二个独立动作头。
+- 教师每轮24步采样和全部PPO更新期间固定HIM。PPO更新actor、可见地形编码器及动作分布，价值损失更新独立446维critic并保留其归一化。每个PPO小批次重新编码保存的原始geometry，不能缓存detach的地形latent代替训练。
+- 全部PPO结束后，单独HIM优化器更新编码器、目标编码器和原型，使用下一步速度Huber与原型交换损失；标签来自reset前真实下一帧和速度，排除真实终止，允许纯timeout。更新后立即冻结HIM。该更新会改变下一轮策略输入，效果需实测，不能声称PPO裁剪约束了这部分轮间漂移。
+- 教师通过完整资格后冻结。学生初训重新随机初始化CNN/GRU，使用自身动作访问状态，同时监督教师动作均值与地形32。教师目标无梯度；冻结actor仍保留对视觉输入的梯度，只更新CNN/GRU。
+
+## 感知与状态时序
+
+原始160×90深度按区域取最近有效点缩小到64×48，并保留真实源pixel索引。学生CNN读取这份深度；教师再按4×4区域取最近有效点，用真实pixel与相机内参回投成12×16个xyz/4＋valid，共768维。完整地形和raw446仅供critic。相机10Hz、控制50Hz，教师和学生共享可见范围、遮挡、帧与时间标识；近点选择的噪声和薄障碍物表现需另验。
+
+学生每轮更新后从当前episode出生起，使用新CNN/GRU和保存的全部fresh valid前缀，从零重算hidden；梯度仍只回传当前24步。禁止继续使用旧参数计算的更早hidden。reset清除对应lane前缀；整个窗口无有效新帧时，未调用的GRUCell允许grad=None，Adam保持其权重、动量和步数不变。长episode前缀有内存准入检查，4096环境的实际内存、速度和长期稳定性还需验证。
+
+原生环境关闭自动reset，先取得真实下一帧、`terminal_critic`和`next_velocity`，再局部reset。纯timeout用reset前V(s_next)补值，并去掉上游旧补偿，防止重复bootstrap；真实终止优先且不补值。
+
+## 课程与独立资格
+
+|阶段|分布与进入要求|
+|---|---|
+|`flat_foundation`|默认全随机、全平地；静止→基础运动→停车|
+|`flat_axes`|全平地0.10/0.25纯轴起动、反转、停车；进入前通过三个固定seed的完整flat8|
+|`stairs`|25%平地纯轴＋75%楼梯；进入前同一教师通过三个seed的flat8与axes|
+|`student`|同一冻结教师再通过三个seed的完整54格楼梯；初训视觉模块重新随机|
+
+固定评估seed为191301、191401、191501，第二批各加1；训练不得使用这六个seed。资格索引`all_cells_all_seeds_v2`只提供原始证据位置，入口重新核验MANIFEST/RESULT/trial的hash、同一bundle与当前教师/源码身份。每个固定试验必须通过且无无效深度帧；缺失、重复、行政截短、FAILED与RESULT并存均拒绝。旧SCORE、手填passed和课程成功率不能授权晋级。
+
+楼梯需12个有序踏面、landing、安全出口，以及连续50步严格稳停并真实terminated/reset闭合。课程将timeout未停车转为失败票；具体速度、接触、时间门见本目录`EVALUATION_PROTOCOL.md`。路线双向不能表述为倒走楼梯能力。
+
+## 执行、恢复与导出边界
+
+`run.py`默认plan，不创建环境或优化器。执行需显式`--execute`和新输出目录，teacher/student还需明确新增`--rounds`。probe最多120控制步。所有有限检查均独立记录；本轮不启动正式长训。
+
+`--bundle`加载v2模型权重并新建学习器；阶段切换必须提供当前教师的资格索引。`--resume-learner`严格恢复同课程、配方、环境数和参数顺序，两者互斥。教师完整恢复critic与归一化、动作分布、PPO/HIM优化器、随机状态和累计计数；学生恢复CNN/GRU学习器并重新核验同一冻结教师资格。周期保存默认每100个完整轮，原子发布且不覆盖。物理、课程、相机、episode、GRU与前缀冷启动，不能声称恢复原物理轨迹。v1包不能冒充v2学习器。
+
+教师TorchScript/ONNX输入为history＋geometry；学生TorchScript显式输入hidden和帧标志，并输出新hidden。学生ONNX未实现或验证。动作映射、比例、延迟和PD目标保持manifest约定，导出等价不等于实机验收。
+
+首次坏状态capture记录教师身份与策略更新计数、源码身份、软件版本、物理状态、延迟历史、时钟和随机状态，保留最早异常；未完整恢复接触求解器内部状态，不能宣称精确replay。旧NaN根因未闭合，随机重训不等于修复物理异常。
+
+当前可读入口为v2的`README.md`与`EVALUATION_PROTOCOL.md`；同目录`.txt`仅做跳转。v1历史实现和证据留在`shared_actor_v1_20261119`。新目录仍依赖项目源码、资产和历史类定义，单独上传快照不能直接运行。以下Development Workflow及后续历史原文保持字节不变。
+
+# Development Workflow
+
+**Always use `uv run`, not python**.
+
+```sh
+
+# 1. Make changes.
+
+# 2. Type check.
+uv run ty check  # Fast
+uv run pyright  # More thorough, but slower
+
+# 3. Run tests.
+uv run pytest tests/  # Single suite
+uv run pytest tests/<test_file>.py  # Specific file
+
+# 4. Format and lint before committing.
+uv run ruff format
+uv run ruff check --fix
+```
+
+We've bundled common commands into a Makefile for convenience.
+
+```sh
+make format     # Format and lint
+make type       # Type-check
+make check      # make format && make type
+make test-fast  # Run tests excluding slow ones
+make test       # Run the full test suite
+make docs       # Build documentation
+```
+
+Always run `make check` before committing. This runs formatting, linting,
+and type checking. Do not commit code that fails type checking.
+
+Before creating a PR, ensure all checks pass with `make test`.
+
+When making user-facing changes, add an entry to `docs/source/changelog.rst`
+under the "Upcoming version (not yet released)" section using
+Added/Changed/Fixed categories. Reference issues with `:issue:\`123\``
+(renders as a link to the GitHub issue).
+
+# Commits and PRs
+
+- Put `Fixes #<number>` at the end of the commit message body, not in
+  the title.
+- PR body should be plain, concise prose. No section headers, checklists,
+  or structured templates. Describe the problem, what the change does, and
+  any non-obvious tradeoffs. A good PR description reads like a short
+  paragraph to a colleague, not a form.
+- PR and commit messages are rendered on GitHub, so don't hard-wrap them
+  at 88 columns. Let each sentence flow on one line.
+
+Some style guidelines to follow:
+- Line length limit is 88 columns. This applies to code, comments, and docstrings.
+- Avoid local imports unless they are strictly necessary (e.g. circular imports).
+- Tests should follow these principles:
+  - Use functions and fixtures; do not use test classes.
+  - Favor targeted, efficient tests over exhaustive edge-case coverage.
+  - Prefer running individual tests rather than the full test suite to improve iteration speed.

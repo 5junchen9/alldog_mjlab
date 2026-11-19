@@ -1,0 +1,26 @@
+BlackV2验证边界与后续验收
+
+已关闭的代码问题与回归入口
+- 随机初始化：test_checkpoint/test_model/test_portability，禁止隐式torch.load旧权重。
+- 全平地课程、4096重采样、严格超时票据：test_curriculum。
+- 固定多seed完整覆盖、伪造通过拒绝、真实末帧稳停：test_qualification/test_eval_score。
+- 精确timeout下一状态补值、终止优先：test_ppo/test_terminal_transition。
+- HIM分阶段梯度、完整优化器恢复：test_pipeline/test_learner_state。
+- 全episode hidden重算、内存上限、课程恢复绑定：test_student_training。
+- 薄物体近点与源pixel：test_terrain。
+- 独立导出/加载、错动作顺序拒绝：test_export/test_ppo。
+- 故障半包与原始异常保留：test_fault_capture/test_entrypoint/test_eval_adapter。
+- 资产/运行库变化和跨目录身份：test_source_identity/test_portability。
+
+仍需实际实验回答的问题
+1.旧NaN的具体触发机制未确定。下次故障使用新增记录定位到原生操作与首坏字段；在可重复轨迹建立之前，不删除原始故障证据，不宣布修复原故障。
+2.4096规模GPU长期稳定性未验证。当前完整学生prefix按6000控制步episode估算约68.6GiB的CPU峰值，32环境约0.536GiB。实际内存需求按配置重新估算；超过可用内存80%会在采样前拒绝。现机32GiB内存、验证时约4.6GiB可用，不能直接运行4096学生。默认32用于接线审计；增加规模前必须评估资源与实测峰值。
+3.HIM辅助更新会改变下一轮策略表征，不受上一轮PPO裁剪直接约束。已保证整轮采样与PPO内HIM固定；收敛质量和课程晋级由真实独立面板确认。
+4.GRU完整重算保证当前参数下hidden一致，反向传播仍按24步截断。更长记忆任务的收益与计算成本需单独实验。
+5.近点采样保住可见薄物体，也会保住近噪点；D435遮挡、空洞、反光、延迟和运动模糊未实测。
+6.学生ONNX、Win部署与实机动作链尚未验收。当前学生交付格式为TorchScript；导出成功不授予实机运行资格。
+7.新架构尚未完成任何真实能力资格面板。测试中的学生训练使用明确标注test_only的内部接线脚本，未绕开或打开正式训练入口的资格要求。
+8.旧权重与v1源码保留供追查，新入口不会加载。当前GitHub草稿是审计快照；现有生产工程的动作顺序、历史长度和观测布局有差异，合入前仍需正式迁移验证。
+
+建议审计顺序
+先核对默认计划与随机初始化；再核对课程和资格；检查梯度、timeout及reset；最后核对导出动作约定、GPU原始结果和源码摘要。审计完成后再决定正式训练规模与轮次。

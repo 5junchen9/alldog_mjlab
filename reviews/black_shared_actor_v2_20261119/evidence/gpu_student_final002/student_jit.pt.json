@@ -1,0 +1,60 @@
+{
+  "schema": "black_shared_actor_v2_student_torchscript",
+  "teacher_id": "f20d7970b878aca894aba338af468031c60dc3a8af2dc5406c44d8dead4c92c6",
+  "sha256": "fa275886d54c50e2b659dc65fc523025a320f087d87d50cebe710779aa35890e",
+  "inputs": {
+    "history": "FP32[B,5,45], oldest_to_newest, current_frame_last",
+    "depth_m": "FP32[B,48,64,1], planar_z_metres, nearest_valid_raw160x90_bins",
+    "hidden": "FP32[B,64], initially_zero",
+    "fresh": "bool[B], true_once_per_new_eligible_camera_frame",
+    "reset": "bool[B], true_before_first_action_of_each_new_episode",
+    "valid_frame": "bool[B], valid_capture_in_current_episode",
+    "frame_age_controls": "int64[B], control_tick_minus_capture_tick"
+  },
+  "p45_layout": [
+    "angular_velocity",
+    "gravity",
+    "joint_position",
+    "joint_velocity",
+    "command",
+    "previous_action"
+  ],
+  "outputs": [
+    "policy_action_mean[B,12]",
+    "next_hidden[B,64]"
+  ],
+  "action_order": [
+    "FL_hip",
+    "FL_thigh",
+    "FL_calf",
+    "FR_hip",
+    "FR_thigh",
+    "FR_calf",
+    "RR_hip",
+    "RR_thigh",
+    "RR_calf",
+    "RL_hip",
+    "RL_thigh",
+    "RL_calf"
+  ],
+  "action_scale": 0.25,
+  "action_semantics": "default_joint_position + 0.25 * delayed_policy_action",
+  "control_hz": 50,
+  "camera_hz": 10,
+  "maximum_frame_age_controls": 6,
+  "delay": {
+    "implementation": "external_native_action_history",
+    "history_slots": 4,
+    "lag_controls": [
+      0,
+      1,
+      2
+    ],
+    "lag_sampling": "uniform_per_lane_on_episode_reset",
+    "preserve_history_on_reset": true,
+    "shift": "once_per_control_before_selecting_delayed_action"
+  },
+  "depth_reduction": "terrain.reduce_depth; never fixed_nearest_pixel_resize",
+  "physical_deployment_validated": false,
+  "onnx": "not_implemented_or_validated"
+}

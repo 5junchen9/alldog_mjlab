@@ -1,0 +1,39 @@
+/home/wujuncheng/Documents/Codex/2026-11-11/task/black_rough_v2/.venv/lib/python3.13/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+{
+  "contract": {
+    "schema": "black_shared_actor_v2",
+    "input_order": [
+      "current_p45",
+      "HIM_next_velocity3",
+      "HIM_unit16",
+      "terrain32"
+    ],
+    "history_shape": [
+      5,
+      45
+    ],
+    "geometry": "nearest_surface_pool_original_pixel_optical_xyz_div4_valid_12x16_v2",
+    "depth": "planar_z_metres_nearest_valid_surface_bins160x90_to64x48_v2",
+    "camera_hz": 10,
+    "control_hz": 50,
+    "action_order": [
+      "FL_hip",
+      "FL_thigh",
+      "FL_calf",
+      "FR_hip",
+      "FR_thigh",
+      "FR_calf",
+      "RR_hip",
+      "RR_thigh",
+      "RR_calf",
+      "RL_hip",
+      "RL_thigh",
+      "RL_calf"
+    ],
+    "action_scale": 0.25,
+    "action_space": "policy_mean_before_native_delay_and_PD"
+  },
+  "executed": false,
+  "formal_training": "stopped"
+}

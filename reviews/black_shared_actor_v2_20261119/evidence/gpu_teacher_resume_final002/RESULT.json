@@ -1,0 +1,85 @@
+{
+  "starting_updates": 1,
+  "added_updates": 1,
+  "completed_updates": 2,
+  "optimizer_calls": 40,
+  "him_optimizer_calls": 2,
+  "teacher_id": "662444274b7b296818319582fdfef9ce729cce4f4281fa799c91d1ed6575e3b8",
+  "qualification": "not_evaluated",
+  "recipe": {
+    "algorithm": "shared_actor_teacher_ppo_v2",
+    "course": "flat_foundation",
+    "num_envs": 32,
+    "controls_per_round": 24,
+    "ppo_options": {
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 5e-05,
+      "schedule": "fixed",
+      "gamma": 0.99,
+      "lam": 0.95,
+      "entropy_coef": 0.01,
+      "desired_kl": 0.01,
+      "max_grad_norm": 1.0,
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "clip_param": 0.2,
+      "normalize_advantage_per_mini_batch": false,
+      "optimizer": "adam"
+    },
+    "critic_seed": 119033,
+    "him": {
+      "update": "one_Adam_after_entire_PPO_round",
+      "target": "reset_before_next_velocity_and_next_frame_exclude_terminated",
+      "learning_rate": 0.0001,
+      "loss": "Huber(next_velocity)+prototype_swap",
+      "microbatch": 2048,
+      "gradient_clip": 1.0
+    }
+  },
+  "learner_resumed": true,
+  "exact_physical_resume": false,
+  "restart_boundary": "new_physics_curriculum_camera_episode",
+  "camera": {
+    "parent": "robot/d435_link",
+    "position_relative_trunk_m": [
+      0.325,
+      0.0,
+      -0.038000000000000006
+    ],
+    "optical_axis_relative_trunk": [
+      0.8544588301328074,
+      0.0,
+      -0.5195191118795095
+    ],
+    "fov_degrees": [
+      86.99999237060547,
+      57.999996185302734
+    ],
+    "resolution": [
+      424,
+      240
+    ],
+    "convention": "MuJoCo camera local -Z; static compiled nominal data relative trunk",
+    "distinct_from_Codex_aligned88_8": true
+  },
+  "render": {
+    "reference_wh": [
+      424,
+      240
+    ],
+    "render_wh": [
+      160,
+      90
+    ],
+    "camera_id": 0,
+    "chunk": 32,
+    "frustum_retargeted": true,
+    "model_mutated": false
+  },
+  "course": "flat_foundation",
+  "stage_admission": null,
+  "initialization": "learner_resume_cold_environment",
+  "exact_failure_replay": false,
+  "capability_evaluated": false
+}
